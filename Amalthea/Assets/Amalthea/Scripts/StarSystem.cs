@@ -168,14 +168,73 @@ namespace Amalthea
     {
         public int seed;
         public Vector3 position = Vector3.zero;
-        public List<Planet> planets = new List<Planet>();
-
-        void Generate()
+        public Color color;
+        public float temperature;
+        public float radius;
+        public string name;
+        public StarSystem(int s, Vector3 p, Color c, float t, float r, string n)
         {
-            System.Random rnd = new System.Random(seed);
+            radius = r;
+            seed = s;
+            position = p;
+            temperature = t;
+            radius = r;
+            color = c;
+            name = n;
+        }
 
+    }
+
+    [System.Serializable]
+    public class Galaxy
+    {
+        public int seed;
+        public List<StarSystem> stars = new List<StarSystem>();
+        public Mesh mesh;
+        public LemonSpawn.LSMesh lsMesh;
+        public void Generate(int no, int se, float lyWidth)
+        {
+            seed = se;
+            System.Random rnd = new System.Random(seed);
+            stars.Clear();
+            Color c = new Color();
+            // Always one in zero
+            stars.Add(new StarSystem(rnd.Next(), Vector3.zero, new Color(1.0f, 0.9f, 0.7f), 5800, 1, LemonSpawn.Util.getRandomName(rnd)));
+            for (int i=0;i<no-1;i++)
+            {
+                c.r = 0.5f + (float)(rnd.NextDouble() * 0.5);
+                c.b = 0.5f + (float)(rnd.NextDouble() * 0.5);
+                c.g = Mathf.Max(c.r, 0.5f + (float)(rnd.NextDouble() * 0.5));
+                StarSystem s = new StarSystem(rnd.Next(), LemonSpawn.Util.randomVector(rnd, lyWidth, lyWidth, lyWidth) - Vector3.one * lyWidth / 2,
+                    c, 5800, 0.1f + (float)rnd.NextDouble() * 2f, LemonSpawn.Util.getRandomName(rnd));
+                stars.Add(s);
+            }
+            CreateMesh();            
+        }
+
+        public void CreateMesh()
+        {
+            lsMesh = new LemonSpawn.LSMesh();
+            int i = 0;
+            foreach (StarSystem s in stars)
+            {
+                lsMesh.vertexList.Add(s.position);
+                lsMesh.faceList.Add(i);
+                lsMesh.faceList.Add(i);
+                lsMesh.faceList.Add(i);
+                lsMesh.normalList.Add(new Vector3(s.color.r, s.color.g, s.color.b));
+                lsMesh.uvList.Add(new Vector2(s.radius,0));
+                lsMesh.tangentList.Add(Vector4.zero);
+                i++;
+            }
+            lsMesh.createMesh(false);
+            Debug.Log(lsMesh.mesh.vertexCount);
+            mesh = lsMesh.mesh;
+            mesh.name = "GalaxyMesh";
+
+            GameObject go = lsMesh.Realize("Galaxy", (Material)Resources.Load("StarMaterial"), 0, "normal", false);
+            go.layer = 12;
             
-        
         }
 
 

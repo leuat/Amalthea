@@ -518,6 +518,7 @@ namespace LemonSpawn
 
         public void Subdivide(int level, float size)
         {
+            if (RenderSettings.cullCamera)
             if (Vector3.Dot((World.MainCamera.transform.position - (qb.centerReal.P + planetSettings.properties.localCamera)).normalized, qb.normal.normalized) > 0.1)
             {
                 deleteChildren();

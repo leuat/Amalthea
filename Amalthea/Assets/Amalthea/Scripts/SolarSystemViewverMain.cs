@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using System;
 
 namespace Amalthea {
 
@@ -18,203 +19,99 @@ namespace Amalthea {
         public static Color spaceCraftColor = new Color(1.0f, 0.5f, 0.2f, 1f);
         public static Color moonColor = new Color(0.5f, 0.7f, 1.0f, 0.9f);
         public static Color planetColor = new Color(0.9f, 0.7f, 0.3f, 0.9f);
+        public static float starCameraScale = 0.00001f;
+        public static GameObject extraGameObject;
+        public static float MiniCamDist = 3;
+        public static float MiniCamFOV = 60;
+        public static float MiniCamSize = 0.1f;
+        public static float ManagePlanetDistance = 2.0f;
+        public static string audioClickPlanet = "GUI40Click";
+        public static string audioHoverMenu = "GUIPop";
+        
+
+
+        public static AudioClip loadAudio(string s)
+        {
+            return (AudioClip)Resources.Load("Effects/" + s);
+        } 
+
         
     }
 
-    //    exp(1/2)  * exp(-1/2) = 
 
-    public class DisplayPlanet {
-		public Planet planet;
-//        public LemonSpawn.SerializedPlanet serializedPlanet;
-		public GameObject go;
-        public GameObject textMesh;
-		public List<Vector3> orbitLines = new List<Vector3>();
-        private static Material lineRenderer;
-        public Color orbitColor;
-
-
-        public DisplayPlanet(GameObject g, Planet p)
-        {
-            go = g;
-            planet = p;
-            //            CreateTextMesh();
-            //CreateOrbitFromFrames ();
-           // if (planet.lsPlanet.pSettings.category == LemonSpawn.PlanetSettings.Categories.Moon)
-             //   isMoon = true;
-        }
-
-        /*        public void MaintainOrbits() {
-                    int maxFrames = serializedPlanet.Frames.Count;
-                    int currentFrame = (int)(SSVSettings.currentFrame*maxFrames);
-                    Color c = SSVSettings.orbitLinesColor;
-
-                    int h = orbitLines.Count / 1;
-
-                    for (int i=0;i<orbitLines.Count;i++) {
-                        int f1 = (int)Mathf.Clamp((i-h)*SSVSettings.LineScale +currentFrame  ,0,maxFrames);
-                        int f2 = (int)Mathf.Clamp((i+1-h) * SSVSettings.LineScale + currentFrame , 0, maxFrames);
-                        if (f1 >= serializedPlanet.Frames.Count || f1<0)
-                            break;
-                        if (f2 >= serializedPlanet.Frames.Count || f2 < 0)
-                            break;
-                        LineRenderer lr = orbitLines[i].GetComponent<LineRenderer>();
-                        Frame sp = serializedPlanet.Frames[f1];
-                        Frame sp2 = serializedPlanet.Frames[f2];
-                        DVector from = new DVector (sp.pos_x, sp.pos_y,sp.pos_z) * SSVSettings.SolarSystemScale;
-                        DVector to = new DVector (sp2.pos_x, sp2.pos_y,sp2.pos_z) * SSVSettings.SolarSystemScale;
-
-
-                        lr.SetPosition (0, from.toVectorf());
-                        lr.SetPosition (1, to.toVectorf());
-
-                        float colorScale = Mathf.Abs(i-orbitLines.Count/2)/(float)orbitLines.Count*2;
-                        Color col = c*(1-colorScale);
-                        col.a = 1;
-                        lr.SetColors(col,col);
-                    }
-                }
-*/
-                public void DestroyOrbits() {
-                    orbitLines.Clear();
-
-                }
-
-        /*                public void SetWidth(float w)
-                        {
-                            foreach (GameObject g in orbitLines)
-                            {
-                                LineRenderer lr = g.GetComponent<LineRenderer>();
-                                lr.SetWidth(SSVSettings.OrbitalLineWidth.x*w, SSVSettings.OrbitalLineWidth.y*w);
-                            }
-                        }
-                        */
-
-
-
-        public void RenderGLOrbits(int maxLines)
-        {
-
-            Vector3 center = planet.lsPlanet.pSettings.transform.parent.position;
-            float d = (planet.lsPlanet.pSettings.transform.position - center).magnitude;
-            if (lineRenderer==null)
-                //                lineRenderer = new Material(Shader.Find("Particles/Additive"));//(Material)Resources.Load ("LineMaterial");
-                lineRenderer = new Material(Shader.Find("Particles/Alpha Blended"));
-            //            return;
-
-            lineRenderer.SetPass(0);
-            GL.Begin(GL.LINES);
-            GL.Color(orbitColor);
-
-            for (int i = 0; i < orbitLines.Count; i++)
-            {
-                //float t0 = (float)i / (maxLines + 1) * 2 * Mathf.PI;
-                //float t1 = (float)(i + 1) / (maxLines + 1) * 2 * Mathf.PI;
-
-
-                //Vector3 from = center + new Vector3(Mathf.Cos(t0), 0, Mathf.Sin(t0)) * d;
-                //Vector3 to = center + new Vector3(Mathf.Cos(t1), 0, Mathf.Sin(t1)) * d;
-                Vector3 from = orbitLines[i] + center;
-                Vector3 to = orbitLines[(i+1)%orbitLines.Count] + center;
-
-
-
-                //            lineMat.SetPass(0);
-                GL.Vertex3(from.x, from.y, from.z);
-                GL.Vertex3(to.x, to.y, to.z);
-            }
-            GL.End();
-        }
-
-        public void CreateOrbits(int maxLines)
-        {
-
-            DestroyOrbits();
-
-            //if (planet.pSettings.category == PlanetSettings.Categories.Moon)
-            //    return;
-
-            orbitColor = planet.stellarCategory.color * (0.5f + 1.0f*Random.value);
-            orbitColor.a = 0.5f;
-
-            Vector3 center = planet.lsPlanet.pSettings.transform.parent.position;
-            float d = (planet.lsPlanet.pSettings.transform.position - center).magnitude;
-            //Quaternion q = Quaternion.Euler(planet.lsPlanet.pSettings.eulerX, 0, planet.lsPlanet.pSettings.eulerZ);
-            for (int i = 0; i < maxLines; i++)
-            {
-                float t0 = (float)i / (maxLines + 1) * 2 * Mathf.PI;
-
-
-                Vector3 p = planet.lsPlanet.pSettings.getOrbit(t0);// *SSVSettings.SolarSystemScale;
-                Vector3 dp = getDisplayPosition(p);
-
-                    //planet.lsPlanet.pSettings.properties.rotationMatrix* new Vector3(Mathf.Cos(t0), 0, Mathf.Sin(t0))*d;
-                orbitLines.Add(dp);
-                
-
-            }
-        }
-
-        public Vector3 getDisplayPosition(Vector3 pos)
-        {
-            float ms = 1;
-            float prevRadius = 0;
-            if (planet.lsPlanet.pSettings.category == LemonSpawn.PlanetSettings.Categories.Moon)
-            {
-                ms = 2.0f / SSVSettings.PlanetSizeScale;
-                prevRadius = planet.lsPlanet.pSettings.transform.parent.gameObject.GetComponent<LemonSpawn.PlanetSettings>().radius;
-                //Debug.Log("IS MOON");
-            }
-
-            return  pos * SSVSettings.SolarSystemScale * ms + pos.normalized * prevRadius;
-
-        }
-
-
-        public void UpdatePosition(float t, Vector3 cam) {
-            //            planet.serializedPlanet.position = planet.lsPlanet.pSettings.properties.pos.toVectorf();
-            //            planet.serializedPlanet.position*=SSVSettings.SolarSystemScale;
-            /*            planet.lsPlanet.pSettings.properties.pos = planet.lsPlanet.pSettings.properties.orgPos * SSVSettings.SolarSystemScale; 
-
-                        planet.lsPlanet.pSettings.transform.position = planet.lsPlanet.pSettings.properties.pos.toVectorf();
-                        go.transform.position = planet.lsPlanet.pSettings.properties.pos.toVectorf();*/
-
-//          if (planet.lsPlanet.pSettings.category == LemonSpawn.PlanetSettings.Categories.Planet)
-  //              return;
-            planet.lsPlanet.pSettings.setPosition(t);
-
-
-            planet.lsPlanet.pSettings.transform.localPosition = getDisplayPosition(planet.lsPlanet.pSettings.properties.pos.toVectorf());
-
-            float scale = Mathf.Clamp((go.transform.position - cam).magnitude*0.003f, 1, 25);
-
-           
-            go.transform.localScale = Vector3.one * planet.lsPlanet.pSettings.radius * 3f*scale;
-
-
-        }
-
-    }
+   
 
     public class SolarSystemViewverMain : LemonSpawn.World
     {
 
 
-
+        public static AudioSource audioSource;
         private List<DisplayPlanet> dPlanets = new List<DisplayPlanet>();
+        DisplayPlanet dpSun = null;
         private Vector3 mouseAccel = new Vector3();
         private Vector3 focusPoint = Vector3.zero;
         private Vector3 focusPointCur = Vector3.zero;
+        private Vector3 focusPointCurStar = Vector3.zero;
         private float scrollWheel, scrollWheelAccel;
         private DisplayPlanet selected = null;
         public static GameObject linesObject = null;
         private GameObject pnlInfo = null;
         public static bool Reload = false;
         private float currentDistance;
+        public GameObject starCamera;
+        public bool initialized = false;
+        private Galaxy galaxy;
+        private StarSystem currentSystem = null, selectedSystem = null;
+        
         private Font GUIFont;
         private GUIStyle guiStyle = new GUIStyle();
         private bool toggleLabels = true;
 
+        private enum Mode { InterPlanetary, EditPlanet, Interstellar };
+        private Mode currentMode = Mode.InterPlanetary;
+
+
         public float tempTime = 0;
+        public float counter=0;
+
+        private MenuItem mainMenu;
+       
+
+
+        public void ClickManagePlanet()
+        {
+
+
+            if (currentMode == Mode.InterPlanetary)
+            {
+                currentMode = Mode.EditPlanet;
+                setText("ToggleManageText", "Back to system");
+            }
+            else
+            {
+                currentMode = Mode.InterPlanetary;
+                setText("ToggleManageText", "Manage planet");
+            }
+        }
+
+
+
+        public DisplayPlanet findDisplayPlanet(LemonSpawn.Planet p)
+        {
+            foreach (DisplayPlanet dp in dPlanets)
+                if (dp.planet.lsPlanet == p)
+                    return dp;
+
+            return null;
+        }
+        public DisplayPlanet findDisplayPlanetWithparent(LemonSpawn.Planet p)
+        {
+            foreach (DisplayPlanet dp in dPlanets)
+                if (dp.planet.lsPlanet.pSettings.properties.parentPlanet == p)
+                    return dp;
+
+            return null;
+        }
 
 
         protected void setText(string box, string text)
@@ -224,8 +121,22 @@ namespace Amalthea {
         }
 
 
-        private void SelectPlanet(DisplayPlanet dp)
+        public void SelectPlanetMenu(System.Object o)
         {
+            SelectPlanet((DisplayPlanet)o);
+        }
+
+        public static void PlaySound(string sound, float amp)
+        {
+            SolarSystemViewverMain.audioSource.PlayOneShot(SSVSettings.loadAudio(sound), amp);
+
+        }
+
+        private void SelectPlanet(DisplayPlanet dp, bool trigger=true)
+        {
+            if (currentMode == Mode.Interstellar)
+                return;
+
              selected = dp;
             focusPoint = dp.go.transform.position;
             pnlInfo.SetActive(true);
@@ -235,10 +146,20 @@ namespace Amalthea {
 
             if (dp.planet.lsPlanet.pSettings.category == LemonSpawn.PlanetSettings.Categories.Star)
             {
-                setText("txtPlanetName", "Star");
-                setText("txtPlanetName2", "Star");
                 setText("txtPlanetType", "Star");
-                setText("txtPlanetInfo", "Star");
+                setText("txtPlanetName", dp.planet.lsPlanet.pSettings.givenName);
+                setText("txtPlanetName2", "(" + dp.planet.lsPlanet.pSettings.name + ")");
+                string infoText2 = "";
+                float radius2 = (int)(dp.planet.lsPlanet.pSettings.getActualRadius()/LemonSpawn.Constants.sunR);
+//                int displayRadius2 = (int)((dp.planet.lsPlanet.pSettings.getActualRadius()) / LemonSpawn.RenderSettings.GlobalRadiusScale * currentScale);
+                float orbit2 = (dp.planet.lsPlanet.pSettings.properties.pos.toVectorf().magnitude);///(float)SSVSettings.SolarSystemScale);
+                infoText2 += "Radius           : " + radius2.ToString("0.00") + " sun radii" + "\n";
+                //          infoText += "Displayed Radius : " + displayRadius / radius + " x original radius\n";
+                infoText2 += "Mass             : " + LemonSpawn.Constants.getFormattedMass(dp.planet.lsPlanet.pSettings.getMass()) + "\n";
+                //            infoText += "Displayed Radius : " + displayRadius + " km \n";
+                infoText2 += "Temperature      : " + (int)dp.planet.lsPlanet.pSettings.temperature + "K\n";
+ //               infoText2 += dp.planet.lsPlanet.pSettings.planetType.PlanetInfo;
+                setText("txtPlanetInfo", infoText2);
                 return;
             }
             else
@@ -269,34 +190,34 @@ namespace Amalthea {
             infoText += dp.planet.lsPlanet.pSettings.planetType.PlanetInfo;
             setText("txtPlanetInfo", infoText);
 
-            UpdateOverviewClick();
+            if (trigger)
+            {
+                PlaySound(SSVSettings.audioClickPlanet, 0.5f);
+                dp.Trigger();
+            }
+
+            if (currentMode == Mode.EditPlanet)
+            {
+                //mainCamera.transform.position = selected.planet.lsPlanet.pSettings.transform.position - Vector3.left * selected.planet.lsPlanet.pSettings.radius * SSVSettings.ManagePlanetDistance;
+                mainCamera.transform.LookAt(selected.planet.lsPlanet.pSettings.transform.position);
+            }
+
+
         }
 
 
-        private void UpdateOverviewClick()
-        {
+        /*
+                public void FocusOnPlanetClick()
+                {
+                    int idx = GameObject.Find("Overview").GetComponent<UnityEngine.UI.Dropdown>().value;
+                    string name = GameObject.Find("Overview").GetComponent<UnityEngine.UI.Dropdown>().options[idx].text;
 
-            GameObject.Find("Overview").GetComponent<UnityEngine.UI.Dropdown>().value = 0;
+                    foreach (DisplayPlanet dp in dPlanets)
+                        if (name.Contains(dp.planet.lsPlanet.pSettings.name))
+                            SelectPlanet(dp);
 
-        }
-
-        public void FocusOnPlanetClick()
-        {
-            int idx = GameObject.Find("Overview").GetComponent<UnityEngine.UI.Dropdown>().value;
-            string name = GameObject.Find("Overview").GetComponent<UnityEngine.UI.Dropdown>().options[idx].text;
-
-            foreach (DisplayPlanet dp in dPlanets)
-                if (name.Contains(dp.planet.lsPlanet.pSettings.name))
-                    SelectPlanet(dp);
-
-        }
-
-        public void ZoomPlanet()
-        {
-            //SolarSystemViewverZoom.SzWorld = SzWorld;
-            //RenderSettings.currentSZWorld = SzWorld;
-            //Application.LoadLevel(4);
-        }
+                }
+                */
 
         private void DeFocus()
         {
@@ -312,42 +233,94 @@ namespace Amalthea {
             toggleLabels = !toggleLabels;
         }
 
-        private void RenderLabels()
+/*        private void Initialize()
         {
-            if (!toggleLabels)
-                return;
-            GUI.skin.font = GUIFont;
+            CreatePlanetMenu();
+            initialized = true;
+        }
+        */
+        private void RenderSolarSystemLabels()
+        {
             foreach (DisplayPlanet dp in dPlanets)
             {
                 guiStyle.normal.textColor = SSVSettings.planetColor;
                 if (dp.planet.lsPlanet.pSettings.category == LemonSpawn.PlanetSettings.Categories.Moon)
                 {
                     Color c = SSVSettings.moonColor;
-                    c.a = Mathf.Clamp(1-0.001f*(dp.go.transform.position - mainCamera.transform.position).magnitude, 0, 1);
+                    c.a = Mathf.Clamp(1 - 0.001f * (dp.go.transform.position - mainCamera.transform.position).magnitude, 0, 1);
+                    guiStyle.normal.textColor = c;
+                }
+                if (dp.planet.lsPlanet.pSettings.category == LemonSpawn.PlanetSettings.Categories.Planet)
+                {
+                    Color c = SSVSettings.planetColor;
+                    c.a = Mathf.Clamp(1 - 0.00001f * (dp.go.transform.position - mainCamera.transform.position).magnitude, 0, 1);
                     guiStyle.normal.textColor = c;
                 }
                 if (dp.planet.lsPlanet.pSettings.category == LemonSpawn.PlanetSettings.Categories.Spacecraft)
                     guiStyle.normal.textColor = SSVSettings.spaceCraftColor;
 
-
+                guiStyle.normal.textColor = guiStyle.normal.textColor * (1 + dp.timer);
 
 
                 Vector3 pos = MainCamera.WorldToScreenPoint(dp.go.transform.position);
-                int width1 = dp.planet.lsPlanet.pSettings.givenName.Trim().Length;
+                //int width1 = dp.planet.lsPlanet.pSettings.givenName.Trim().Length;
                 int width2 = dp.planet.lsPlanet.pSettings.name.Trim().Length;
-                int fs = 16 + (int)Mathf.Pow(dp.planet.lsPlanet.pSettings.radius, 0.6f);
+                int fs = 16 + (int)Mathf.Pow(dp.planet.lsPlanet.pSettings.radius, 0.6f) + (int)(dp.timer * 20f);
                 guiStyle.fontSize = fs;
                 //                if (pos.x >0 && pos.y<Screen.width && pos.y>0 && pos.y<Screen.height)
-                if (pos.z > 0)
+                if (pos.z > 0 && guiStyle.normal.textColor.a > 0)
                 {
-                    float ha = 50;
-                    GUI.Label(new Rect(pos.x - (width1 / 2) * 10, Screen.height - pos.y - ha, 250, 130), dp.planet.lsPlanet.pSettings.givenName, guiStyle);
+                    float ha = 30;
+                    float gf = guiStyle.fontSize / 2;
+                    GUI.Label(new Rect(pos.x - gf * dp.planet.lsPlanet.pSettings.givenName.Length / 2, Screen.height - pos.y - ha - gf, 250, 130), dp.planet.lsPlanet.pSettings.givenName, guiStyle);
                     guiStyle.fontSize = 12;
 
                     GUI.Label(new Rect(pos.x - (width2 / 2) * 4, Screen.height - pos.y + (int)(fs * 1.0) - ha, 250, 130), dp.planet.lsPlanet.pSettings.name, guiStyle);
                 }
 
             }
+
+        }
+
+        private void RenderStarLabel(StarSystem star)
+        {
+            guiStyle.normal.textColor = SSVSettings.planetColor;
+
+            Vector3 pos = MainCamera.WorldToScreenPoint(star.position);
+            int width2 = star.name.Trim().Length;
+            int fs = 16;
+            guiStyle.fontSize = fs;
+            if (pos.z > 0 && guiStyle.normal.textColor.a > 0)
+            {
+                float ha = 30;
+                float gf = guiStyle.fontSize / 2;
+                GUI.Label(new Rect(pos.x - gf * star.name.Length / 2, Screen.height - pos.y - ha - gf, 250, 130), star.name, guiStyle);
+                guiStyle.fontSize = 12;
+
+                //GUI.Label(new Rect(pos.x - (width2 / 2) * 4, Screen.height - pos.y + (int)(fs * 1.0) - ha, 250, 130), dp.planet.lsPlanet.pSettings.name, guiStyle);
+            }
+
+        }
+
+        private void RenderInterstellarLabels()
+        {
+            RenderStarLabel(selectedSystem);
+        }
+
+
+
+        private void RenderLabels()
+        {
+            if (!toggleLabels)
+                return;
+
+
+            GUI.skin.font = GUIFont;
+            if (currentMode == Mode.InterPlanetary)
+                RenderSolarSystemLabels();
+
+            if (currentMode == Mode.Interstellar)
+                RenderInterstellarLabels();
         }
 
 
@@ -356,7 +329,7 @@ namespace Amalthea {
             Slider slider = GameObject.Find("Slider").GetComponent<Slider>();
 
             //SSVSettings.LineScale = slider.value * 10;
-            tempTime = slider.value * 1.01f;
+            tempTime = slider.value * 0.002f;
 
         }
 
@@ -398,7 +371,7 @@ namespace Amalthea {
 
         private void UpdateFocus()
         {
-            if (Input.GetMouseButtonDown(0))
+            if (Input.GetMouseButtonDown(0) && currentMode == Mode.InterPlanetary)
             {
                 RaycastHit hit;
                 Ray ray = MainCamera.ScreenPointToRay(Input.mousePosition);
@@ -407,7 +380,9 @@ namespace Amalthea {
                     foreach (DisplayPlanet dp in dPlanets)
                     {
                         if (dp.go == hit.transform.gameObject)
+                        {
                             SelectPlanet(dp);
+                                                    }
                     }
                 }
                 else
@@ -429,20 +404,24 @@ namespace Amalthea {
             float theta = 0.0f;
             float phi = 0.0f;
 
-            if (Input.GetMouseButton(1))
+//            if (Input.GetMouseButton(1))
             {
 //                Debug.Log("TEST");
-                theta = s * Input.GetAxis("Mouse X");
-                phi = s * Input.GetAxis("Mouse Y") * -1.0f;
+  //              theta = s * Input.GetAxis("Mouse X");
+    //            phi = s * Input.GetAxis("Mouse Y") * -1.0f;
+                theta = s * Input.GetAxis("Horizontal");
+                phi = s * Input.GetAxis("Vertical") * -1.0f;
             }
             mouseAccel += new Vector3(theta, phi, 0);
-            focusPointCur += (focusPoint - focusPointCur) * 0.1f;
-            mouseAccel *= 0.9f;
+            focusPointCur += (focusPoint - focusPointCur) * 0.05f;
+            focusPointCurStar += (selectedSystem.position - focusPointCurStar) * 0.05f;
+            mouseAccel *= 0.65f;
 
             euler += mouseAccel * 10f;
 //            Debug.Log(theta);
             mainCamera.transform.RotateAround(focusPointCur, mainCamera.transform.up, mouseAccel.x);
-            
+            starCamera.transform.RotateAround(focusPointCurStar, starCamera.transform.up, mouseAccel.x);
+
 
 
             if ((Vector3.Dot(mainCamera.transform.forward, Vector3.up)) > 0.99)
@@ -456,23 +435,123 @@ namespace Amalthea {
             mainCamera.transform.RotateAround(focusPointCur, mainCamera.transform.right, mouseAccel.y);
             mainCamera.transform.LookAt(focusPointCur);
 
-            if (selected != null && Mathf.Abs(scrollWheel) < 0.001)
+            starCamera.transform.RotateAround(focusPointCurStar, starCamera.transform.right, mouseAccel.y);
+            starCamera.transform.LookAt(focusPointCurStar);
+
+
+/*            if (currentMode == Mode.Move)
             {
-                Vector3 dir = selected.planet.lsPlanet.pSettings.gameObject.transform.position - mainCamera.transform.position;
-                float dist = dir.magnitude;
-                //  Debug.Log("LOWER:" + dist + " c: " + currentDistance);
-                if (Mathf.Abs(dist - currentDistance) > 0.01)
+
+
+                if (selected != null && Mathf.Abs(scrollWheel) < 0.001)
                 {
-                    float add = dist - currentDistance;
-                    cameraAdd += dir.normalized * add * 0.06f;
-                    //                    mainCamera.transform.position = mainCamera.transform.position + dir.normalized * add;
+                    Vector3 dir = selected.planet.lsPlanet.pSettings.gameObject.transform.position - mainCamera.transform.position;
+                    float dist = dir.magnitude;
+                    //  Debug.Log("LOWER:" + dist + " c: " + currentDistance);
+                    if (Mathf.Abs(dist - currentDistance) > 0.01)
+                    {
+                        float add = Mathf.Pow(dist - currentDistance, 0.5f);
+                        cameraAdd += dir.normalized * add * 0.6f;
+                        //                    mainCamera.transform.position = mainCamera.transform.position + dir.normalized * add;
+                    }
+
+                }
+
+                mainCamera.transform.position = mainCamera.transform.position + cameraAdd;
+            }*/
+            if (currentMode == Mode.EditPlanet)
+            {
+                Vector3 dir = (mainCamera.transform.position - selected.planet.lsPlanet.pSettings.transform.position).normalized*-1;
+                mainCamera.transform.position = selected.planet.lsPlanet.pSettings.transform.position - dir * selected.planet.lsPlanet.pSettings.radius * SSVSettings.ManagePlanetDistance;
+            }
+            cameraAdd *= 0.5f;
+        }
+
+        //        private void CreatePlanetHierarchy(DisplayPlanets dp) { }
+
+
+        static Vector2 menuSizeText = new Vector2(0.2f, 0.1f) * Screen.height;
+        static Vector2 menuSizeImage = new Vector2(0.2f, 0.2f) * Screen.height;
+
+
+        MenuItem CreateFileMenu(MenuLayout mLayout)
+        {
+            MenuItem m = new MenuItem(mainMenu, "File Menu", "File", null, menuSizeText, true, 1, mLayout, null, null);
+            m.children.Add(new MenuItem(m, "File Menu", "Load", null, menuSizeText, true, 1, mLayout, null, null));
+            m.children.Add(new MenuItem(m, "File Menu", "Save", null, menuSizeText, true, 1, mLayout, null, null));
+            
+            return m;
+        }
+
+        MenuItem CreateNavigation(MenuLayout mLayout)
+        {
+            MenuItem m = new MenuItem(mainMenu, "Navigation", "Navigation", null, menuSizeText, true, 1, mLayout, null, null);
+            m.children.Add(new MenuItem(m, "Go to", "Go to", null, menuSizeText, true, 1, mLayout, null, null));
+
+            return m;
+        }
+
+        void CreateMainMenu()
+        {
+            Color c = new Color(0.3f, 0.6f, 1.0f, 1.0f);
+            GUIStyle s = new GUIStyle();
+            s.font = (Font)Resources.Load("CaviarDreams");
+            s.fontSize = 16;
+            s.normal.textColor = c*4;
+            s.alignment = TextAnchor.MiddleCenter;
+            MenuLayout mLayout = new MenuLayout(16, s, c, c * 0.4f, MenuLayout.MenuStyle.SolidFrame);
+            mainMenu = new Amalthea.MenuItem(null, "Main Menu", "", null, menuSizeText, false, 1, mLayout, null, null);
+
+            mainMenu.children.Add(CreateFileMenu(mLayout));
+            mainMenu.children.Add(new MenuItem(mainMenu, "File Menu", "Assets", null, menuSizeText, true, 1, mLayout, null, null));
+//            new MenuItem()
+
+
+        }
+
+        private void CreatePlanetMenu(bool isInterPlanetary)
+        {
+            mainMenu.deleteFromChildren("SolarSystem");
+            if (isInterPlanetary)
+            {
+                foreach (DisplayPlanet dp in dPlanets)
+                    dp.CreatePlanetCamera();
+
+                dpSun.CreateMenu("SolarSystem", mainMenu, menuSizeImage, true, 0.75f, mainMenu.layout, SelectPlanetMenu);
+            }
+//            Debug.Log(mainMenu.children.Count);
+        }
+
+
+
+        private void CreatePlanetHierarchy()
+        {
+            // First, find the sun
+            //            DisplayPlanet sun = dPlanets[0];
+            dpSun = findDisplayPlanetWithparent(null);
+            dpSun.children.Clear();
+            foreach (DisplayPlanet dp in dPlanets)
+            {
+                if (dp.planet.lsPlanet.pSettings.properties.parentPlanet == dpSun.planet.lsPlanet)
+                {
+  //                  Debug.Log("Adding child " + dp.planet.lsPlanet.pSettings.name);
+                    dpSun.children.Add(dp);
+                }
+                if (dp.planet.lsPlanet.pSettings.category == LemonSpawn.PlanetSettings.Categories.Planet)
+                foreach (DisplayPlanet sp in dPlanets)
+                {
+                    if (sp.planet.lsPlanet.pSettings.properties.parentPlanet == dp.planet.lsPlanet)
+                    {
+
+                        dp.children.Add(sp);
+                    }
                 }
 
             }
-
-            mainCamera.transform.position = mainCamera.transform.position + cameraAdd;
-            cameraAdd *= 0.6f;
+//            Debug.Log("CHILDREN COUNT" + dpSun.children.Count);
+            // Find all who have this as a parent
         }
+
 
 
         private void PopulateWorld()
@@ -506,6 +585,8 @@ namespace Amalthea {
                 hidden.transform.parent = p.pSettings.transform;
                 hidden.transform.localPosition = Vector3.zero;// coolpos * SSVSettings.SolarSystemScale*ms;
                 hidden.transform.localScale = Vector3.one * p.pSettings.radius * 3f;
+//                Debug.Log(p.pSettings.name);
+
                 //if (p.pSettings.planetTypeName=="star" || p.pSettings.planetTypeName=="spacecraft")
                 //    hidden.SetActive(false);
 
@@ -516,14 +597,17 @@ namespace Amalthea {
                     ap.stellarCategory = Globals.definitions.stellarCategories.Get("Planet");
                 if (p.pSettings.category == LemonSpawn.PlanetSettings.Categories.Moon)
                     ap.stellarCategory = Globals.definitions.stellarCategories.Get("Moon");
-                if (p.pSettings.category == LemonSpawn.PlanetSettings.Categories.Star)
+                if (p.pSettings.category == LemonSpawn.PlanetSettings.Categories.Star) 
                     ap.stellarCategory = Globals.definitions.stellarCategories.Get("Star");
                 dPlanets.Add(new DisplayPlanet(hidden, ap));
             }
-
+            selected = dPlanets[0];
             foreach (DisplayPlanet dp in dPlanets)
+            {
+                dp.UpdatePosition(tempTime, mainCamera.transform.position);
                 dp.CreateOrbits(SSVSettings.OrbitalLineSegments);
-
+            }
+            CreatePlanetHierarchy();
         }
 
 
@@ -560,30 +644,19 @@ namespace Amalthea {
 
         public static GameObject satellite = null;
 
-        public void TestSlapDash()
-        {
-            System.Random rnd = new System.Random(4);
-            LemonSpawn.SlapDash d = new LemonSpawn.SlapDash();
-            foreach (LemonSpawn.Language l in d.languages)
-            {
-                string s = "";
-
-                for (int i = 0; i < 100; i++)
-                    s += l.GenerateWord(rnd) + "  ";
-                Debug.Log(s);
-
-            }
-
-
-        }
 
         public override void Start()
         {
             //            TestSlapDash();
+            LemonSpawn.RenderSettings.planetCubeSphere = false;
+
+
             GUIFont = (Font)Resources.Load("CaviarDreams");
             guiStyle.font = GUIFont;
             Globals.Save();
             Globals.Initialize();
+            audioSource = GameObject.Find("GUIAudio").GetComponent<AudioSource>() ;
+//            Debug.Log(audioSource);
             //			CurrentApp = Verification.SolarSystemViewerName;
             LemonSpawn.RenderSettings.path = Application.dataPath + "/../";
 
@@ -599,6 +672,9 @@ namespace Amalthea {
             LemonSpawn.RenderSettings.ResolutionScale = szWorld.resolutionScale;
             LemonSpawn.RenderSettings.usePointLightSource = true;
             LemonSpawn.RenderSettings.logScale = true;
+            LemonSpawn.RenderSettings.cullCamera = false;
+
+            SSVSettings.extraGameObject = new GameObject("extra");
 
 
             satellite = GameObject.Find("Satellite");
@@ -610,25 +686,49 @@ namespace Amalthea {
             solarSystem = new LemonSpawn.SolarSystem(sun, sphere, GameObject.Find("SolarSystem").transform, (int)szWorld.skybox);
             LemonSpawn.PlanetTypes.Initialize();
             SetupCloseCamera();
+            starCamera.transform.position = MainCamera.transform.position * SSVSettings.starCameraScale;
             MainCamera = mainCamera.GetComponent<Camera>();
             SzWorld = szWorld;
 
             setText("TextVersion", "Version: " + LemonSpawn.RenderSettings.version.ToString("0.00"));
 
 
-            linesObject = new GameObject("Lines");
-            CreateAxis();
+//            linesObject = new GameObject("Lines");
+  //          CreateAxis();
+            galaxy = new Galaxy();
+            galaxy.Generate(50000, 0, 3000);
+            currentSystem = galaxy.stars[0];
 
-            solarSystem.GenerateSolarSystem(6);
+            solarSystem.GenerateSolarSystem(currentSystem.seed, currentSystem.name);
+            selectedSystem = currentSystem;
+
+
             PopulateWorld();
+            CreateMainMenu ();
+            Update();
+            CreatePlanetMenu(true);
+        }
+
+        protected void GotoStarSystem()
+        {
 
         }
+
+        protected void DestroySolarSystem()
+        {
+            solarSystem.ClearStarSystem();
+            solarSystem = null;
+            DestroyAllGameObjects();
+            selected = null;
+        }
+
 
 
         private void UpdateZoom()
         {
             if (EventSystem.current.IsPointerOverGameObject())
                 return;
+
             scrollWheelAccel = Input.GetAxis("Mouse ScrollWheel") * 0.5f * -1;
             scrollWheel = scrollWheel * 0.9f + scrollWheelAccel * 0.1f;
             if (Mathf.Abs(scrollWheel) < 0.001)
@@ -636,15 +736,31 @@ namespace Amalthea {
             if (Mathf.Abs(scrollWheel) > 0) currentDistance = 0;
             //            Debug.Log(ScrollWheel);
 
-            Vector3 pos = MainCamera.transform.position;
-            if (selected != null)
+            if (currentMode!=Mode.Interstellar)
             {
-                pos -= selected.go.transform.position;
-                MainCamera.transform.position = pos * (1 + scrollWheel) + selected.go.transform.position;
-            }
-            else
-                MainCamera.transform.position = pos * (1 + scrollWheel);
+                Vector3 posM = MainCamera.transform.position;
+                if (selected != null)
+                {
+                    posM -= selected.go.transform.position;
+                    MainCamera.transform.position = posM * (1 + scrollWheel) + selected.go.transform.position;
+                }
 
+            }
+
+
+            Vector3 posS = starCamera.transform.position;
+
+            if (selectedSystem != null)
+            {
+                posS -= selectedSystem.position;
+                starCamera.transform.position = posS * (1 + scrollWheel) + selectedSystem.position;
+            }
+/*            else
+            {
+                starCamera.transform.position = starCamera.transform.position * (1 + scrollWheel * scale);
+                MainCamera.transform.position = MainCamera.transform.position * (1 + scrollWheel);
+            }
+            */
         }
         public void OnPostRender()
         {
@@ -652,28 +768,118 @@ namespace Amalthea {
                 dp.RenderGLOrbits(SSVSettings.OrbitalLineSegments);
         }
 
+        protected void UpdateStarCamera()
+        {
+            float min;
+            if (currentSystem != null)
+                min = Mathf.Min((starCamera.transform.position - currentSystem.position).magnitude, (starCamera.transform.position - selectedSystem.position).magnitude);
+            else
+                min = (starCamera.transform.position - selectedSystem.position).magnitude;
+
+            if (min>1)
+            {
+                if (currentMode == Mode.InterPlanetary)
+                {
+                    // Coming from interplanetary to interstellar
+                    Debug.Log("INTERSTELLAR");
+                    DestroySolarSystem();
+                    MainCamera.enabled = false;
+                    currentSystem = null;
+                    CreatePlanetMenu(false);
+                    Debug.Log(starCamera.transform.position);
+                }
+                currentMode = Mode.Interstellar;
+            } 
+            else
+            {
+                if (currentMode == Mode.Interstellar)
+                {
+                    Debug.Log("INTERPLANETARY");
+                    // Coming from insterstellar to interplanetary
+                    currentSystem = selectedSystem;
+                    solarSystem = new LemonSpawn.SolarSystem(sun, sphere, GameObject.Find("SolarSystem").transform, (int)szWorld.skybox);
+                    MainCamera.enabled = true;
+                    solarSystem.GenerateSolarSystem(currentSystem.seed, currentSystem.name);
+
+                    PopulateWorld();
+                    solarSystem.Update();
+                    CreatePlanetMenu(true);
+                    MainCamera.transform.position = (starCamera.transform.position - currentSystem.position) / SSVSettings.starCameraScale;
+    
+                }
+                currentMode = Mode.InterPlanetary;
+
+
+            }
+//            starCamera.transform.rotation =  mainCamera.transform.rotation;
+        //    starCamera.transform.position = mainCamera.transform.position * 0.00001f;
+        }
+        
+        protected void SelectStarSystem()
+        {
+            if (Input.GetMouseButtonDown(0))
+            {
+                Ray ray = starCamera.GetComponent<Camera>().ScreenPointToRay(Input.mousePosition);
+                StarSystem winnerSystem = null;
+                float winner = 1E30f;
+                foreach (StarSystem ss in galaxy.stars)
+                {
+                    float d = LemonSpawn.Util.DistanceToLine(ray, ss.position);
+                    if (d < winner)
+                    {
+                        winnerSystem = ss;
+                        winner = d;
+                    }
+                }
+
+                if (winnerSystem != null)
+                {
+                    /*GameObject temp = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                    temp.transform.position = winnerSystem.position;
+                    temp.transform.localScale = Vector3.one * 10;
+                    temp.layer = 12;*/
+                    selectedSystem = winnerSystem;
+                }
+
+            }
+
+        }
+
         public override void Update()
         {
             UpdateFocus();
             UpdateCamera();
             UpdateZoom();
-            solarSystem.Update();
+            if (solarSystem != null)
+                solarSystem.Update();
+            UpdateStarCamera();
 
-//            tempTime += 0.000000015f;
+
+            if (DisplayPlanet.performSelect!=null)
+            {
+                SelectPlanet(DisplayPlanet.performSelect);
+                DisplayPlanet.performSelect = null;
+            }
 
             if (LemonSpawn.RenderSettings.UseThreading)
+            {
+                for (int i=0;i<10;i++)
                 LemonSpawn.ThreadQueue.MaintainThreadQueue();
+            }
 
             // Always point to selected planet
             if (selected != null)
-                SelectPlanet(selected);
+                SelectPlanet(selected, false);
+
+
+            SelectStarSystem();
 
 
             foreach (DisplayPlanet dp in dPlanets)
                 dp.UpdatePosition(tempTime, mainCamera.transform.position);
 
-//            UpdatePlay();
-//            ForceSpaceCraft();
+//            Debug.Log(LemonSpawn.ThreadQueue.currentThreads.Count + LemonSpawn.ThreadQueue.threadQueue.Count);
+
 
             if (Input.GetKey(KeyCode.Escape))
             {
@@ -688,6 +894,10 @@ namespace Amalthea {
         protected void OnGUI()
         {
             RenderLabels();
+      
+            if (mainMenu != null)
+                mainMenu.Render(new Vector2(0.05f, 0.05f) * Screen.height);
+
         }
 
 
@@ -698,6 +908,7 @@ namespace Amalthea {
             {
                 GameObject.Destroy(dp.go);
             }
+            dPlanets.Clear();
         }
 
     }

@@ -169,6 +169,8 @@ namespace LemonSpawn {
 
         public void setPosition(float tval)
         {
+            if (properties.parentPlanet == null)
+                return;
             double M = properties.parentPlanet.pSettings.getMass();
             //Debug.Log("Escvel for : " + ve + " withg radius " + getActualRadius() + " name " + givenName + " with mass " + getMass());
             float t = getVe(M) * tval;
@@ -257,12 +259,7 @@ namespace LemonSpawn {
         public void Randomize(int count, string forcedPlanetType) {
             System.Random r = new System.Random(seed);
 
-            SlapDash sd = new SlapDash();
-            //sd.InitializeIntrinsic();
-            sd.Load(RenderSettings.path + "slapdash.xml");
-            givenName = sd.getWord(r);
-            givenName = givenName[0].ToString().ToUpper() + givenName.Substring(1); 
-
+            givenName = Util.getRandomName(r);
 
             sea = new Sea();
             hasFlatClouds = true;

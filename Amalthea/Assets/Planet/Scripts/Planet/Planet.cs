@@ -15,9 +15,11 @@ namespace LemonSpawn
         public PlanetSettings pSettings;// = new PlanetSettings();
         public Rings rings;
         CubeSphere cube;
+        private Mesh planetSphere;
         public GameObject impostor;
         public TextMesh infoText;
         public GameObject infoTextGO;
+        public GameObject planetSphereGO;
         public static Color color = new Color(1f, 1f, 0.8f, 0.6f);
         public Environment environment;
         public Clouds clouds;
@@ -86,7 +88,7 @@ namespace LemonSpawn
             //              pSettings.properties.gpuSurface = new GPUSurface(pSettings);
 
             pSettings.atmosphere = new Atmosphere(sun, ground, sky, sphere, pSettings);
-
+            planetSphere = sphere;
             pSettings.Initialize();
 //            if (pSettings.radius > RenderSettings.RingRadiusRequirement && pSettings.hasRings)
 
@@ -159,8 +161,28 @@ namespace LemonSpawn
 
         public void Instantiate()
         {
-            cube.SubDivide(RenderSettings.ResolutionScale);
-            cube.Realise();
+            if (RenderSettings.planetCubeSphere)
+            {
+                cube.SubDivide(RenderSettings.ResolutionScale);
+                cube.Realise();
+            }
+            else
+            {
+                if (planetSphereGO == null)
+                {
+                    // Create sphere
+                    planetSphereGO = new GameObject("SphereWorld");
+                    planetSphereGO.transform.position = Vector3.zero;
+                    planetSphereGO.transform.parent = pSettings.gameObject.transform;
+                    planetSphereGO.transform.localScale = Vector3.one * pSettings.radius;
+                    planetSphereGO.AddComponent<MeshFilter>().mesh = planetSphere;
+                    planetSphereGO.AddComponent<MeshRenderer>();
+                    planetSphereGO.transform.position = Vector3.zero;
+                    planetSphereGO.GetComponent<MeshRenderer>().material = pSettings.atmosphere.m_groundMaterial;
+
+                }
+
+            }
 
         }
 
@@ -179,13 +201,22 @@ namespace LemonSpawn
                 pSettings.properties.environmentObject.transform.localPosition = Vector3.zero;
                 pSettings.properties.environmentObject.transform.localScale = Vector3.one;
                 pSettings.properties.environmentObject.transform.localRotation = Quaternion.identity;
-                cube = new CubeSphere(pSettings, false);
+
+//                planetSphereGO.transform.parent = pSettings.properties.terrainObject.transform;
+
+                if (RenderSettings.planetCubeSphere)
+                {
+                    cube = new CubeSphere(pSettings, false);
+                }
                 if (impostor != null)
                     GameObject.Destroy(impostor);
             }
             Instantiate();
             pSettings.Update();
             UpdateText();
+            if (planetSphereGO != null)
+            planetSphereGO.transform.localPosition = Vector3.zero;
+//            planetSphereGO.transform.position = Vector3.zero;
 
 
 

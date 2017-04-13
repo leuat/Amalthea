@@ -843,6 +843,11 @@ namespace LemonSpawn
         }
 
 
+        public static float DistanceToLine(Ray ray, Vector3 point)
+        {
+            return Vector3.Cross(ray.direction, point - ray.origin).magnitude;
+        }
+
         public static void SetPropertyValue(object srcobj, string propertyName, object val)
         {
             if (srcobj == null)
@@ -873,6 +878,25 @@ namespace LemonSpawn
 
             }
 
+
+        }
+
+
+        public static LemonSpawn.SlapDash slapDash = null;
+        public static string getRandomName(System.Random r, string language = "")
+        {
+            //sd.InitializeIntrinsic();
+            if (slapDash == null)
+            {
+                slapDash = new LemonSpawn.SlapDash();
+                slapDash.Load(LemonSpawn.RenderSettings.path + "slapdash.xml");
+            }
+            string n = "";
+            if (language == "")
+                n = slapDash.getWord(r);
+            else n = slapDash.getWord(language, r);
+            n = n[0].ToString().ToUpper() + n.Substring(1);
+            return n;
 
         }
 

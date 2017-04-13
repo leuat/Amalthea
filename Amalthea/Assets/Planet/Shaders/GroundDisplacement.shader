@@ -268,7 +268,7 @@ Shader "LemonSpawn/GroundDisplacement"
 	float3 mColor = ((1 - tt)*middleColor + middleColor2*tt);
 	//	float3 bColor = ((1-tt)*basinColor + basinColor2*tt*r_noise(normalize(i.vpos.xyz),2.1032,3));
 
-	float3 hColor = mColor*getTex(_Surface, i.tex.xy);//float3(1,1,1);//s.diffColor;
+	float3 hColor = mColor;// *getTex(_Surface, i.tex.xy);//float3(1,1,1);//s.diffColor;
 													  //	float3 hillColor = s.diffColor;
 													  //if (dd < 0.98 )
 													  //	hColor = float3(0.2, 0.2 ,0.2);

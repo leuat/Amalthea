@@ -22,6 +22,7 @@ namespace LemonSpawn {
 			GO = GameObject.CreatePrimitive(PrimitiveType.Plane);
 			GO.name = "Rings";
 			GO.transform.position = Vector3.zero;
+            GO.transform.localPosition = Vector3.zero;
 			GO.transform.parent = planetSettings.gameObject.transform;
 			GO.transform.localScale = Vector3.one*planetSettings.radius*1.2f;
 			GO.GetComponent<Renderer>().material = mat;
@@ -32,7 +33,7 @@ namespace LemonSpawn {
 		public void Update() {
 			if (mat==null)
 				return;
-			
+            GO.transform.localPosition = Vector3.zero;
             if (planetSettings.ringAmplitude<=0)
             {
                 GO.SetActive(false);

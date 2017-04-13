@@ -217,24 +217,29 @@ namespace LemonSpawn {
 			
 		}
 		
-		public void createMesh() {
+		public void createMesh(bool isPoints = false) {
             //mesh = null;
 
             if (mesh==null)
 	    		mesh = new Mesh();
 
-			mesh.vertices = vertexList.ToArray(); 
+
+            mesh.vertices = vertexList.ToArray(); 
+            if (!isPoints)
 			mesh.triangles = faceList.ToArray();
 			mesh.uv = uvList.ToArray();
 			mesh.normals = normalList.ToArray();
+            if (!isPoints)
 			mesh.tangents = tangentList.ToArray();
-			
-//			mesh.RecalculateNormals();
-			//mesh.Optimize();
-			
-		}
-		
-		public void addRandomPerturbations(float s) {
+            if (isPoints)
+                mesh.SetIndices(mesh.triangles, MeshTopology.Points, 0);
+
+            //			mesh.RecalculateNormals();
+            //mesh.Optimize();
+
+        }
+
+        public void addRandomPerturbations(float s) {
 			Vector3 r = new Vector3();
 			System.Random rnd = new System.Random(0);
 			for (int i=0;i<vertexList.Count;i++) {

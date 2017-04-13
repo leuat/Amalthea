@@ -41,13 +41,14 @@ namespace LemonSpawn {
         public static bool MoveCam = false;
 		public static bool RenderText = false;
         public static bool logScale = false;
+        public static bool planetCubeSphere = true;
 		public static int waterMaxQuadNodeLever = 3;
 		public static float RingProbability = 0.5f;
 		public static float RingRadiusRequirement = 4000;
 		public static int CloudTextureSize = 1024;
 		public static bool RenderMenu = true;
 		public static bool GPUSurface = true;
-		public static float version = 0.16f;
+		public static float version = 0.01f;
         public static float powScale = 0.75f;
         public static SerializedWorld currentSZWorld;
         public static bool debug = true;
