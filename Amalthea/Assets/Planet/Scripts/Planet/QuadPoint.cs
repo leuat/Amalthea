@@ -71,9 +71,9 @@ namespace LemonSpawn {
 			normal = center.P.normalized;
 			
 			centerReal.set(center);
-			//mtmp = mtmp*(radius *(1+ps.surface.GetHeight(mtmp, (int)lod)));
-			
-			centerReal.P = centerReal.P.normalized*planetSettings.getPlanetSize()*(1+ps.surface.GetHeight(centerReal.P.normalized, 0));
+            //mtmp = mtmp*(radius *(1+ps.surface.GetHeight(mtmp, (int)lod)));
+
+            centerReal.P = centerReal.P.normalized * planetSettings.getPlanetSize() * 1;// (1+ps.surface.GetHeight(centerReal.P.normalized, 0));
             //if (RenderSettings.GPUSurface)
              //   centerGPU = planetSettings.properties.gpuSurface.getPlanetSurfaceOnly(centerReal.P.normalized);
 
@@ -92,7 +92,7 @@ namespace LemonSpawn {
 
             for (int i = 0; i < 4; i++) {
                 //				PReal[i].P = PReal[i].P.normalized * planetSettings.getPlanetSize();
-                PReal[i].P = PReal[i].P * planetSettings.getPlanetSize() * (1 + ps.surface.GetHeight(PReal[i].P.normalized, 0));
+                PReal[i].P = PReal[i].P * planetSettings.getPlanetSize() * (1);// + ps.surface.GetHeight(PReal[i].P.normalized, 0));
             }
 
 

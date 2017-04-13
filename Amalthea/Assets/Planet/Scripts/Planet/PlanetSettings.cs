@@ -259,9 +259,10 @@ namespace LemonSpawn {
         public void Randomize(int count, string forcedPlanetType) {
             System.Random r = new System.Random(seed);
 
-            givenName = Util.getRandomName(r);
+            givenName = Util.getRandomName(r,"Kvorsk");
 
-            sea = new Sea();
+            
+            //sea = new Sea();
             hasFlatClouds = true;
             if (forcedPlanetType != null)
                 planetType = PlanetTypes.p.FindPlanetType(forcedPlanetType);
@@ -379,7 +380,7 @@ namespace LemonSpawn {
             return radius;
         }
         public PlanetSettings() {
-			surface = new Surface(this);
+//			surface = new Surface(this);
             properties.gpuSurface = new GPUSurface(this);
 			
 		}

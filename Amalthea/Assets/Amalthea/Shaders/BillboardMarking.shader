@@ -1,7 +1,5 @@
-﻿// Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
-// Upgrade NOTE: replaced '_World2Object' with 'unity_WorldToObject'
-
-Shader "LemonSpawn/GS Billboard"
+﻿
+Shader "LemonSpawn/BillboardMarking"
 {
 	Properties
 	{
@@ -13,13 +11,13 @@ Shader "LemonSpawn/GS Billboard"
 	{
 		Pass
 	{
-		Tags{ "RenderType" = "Transparent" "Queue" = "Transparent+100" }
+		Tags{ "RenderType" = "Transparent" "Queue" = "Transparent" }
 		LOD 200
 		Blend One One
 		cull off
 		Zwrite off
 		Ztest off
-		
+
 		LOD 200
 
 		CGPROGRAM
@@ -85,7 +83,7 @@ Shader "LemonSpawn/GS Billboard"
 		look = normalize(look);
 		float3 right = cross(up, look);
 
-		float halfS = 1 * _Size *p[0].tex0.x;
+		float halfS = 1* _Size;
 
 		float4 v[4];
 		v[0] = float4(p[0].pos + halfS * right - halfS * up, 1.0f);
@@ -120,14 +118,18 @@ Shader "LemonSpawn/GS Billboard"
 	float4 FS_Main(FS_INPUT input) : COLOR
 	{
 
-		float d= length(input.tex0 - float2(0.5, 0.5));
-		float val = exp(-d*d*500)*1.2;
-		float3 c = input.normal;
+		float d = length(input.tex0 - float2(0.5, 0.5));
+	d -= 0.25;
+	float val = exp(-d*d * 15000);
+	float3 c = input.normal;
+	float v = val;// abs(val - 0.2);
 	/*	c.x = c.x*c.x;
-		c.y = c.y*c.y;
-		c.z = c.z*c.z;*/
-		float4 col = float4(c*val, val);
-		return col;
+	c.y = c.y*c.y;
+	c.z = c.z*c.z;*/
+	float4 col = float4(c*v, v);
+	//col.r = 1;
+	//col.a = 1;
+	return col;
 	}
 
 		ENDCG

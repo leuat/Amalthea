@@ -72,47 +72,50 @@ namespace LemonSpawn
             return Mathf.Pow((float)(L * (1 - A) / (16 * Mathf.PI * D * D * Constants.boltzmannSigma)), 0.25f);
         }
 
-        public static Color getRGBFromTemperature(float T)
+        public static Color colorTemperatureToRGB(float kelvin)
         {
-            double tmpCalc;
-            T = Mathf.Clamp(T, 1000, 40000);
-            T = T / 100;
-            Color c = Color.black;
-            if (T <= 66)
-                c.r = 1;
-            else
+
+            float temp = kelvin / 100f;
+            float red, green, blue;
+            if (temp <= 66)
             {
-                tmpCalc = T - 60;
-                tmpCalc = 329.698727446 * (Mathf.Pow((float)tmpCalc, -0.1332047592f));
-                c.r = Mathf.Clamp((float)tmpCalc/255f,0,1);
-            }
-            if (T<66)
-            {
-                tmpCalc = T;
-                tmpCalc = 99.4708025861 * Mathf.Log((float)tmpCalc) - 161.1195681661f;
-                c.g = Mathf.Clamp((float)tmpCalc/255f, 0, 1);
+
+                red = 255;
+
+                green = temp;
+                green = 99.4708025861f * Mathf.Log(green) - 161.1195681661f;
+
+
+                if (temp <= 19)
+                {
+
+                    blue = 0;
+
+                }
+                else
+                {
+
+                    blue = temp - 10;
+                    blue = 138.5177312231f * Mathf.Log(blue) - 305.0447927307f;
+
+                }
 
             }
             else
             {
-                tmpCalc = T - 60;
-                tmpCalc = 288.1221695283 * Mathf.Pow((float)tmpCalc, -0.0755148492f);
-                c.g = Mathf.Clamp((float)tmpCalc / 255f, 0, 1);
+
+                red = temp - 60;
+                red = 329.698727446f * Mathf.Pow(red, -0.1332047592f);
+
+                green = temp - 60;
+                green = 288.1221695283f * Mathf.Pow(green, -0.0755148492f);
+
+                blue = 255;
+
             }
-            if (T >= 66)
-            {
-                c.b = 1;
-            }
-            else
-            if (T <= 19)
-                c.b = 0;
-            else
-            {
-                tmpCalc = T - 10;
-                tmpCalc = 138.5177312231 * Mathf.Log((float)tmpCalc) - 305.0447927307f;
-                c.b = Mathf.Clamp((float)tmpCalc / 255f, 0, 1);
-            }
-            return c;
+
+            return new Color(Mathf.Clamp(red, 0, 255) / 255f, Mathf.Clamp(green, 0, 255) / 255f, Mathf.Clamp(blue, 0, 255) / 255f);
+
         }
 
     }

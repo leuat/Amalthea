@@ -403,6 +403,9 @@ namespace LemonSpawn
 
         //				static Vector3 N = new Vector3 ();
 
+
+        
+
         public static float swissTurbulence(Vector3 p, float scalex, float scaley, int octaves, float lacunarity, float warp, float offset, float gain, float powscale, float background)
         {
 
@@ -577,6 +580,15 @@ namespace LemonSpawn
             }
 
         }
+        public static void DestroyGameObject(string name)
+        {
+
+            GameObject go = GameObject.Find(name);
+            if (go!=null)
+                GameObject.Destroy(go);
+
+        }
+
         static string trimMaterial(string mat)
         {
             mat = mat.Replace("(Instance)", "");

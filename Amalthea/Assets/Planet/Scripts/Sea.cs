@@ -15,29 +15,29 @@ namespace LemonSpawn {
         protected void InitializeMesh(GameObject p) {
 
             parent = p;
-//            psOcean = new PlanetSettings();
+            //            psOcean = new PlanetSettings();
 
-
+            
             m_go = new GameObject("water");
             m_go.transform.parent = parent.transform;
             m_go.transform.localPosition = Vector3.zero;
             m_go.transform.localScale = Vector3.one;
-
-
-            psOcean = m_go.AddComponent<PlanetSettings>();
+            //return;
+            //Debug.Log(planetSettings);
+            psOcean =  m_go.AddComponent<PlanetSettings>();
 
             psOcean.atmosphere = new Atmosphere();
 
             //psOcean.gameObject = psOcean.terrainObject;
 
             psOcean.atmosphere.m_groundMaterial = m_groundMaterial;
-            cube = new CubeSphere(psOcean, false);
+            //cube = new CubeSphere(psOcean, false);
 
 
 			InitializeParameters(planetSettings.radius);
 			m_radius = planetSettings.radius * (1 + planetSettings.liquidThreshold);
-            if (ocean==null)
-               ocean = new Ocean();
+//            if (ocean==null)
+  //             ocean = new Ocean();
 
             Material m = (Material)Resources.Load("OceanIndie");
 
@@ -96,14 +96,16 @@ namespace LemonSpawn {
             m_go.SetActive(true);
 
             psOcean.properties.localCamera = planetSettings.properties.localCamera;
-//            Debug.Log(psOcean.localCamera);
+            //            Debug.Log(psOcean.localCamera);
+            if (cube != null)
+            {
+                cube.SubDivide(RenderSettings.ResolutionScale);
+                cube.Realise();
+            }
 
-            cube.SubDivide(RenderSettings.ResolutionScale);
-            cube.Realise();
+            //psOcean.Update();
 
-            psOcean.Update();
-
-            ocean.UpdateMaterial(m_groundMaterial);
+            //ocean.UpdateMaterial(m_groundMaterial);
 
 
         }

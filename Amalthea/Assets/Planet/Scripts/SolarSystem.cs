@@ -65,7 +65,8 @@ namespace LemonSpawn
 
         Planet AddPlanet(Planet parentPlanet, float parentD, float CurrentRadius, System.Random rnd, Transform parent, PlanetSettings.Categories cat, float Luminosity, float i, float rMin, float rMax, float tilt, string name, bool isStar)
         {
-            GameObject go = new GameObject();
+                
+                GameObject go = new GameObject();
             go.transform.parent = parent;
             //sz.global_radius_scale = RenderSettings.GlobalRadiusScale;
             PlanetSettings ps = go.AddComponent<PlanetSettings>();
@@ -104,8 +105,8 @@ namespace LemonSpawn
             else
             {
                 ps.temperature = rMax;
-                ps.properties.extraColor = Constants.getRGBFromTemperature(ps.temperature);
-                ps.properties.extraColor = new Color(0.9f, 0.7f, 0.5f);
+                ps.properties.extraColor = Constants.colorTemperatureToRGB(ps.temperature);
+//                ps.properties.extraColor = new Color(0.9f, 0.7f, 0.5f);
 //                Debug.Log(ps.properties.extraColor);
             }
             ps.Randomize(0, "");
@@ -131,27 +132,25 @@ namespace LemonSpawn
         }
 
 
-        public void GenerateSolarSystem(int seed, string systemName)
+        public void GenerateSolarSystem(Amalthea.StarSystem starSystem)
         {
-            System.Random rnd = new System.Random(seed);
+            System.Random rnd = new System.Random(starSystem.seed);
 
             //            PlanetSettings starPs = new PlanetSettings();
             //            starPs.category = LemonSpawn.PlanetSettings.Categories.Star;
             planets.Clear();
 
-            float starT = Mathf.Pow((float)rnd.NextDouble(), 2);
-            float starR = Mathf.Pow((float)rnd.NextDouble(), 2);
+      
 
-            Planet star = AddPlanet(null, 0, 0, rnd, transform, PlanetSettings.Categories.Star, 0, 0, RenderSettings.fromActualRadius((float)Constants.sunR), 
-                5800*2.5f, 25, "Star", true);
+            Planet star = AddPlanet(null, 0, 0, rnd, transform, PlanetSettings.Categories.Star, 0, 0, RenderSettings.fromActualRadius((float)Constants.sunR)* starSystem.radius,
+                starSystem.temperature, 25, "Star", true);
             star.pSettings.density = 1400;
-            star.pSettings.givenName = systemName;
-            star.pSettings.name = systemName;
+            star.pSettings.givenName = starSystem.getName() ;
+            star.pSettings.name = starSystem.getName();
             //            Debug.Log("Sun mass: " + star.pSettings.getMass());
 
             //          Debug.Log("Star T,R:" + star.pSettings.temperature + " , " + star.pSettings.radius/Constants.sunR);
             float lum = Constants.LumFromT(star.pSettings.getActualRadius()*1000, star.pSettings.temperature);
-            int noPlanets = 2 + rnd.Next() % 6 ;
                                //            noPlanets = 0;
                                //            Debug.Log("Transform:" + transform);
             float R = (float)(0.4 + rnd.NextDouble()*0.5);
@@ -160,8 +159,11 @@ namespace LemonSpawn
                         float ve = Mathf.Sqrt((float)(2 * Constants.G * M / (1 * Constants.AU)));
                         Debug.Log("Earths speed: " + ve);
                         */
-//            noPlanets = 1;
-            for (int i=0;i < noPlanets;i ++)
+            //            noPlanets = 1;
+            System.Diagnostics.Stopwatch so = new System.Diagnostics.Stopwatch();
+            so.Start();
+
+            for (int i=0;i < starSystem.noPlanets;i ++)
             {
                 float max = 40000;
                 if (rnd.NextDouble() > 0.8)
@@ -179,6 +181,7 @@ namespace LemonSpawn
                 }
                 R += (float)(0.4 + rnd.NextDouble() * (i + 1));
             }
+            Debug.Log("El: " + so.Elapsed);
 
         }
 

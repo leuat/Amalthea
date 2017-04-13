@@ -27,6 +27,7 @@ namespace Amalthea {
         public static float ManagePlanetDistance = 2.0f;
         public static string audioClickPlanet = "GUI40Click";
         public static string audioHoverMenu = "GUIPop";
+        public static float StarCamFixDistance = 20000;
         
 
 
@@ -60,7 +61,7 @@ namespace Amalthea {
         private float currentDistance;
         public GameObject starCamera;
         public bool initialized = false;
-        private Galaxy galaxy;
+        private APlayer player = new APlayer();
         private StarSystem currentSystem = null, selectedSystem = null;
         
         private Font GUIFont;
@@ -75,7 +76,9 @@ namespace Amalthea {
         public float counter=0;
 
         private MenuItem mainMenu;
-       
+
+        static Vector2 menuSizeText = new Vector2(0.2f, 0.2f) * Screen.height;
+        static Vector2 menuSizeImage = new Vector2(0.2f, 0.2f) * Screen.height;
 
 
         public void ClickManagePlanet()
@@ -132,6 +135,25 @@ namespace Amalthea {
 
         }
 
+        private void DisplayStarInfo(StarSystem star)
+        {
+            setText("txtPlanetType", star.getCategory());
+            setText("txtPlanetName", star.getName());
+            setText("txtPlanetName2", "(" + star.noPlanets + " planets" + ")");
+            string infoText2 = "";
+            float radius2 = (int)(star.radius);
+            //                int displayRadius2 = (int)((dp.planet.lsPlanet.pSettings.getActualRadius()) / LemonSpawn.RenderSettings.GlobalRadiusScale * currentScale);
+            infoText2 += "Radius           : " + radius2.ToString("0.00") + " sun radii" + "\n";
+            //          infoText += "Displayed Radius : " + displayRadius / radius + " x original radius\n";
+            infoText2 += "Mass             : " + star.mass + " sun masses" + "\n";
+            //            infoText += "Displayed Radius : " + displayRadius + " km \n";
+            infoText2 += "Temperature      : " + (int)star.temperature + "K\n";
+            //               infoText2 += dp.planet.lsPlanet.pSettings.planetType.PlanetInfo;
+            setText("txtPlanetInfo", infoText2);
+
+        }
+
+
         private void SelectPlanet(DisplayPlanet dp, bool trigger=true)
         {
             if (currentMode == Mode.Interstellar)
@@ -146,20 +168,7 @@ namespace Amalthea {
 
             if (dp.planet.lsPlanet.pSettings.category == LemonSpawn.PlanetSettings.Categories.Star)
             {
-                setText("txtPlanetType", "Star");
-                setText("txtPlanetName", dp.planet.lsPlanet.pSettings.givenName);
-                setText("txtPlanetName2", "(" + dp.planet.lsPlanet.pSettings.name + ")");
-                string infoText2 = "";
-                float radius2 = (int)(dp.planet.lsPlanet.pSettings.getActualRadius()/LemonSpawn.Constants.sunR);
-//                int displayRadius2 = (int)((dp.planet.lsPlanet.pSettings.getActualRadius()) / LemonSpawn.RenderSettings.GlobalRadiusScale * currentScale);
-                float orbit2 = (dp.planet.lsPlanet.pSettings.properties.pos.toVectorf().magnitude);///(float)SSVSettings.SolarSystemScale);
-                infoText2 += "Radius           : " + radius2.ToString("0.00") + " sun radii" + "\n";
-                //          infoText += "Displayed Radius : " + displayRadius / radius + " x original radius\n";
-                infoText2 += "Mass             : " + LemonSpawn.Constants.getFormattedMass(dp.planet.lsPlanet.pSettings.getMass()) + "\n";
-                //            infoText += "Displayed Radius : " + displayRadius + " km \n";
-                infoText2 += "Temperature      : " + (int)dp.planet.lsPlanet.pSettings.temperature + "K\n";
- //               infoText2 += dp.planet.lsPlanet.pSettings.planetType.PlanetInfo;
-                setText("txtPlanetInfo", infoText2);
+                DisplayStarInfo(currentSystem);
                 return;
             }
             else
@@ -228,10 +237,6 @@ namespace Amalthea {
         }
 
 
-        public void ToggleLabels()
-        {
-            toggleLabels = !toggleLabels;
-        }
 
 /*        private void Initialize()
         {
@@ -265,7 +270,7 @@ namespace Amalthea {
                 Vector3 pos = MainCamera.WorldToScreenPoint(dp.go.transform.position);
                 //int width1 = dp.planet.lsPlanet.pSettings.givenName.Trim().Length;
                 int width2 = dp.planet.lsPlanet.pSettings.name.Trim().Length;
-                int fs = 16 + (int)Mathf.Pow(dp.planet.lsPlanet.pSettings.radius, 0.6f) + (int)(dp.timer * 20f);
+                int fs = (int)Mathf.Clamp( 16 + (int)Mathf.Pow(dp.planet.lsPlanet.pSettings.radius, 0.6f) + (int)(dp.timer * 20f) ,8 ,35);
                 guiStyle.fontSize = fs;
                 //                if (pos.x >0 && pos.y<Screen.width && pos.y>0 && pos.y<Screen.height)
                 if (pos.z > 0 && guiStyle.normal.textColor.a > 0)
@@ -284,17 +289,22 @@ namespace Amalthea {
 
         private void RenderStarLabel(StarSystem star)
         {
-            guiStyle.normal.textColor = SSVSettings.planetColor;
+//            guiStyle.normal.textColor = star.color;
+            Color c = star.color;
+            c.a = Mathf.Clamp(1 - 0.0025f * (star.position - starCamera.transform.position).magnitude, 0, 1);
+            guiStyle.normal.textColor = c;
+            if (guiStyle.normal.textColor.a <= 0)
+                return;
 
-            Vector3 pos = MainCamera.WorldToScreenPoint(star.position);
-            int width2 = star.name.Trim().Length;
-            int fs = 16;
+            Vector3 pos = starCamera.GetComponent<Camera>().WorldToScreenPoint(star.position);
+            int width2 = star.getName().Trim().Length;
+            int fs = (int)(25 *(0.25f + 0.75f*c.a)) ;
             guiStyle.fontSize = fs;
-            if (pos.z > 0 && guiStyle.normal.textColor.a > 0)
+            if (pos.z > 0)
             {
                 float ha = 30;
                 float gf = guiStyle.fontSize / 2;
-                GUI.Label(new Rect(pos.x - gf * star.name.Length / 2, Screen.height - pos.y - ha - gf, 250, 130), star.name, guiStyle);
+                GUI.Label(new Rect(pos.x - gf * star.getName().Length / 2, Screen.height - pos.y - ha - gf, 250, 130), star.getName(), guiStyle);
                 guiStyle.fontSize = 12;
 
                 //GUI.Label(new Rect(pos.x - (width2 / 2) * 4, Screen.height - pos.y + (int)(fs * 1.0) - ha, 250, 130), dp.planet.lsPlanet.pSettings.name, guiStyle);
@@ -304,7 +314,9 @@ namespace Amalthea {
 
         private void RenderInterstellarLabels()
         {
-            RenderStarLabel(selectedSystem);
+            //RenderStarLabel(selectedSystem);
+            foreach (StarSystem s in player.localSystems)
+                RenderStarLabel(s);
         }
 
 
@@ -413,14 +425,20 @@ namespace Amalthea {
                 phi = s * Input.GetAxis("Vertical") * -1.0f;
             }
             mouseAccel += new Vector3(theta, phi, 0);
-            focusPointCur += (focusPoint - focusPointCur) * 0.05f;
-            focusPointCurStar += (selectedSystem.position - focusPointCurStar) * 0.05f;
+            /*            focusPointCur += (focusPoint - focusPointCur) * 0.05f;
+                        focusPointCurStar += (selectedSystem.position - focusPointCurStar) * 0.05f;
+                        */
+            float t = 0.1f;
+            focusPointCur = (focusPoint*t + focusPointCur*(1-t));
+            focusPointCurStar = (selectedSystem.position*t + focusPointCurStar*(1-t));
+
             mouseAccel *= 0.65f;
 
             euler += mouseAccel * 10f;
 //            Debug.Log(theta);
             mainCamera.transform.RotateAround(focusPointCur, mainCamera.transform.up, mouseAccel.x);
             starCamera.transform.RotateAround(focusPointCurStar, starCamera.transform.up, mouseAccel.x);
+//            Debug.Log(selectedSystem.position);
 
 
 
@@ -470,8 +488,6 @@ namespace Amalthea {
         //        private void CreatePlanetHierarchy(DisplayPlanets dp) { }
 
 
-        static Vector2 menuSizeText = new Vector2(0.2f, 0.1f) * Screen.height;
-        static Vector2 menuSizeImage = new Vector2(0.2f, 0.2f) * Screen.height;
 
 
         MenuItem CreateFileMenu(MenuLayout mLayout)
@@ -519,7 +535,7 @@ namespace Amalthea {
 
                 dpSun.CreateMenu("SolarSystem", mainMenu, menuSizeImage, true, 0.75f, mainMenu.layout, SelectPlanetMenu);
             }
-//            Debug.Log(mainMenu.children.Count);
+            mainMenu.replaceItem("SolarSystem", 0);
         }
 
 
@@ -602,11 +618,15 @@ namespace Amalthea {
                 dPlanets.Add(new DisplayPlanet(hidden, ap));
             }
             selected = dPlanets[0];
+            System.Diagnostics.Stopwatch so = new System.Diagnostics.Stopwatch();
+            so.Start();
+
             foreach (DisplayPlanet dp in dPlanets)
             {
                 dp.UpdatePosition(tempTime, mainCamera.transform.position);
                 dp.CreateOrbits(SSVSettings.OrbitalLineSegments);
             }
+            Debug.Log("Orbits:  " + so.Elapsed);
             CreatePlanetHierarchy();
         }
 
@@ -648,6 +668,7 @@ namespace Amalthea {
         public override void Start()
         {
             //            TestSlapDash();
+
             LemonSpawn.RenderSettings.planetCubeSphere = false;
 
 
@@ -686,27 +707,29 @@ namespace Amalthea {
             solarSystem = new LemonSpawn.SolarSystem(sun, sphere, GameObject.Find("SolarSystem").transform, (int)szWorld.skybox);
             LemonSpawn.PlanetTypes.Initialize();
             SetupCloseCamera();
-            starCamera.transform.position = MainCamera.transform.position * SSVSettings.starCameraScale;
             MainCamera = mainCamera.GetComponent<Camera>();
             SzWorld = szWorld;
 
             setText("TextVersion", "Version: " + LemonSpawn.RenderSettings.version.ToString("0.00"));
 
 
-//            linesObject = new GameObject("Lines");
-  //          CreateAxis();
-            galaxy = new Galaxy();
-            galaxy.Generate(50000, 0, 3000);
-            currentSystem = galaxy.stars[0];
+            //            linesObject = new GameObject("Lines");
+            //          CreateAxis();
 
-            solarSystem.GenerateSolarSystem(currentSystem.seed, currentSystem.name);
+            player.galaxy.Generate(50000, 0, 3000);
+            currentSystem = player.galaxy.stars[0];
+            player.AddToKnown(currentSystem);
+            solarSystem.GenerateSolarSystem(currentSystem);
             selectedSystem = currentSystem;
+
 
 
             PopulateWorld();
             CreateMainMenu ();
             Update();
             CreatePlanetMenu(true);
+            starCamera.transform.position = currentSystem.position + MainCamera.transform.position.normalized*SSVSettings.StarCamFixDistance * SSVSettings.starCameraScale;
+            //           MainCamera.transform.position = (starCamera.transform.position - currentSystem.position) / SSVSettings.starCameraScale;
         }
 
         protected void GotoStarSystem()
@@ -747,13 +770,20 @@ namespace Amalthea {
 
             }
 
-
+            
             Vector3 posS = starCamera.transform.position;
 
-            if (selectedSystem != null)
+            if (selectedSystem != null && MainCamera.transform.position.magnitude>SSVSettings.StarCamFixDistance)
             {
                 posS -= selectedSystem.position;
+                
+                //                if (posS.magnitude>0.01)
                 starCamera.transform.position = posS * (1 + scrollWheel) + selectedSystem.position;
+//                if (starCamera.transform.position.magnitude < ss)
+  //                  starCamera.transform.position = starCamera.transform.position.normalized * ss;
+
+               // starCamera.transform.position = starCamera.transform.position + selectedSystem.position;
+
             }
 /*            else
             {
@@ -772,21 +802,23 @@ namespace Amalthea {
         {
             float min;
             if (currentSystem != null)
+            {
                 min = Mathf.Min((starCamera.transform.position - currentSystem.position).magnitude, (starCamera.transform.position - selectedSystem.position).magnitude);
+            }
             else
                 min = (starCamera.transform.position - selectedSystem.position).magnitude;
+
 
             if (min>1)
             {
                 if (currentMode == Mode.InterPlanetary)
                 {
+                    player.InterStellar();
                     // Coming from interplanetary to interstellar
-                    Debug.Log("INTERSTELLAR");
                     DestroySolarSystem();
                     MainCamera.enabled = false;
                     currentSystem = null;
                     CreatePlanetMenu(false);
-                    Debug.Log(starCamera.transform.position);
                 }
                 currentMode = Mode.Interstellar;
             } 
@@ -794,16 +826,20 @@ namespace Amalthea {
             {
                 if (currentMode == Mode.Interstellar)
                 {
+                    player.AddToKnown(selectedSystem); 
+                    player.InterPlanetary();
                     Debug.Log("INTERPLANETARY");
                     // Coming from insterstellar to interplanetary
                     currentSystem = selectedSystem;
+
                     solarSystem = new LemonSpawn.SolarSystem(sun, sphere, GameObject.Find("SolarSystem").transform, (int)szWorld.skybox);
                     MainCamera.enabled = true;
-                    solarSystem.GenerateSolarSystem(currentSystem.seed, currentSystem.name);
-
+                    solarSystem.GenerateSolarSystem(currentSystem);
+ 
                     PopulateWorld();
                     solarSystem.Update();
                     CreatePlanetMenu(true);
+
                     MainCamera.transform.position = (starCamera.transform.position - currentSystem.position) / SSVSettings.starCameraScale;
     
                 }
@@ -822,7 +858,7 @@ namespace Amalthea {
                 Ray ray = starCamera.GetComponent<Camera>().ScreenPointToRay(Input.mousePosition);
                 StarSystem winnerSystem = null;
                 float winner = 1E30f;
-                foreach (StarSystem ss in galaxy.stars)
+                foreach (StarSystem ss in player.galaxy.stars)
                 {
                     float d = LemonSpawn.Util.DistanceToLine(ray, ss.position);
                     if (d < winner)
@@ -839,6 +875,8 @@ namespace Amalthea {
                     temp.transform.localScale = Vector3.one * 10;
                     temp.layer = 12;*/
                     selectedSystem = winnerSystem;
+                    DisplayStarInfo(selectedSystem);
+
                 }
 
             }
@@ -853,7 +891,9 @@ namespace Amalthea {
             if (solarSystem != null)
                 solarSystem.Update();
             UpdateStarCamera();
+    //        if (currentMode == Mode.Interstellar)
 
+            player.Update(starCamera.transform.position, starCamera.transform.up);
 
             if (DisplayPlanet.performSelect!=null)
             {
@@ -896,7 +936,7 @@ namespace Amalthea {
             RenderLabels();
       
             if (mainMenu != null)
-                mainMenu.Render(new Vector2(0.05f, 0.05f) * Screen.height);
+                mainMenu.Render(new Vector2(0.02f, -0.1f) * Screen.height);
 
         }
 

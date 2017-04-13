@@ -70,8 +70,9 @@ namespace Amalthea
             callback = cb;
             cbObject = cbO;
         }
-    
-        public void deleteFromChildren(string n)
+
+
+        public MenuItem findItem(string n)
         {
             MenuItem found = null;
             foreach (MenuItem mi in children)
@@ -79,6 +80,26 @@ namespace Amalthea
                 if (mi.name == n)
                     found = mi;
             }
+
+            return found;
+
+        }
+
+        public void replaceItem(string item, int newIndex)
+        {
+            MenuItem found = findItem(item);
+            if (found != null)
+            {
+
+                children.Remove(found);
+                children.Insert(newIndex, found);
+            }
+
+        }
+
+        public void deleteFromChildren(string n)
+        {
+            MenuItem found = findItem(n);
 
             if (found != null)
             {
@@ -111,9 +132,14 @@ namespace Amalthea
                 Color c = Color.white*0.8f + Color.white*timer*0.2f;
                 c.a = 1.0f;
                 GUI.color = c;
-                Rect r = new Rect(pos.x-1*scale, pos.y-1*scale, size.x+2*scale, size.y+2*scale);
+
+                float margin = 0;
+                if (image == null)
+                    margin = size.y / 4;
+
+                Rect r = new Rect(pos.x-1*scale, pos.y-1*scale+margin, size.x+2*scale, size.y+2*scale-2*margin);
                 int a = 0;
-                Rect clickRect = new Rect(pos.x-0*a, pos.y-0*a, size.x+2*a, size.y+2*a);
+                Rect clickRect = new Rect(pos.x-0*a, pos.y-0*a+margin, size.x+2*a, size.y+2*a-2*margin);
                 if (GUI.Button(r, "", new GUIStyle()))
                 {
                     //performSelect = this;
