@@ -1,3 +1,5 @@
+// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
 // Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
 
 // Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
@@ -112,6 +114,7 @@ struct VertexOutputForwardBase2
 	float3 posWorld					: TEXCOORD11;
 	#endif
 	float3 posWorld2 				: TEXCOORD12;
+	UNITY_VERTEX_OUTPUT_STEREO
 };
 
 
@@ -190,7 +193,7 @@ struct VertexOutputForwardBase2
 			float wh = (length(o.posWorld.xyz - v3Translate) - fInnerRadius);
 
 
-			o.pos = mul(UNITY_MATRIX_MVP, capV);
+			o.pos = UnityObjectToClipPos(capV);
 
 //			o.vpos = capV;
 

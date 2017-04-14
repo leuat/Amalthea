@@ -49,6 +49,7 @@ namespace LemonSpawn
 
     		StartBasics();
             RenderSettings.path = Application.dataPath + "/../";
+//            RenderSettings.planetCubeSphere = false;
             CurrentApp = Verification.MCAstName;
             Update();
             pnlNumber = GameObject.Find("pnlGroupNumber");

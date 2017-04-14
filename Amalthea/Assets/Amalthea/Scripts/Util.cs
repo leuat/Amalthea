@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml.Serialization;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Amalthea {
 
@@ -83,6 +84,18 @@ namespace Amalthea {
             }
             t.Apply();
             return t;
+        }
+
+        public static void SetCanvasFont(GameObject go, Font font)
+        {
+            Text t = go.GetComponent<Text>();
+            if (t != null)
+                t.font = font;
+
+            foreach (Transform child in go.transform)
+            {
+                SetCanvasFont(child.gameObject, font);
+            }
         }
 
     }

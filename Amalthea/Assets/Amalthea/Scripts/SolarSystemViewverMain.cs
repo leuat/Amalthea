@@ -8,7 +8,7 @@ using System;
 namespace Amalthea {
 
 	public class SSVSettings {
-		public static float SolarSystemScale = 1500.0f;
+		public static float SolarSystemScale = 1000.0f;
 	public static float PlanetSizeScale = 1.0f / 100f;
 //        public static float PlanetSizeScale = (float)(500.0f/RenderSettings.AU);
         public static int OrbitalLineSegments = 100;
@@ -28,8 +28,11 @@ namespace Amalthea {
         public static string audioClickPlanet = "GUI40Click";
         public static string audioHoverMenu = "GUIPop";
         public static float StarCamFixDistance = 20000;
-        
+        public static bool shadowText = true;
+        public static string MainFont = "LektonCode";
 
+        public static string[] fontList = new string[] { "CaviarDreams", "Rubik", "LektonCode", "Orkney", "ProzaLibre","Passageway", "Junction" };
+        public static int currentFont = 0;
 
         public static AudioClip loadAudio(string s)
         {
@@ -141,9 +144,8 @@ namespace Amalthea {
             setText("txtPlanetName", star.getName());
             setText("txtPlanetName2", "(" + star.noPlanets + " planets" + ")");
             string infoText2 = "";
-            float radius2 = (int)(star.radius);
             //                int displayRadius2 = (int)((dp.planet.lsPlanet.pSettings.getActualRadius()) / LemonSpawn.RenderSettings.GlobalRadiusScale * currentScale);
-            infoText2 += "Radius           : " + radius2.ToString("0.00") + " sun radii" + "\n";
+            infoText2 += "Radius           : " + star.radius.ToString("0.00") + " sun radii" + "\n";
             //          infoText += "Displayed Radius : " + displayRadius / radius + " x original radius\n";
             infoText2 += "Mass             : " + star.mass + " sun masses" + "\n";
             //            infoText += "Displayed Radius : " + displayRadius + " km \n";
@@ -237,13 +239,23 @@ namespace Amalthea {
         }
 
 
-
-/*        private void Initialize()
+        public void CycleFonts()
         {
-            CreatePlanetMenu();
-            initialized = true;
+            SSVSettings.currentFont = (SSVSettings.currentFont + 1) % SSVSettings.fontList.Length;
+            string f = SSVSettings.fontList[SSVSettings.currentFont];
+            Debug.Log("New font: " + f);
+            GUIFont = (Font)Resources.Load(f);
+            Util.SetCanvasFont(GameObject.Find("Canvas"), GUIFont);
+
+            guiStyle.font = GUIFont;
+
         }
-        */
+        /*        private void Initialize()
+                {
+                    CreatePlanetMenu();
+                    initialized = true;
+                }
+                */
         private void RenderSolarSystemLabels()
         {
             foreach (DisplayPlanet dp in dPlanets)
@@ -258,7 +270,7 @@ namespace Amalthea {
                 if (dp.planet.lsPlanet.pSettings.category == LemonSpawn.PlanetSettings.Categories.Planet)
                 {
                     Color c = SSVSettings.planetColor;
-                    c.a = Mathf.Clamp(1 - 0.00001f * (dp.go.transform.position - mainCamera.transform.position).magnitude, 0, 1);
+                    c.a = Mathf.Clamp(1 - 0.00005f * (dp.go.transform.position - mainCamera.transform.position).magnitude, 0, 1);
                     guiStyle.normal.textColor = c;
                 }
                 if (dp.planet.lsPlanet.pSettings.category == LemonSpawn.PlanetSettings.Categories.Spacecraft)
@@ -272,11 +284,25 @@ namespace Amalthea {
                 int width2 = dp.planet.lsPlanet.pSettings.name.Trim().Length;
                 int fs = (int)Mathf.Clamp( 16 + (int)Mathf.Pow(dp.planet.lsPlanet.pSettings.radius, 0.6f) + (int)(dp.timer * 20f) ,8 ,35);
                 guiStyle.fontSize = fs;
+                Color black = Color.black;
+                black.a = guiStyle.normal.textColor.a;
                 //                if (pos.x >0 && pos.y<Screen.width && pos.y>0 && pos.y<Screen.height)
                 if (pos.z > 0 && guiStyle.normal.textColor.a > 0)
                 {
                     float ha = 30;
                     float gf = guiStyle.fontSize / 2;
+                    Color c = guiStyle.normal.textColor;
+                    guiStyle.normal.textColor = black;
+                    int a = 2;
+                    GUI.Label(new Rect(pos.x - gf * dp.planet.lsPlanet.pSettings.givenName.Length / 2 + a, Screen.height - pos.y - ha - gf + a, 250, 130), dp.planet.lsPlanet.pSettings.givenName, guiStyle);
+                    guiStyle.fontSize = 12;
+                    GUI.Label(new Rect(pos.x - (width2 / 2) * 4+a, Screen.height - pos.y + (int)(fs * 1.0) - ha+a, 250, 130), dp.planet.lsPlanet.pSettings.name, guiStyle);
+                    guiStyle.fontSize = fs;
+
+
+                    guiStyle.normal.textColor = c;
+
+
                     GUI.Label(new Rect(pos.x - gf * dp.planet.lsPlanet.pSettings.givenName.Length / 2, Screen.height - pos.y - ha - gf, 250, 130), dp.planet.lsPlanet.pSettings.givenName, guiStyle);
                     guiStyle.fontSize = 12;
 
@@ -511,11 +537,12 @@ namespace Amalthea {
         {
             Color c = new Color(0.3f, 0.6f, 1.0f, 1.0f);
             GUIStyle s = new GUIStyle();
-            s.font = (Font)Resources.Load("CaviarDreams");
+            s.font = (Font)Resources.Load(SSVSettings.MainFont);
             s.fontSize = 16;
             s.normal.textColor = c*4;
             s.alignment = TextAnchor.MiddleCenter;
             MenuLayout mLayout = new MenuLayout(16, s, c, c * 0.4f, MenuLayout.MenuStyle.SolidFrame);
+            mLayout.background = (Texture2D)Resources.Load("GUIButton1");
             mainMenu = new Amalthea.MenuItem(null, "Main Menu", "", null, menuSizeText, false, 1, mLayout, null, null);
 
             mainMenu.children.Add(CreateFileMenu(mLayout));
@@ -576,27 +603,9 @@ namespace Amalthea {
             dPlanets.Clear();
 
             //solarSystem.InitializeFromScene();
-
             foreach (LemonSpawn.Planet p in solarSystem.planets)
             {
                 GameObject go = p.pSettings.gameObject;
-
-                Vector3 coolpos = p.pSettings.properties.pos.toVectorf();// new Vector3((float)p.pSettings.properties.pos.x, (float)p.pSettings.properties.pos.y, (float)p.pSettings.properties.pos.z);
-                float ms = 1;
-                float prevRadius = 0;
-                if (p.pSettings.category == LemonSpawn.PlanetSettings.Categories.Moon)
-                {
-                    ms = 2.0f / SSVSettings.PlanetSizeScale;
-                    prevRadius = p.pSettings.transform.parent.gameObject.GetComponent<LemonSpawn.PlanetSettings>().radius;
-                    //Debug.Log("IS MOON");
-                }
-
-                coolpos = Vector3.zero;
-                go.transform.localPosition = coolpos * SSVSettings.SolarSystemScale*ms + coolpos.normalized*prevRadius;
-                p.pSettings.properties.pos = new LemonSpawn.DVector(coolpos);
-                //go.transform.localScale = Vector3.one * SSVSettings.PlanetSizeScale * p.pSettings.radius;
-                //p.pSettings.atmoDensity = 0;
-
                 GameObject hidden = GameObject.CreatePrimitive(PrimitiveType.Sphere);
                 hidden.transform.parent = p.pSettings.transform;
                 hidden.transform.localPosition = Vector3.zero;// coolpos * SSVSettings.SolarSystemScale*ms;
@@ -672,7 +681,9 @@ namespace Amalthea {
             LemonSpawn.RenderSettings.planetCubeSphere = false;
 
 
-            GUIFont = (Font)Resources.Load("CaviarDreams");
+            GUIFont = (Font)Resources.Load(SSVSettings.MainFont);
+            Util.SetCanvasFont(GameObject.Find("Canvas"), GUIFont);
+
             guiStyle.font = GUIFont;
             Globals.Save();
             Globals.Initialize();
@@ -730,6 +741,7 @@ namespace Amalthea {
             CreatePlanetMenu(true);
             starCamera.transform.position = currentSystem.position + MainCamera.transform.position.normalized*SSVSettings.StarCamFixDistance * SSVSettings.starCameraScale;
             //           MainCamera.transform.position = (starCamera.transform.position - currentSystem.position) / SSVSettings.starCameraScale;
+            player.InterPlanetary(currentSystem);
         }
 
         protected void GotoStarSystem()
@@ -827,10 +839,9 @@ namespace Amalthea {
                 if (currentMode == Mode.Interstellar)
                 {
                     player.AddToKnown(selectedSystem); 
-                    player.InterPlanetary();
-                    Debug.Log("INTERPLANETARY");
                     // Coming from insterstellar to interplanetary
                     currentSystem = selectedSystem;
+                    player.InterPlanetary(currentSystem);
 
                     solarSystem = new LemonSpawn.SolarSystem(sun, sphere, GameObject.Find("SolarSystem").transform, (int)szWorld.skybox);
                     MainCamera.enabled = true;
@@ -911,6 +922,9 @@ namespace Amalthea {
             if (selected != null)
                 SelectPlanet(selected, false);
 
+
+            if (Input.GetKeyDown(KeyCode.Space))
+                CycleFonts();
 
             SelectStarSystem();
 

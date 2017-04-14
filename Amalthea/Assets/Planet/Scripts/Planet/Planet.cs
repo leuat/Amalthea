@@ -17,8 +17,6 @@ namespace LemonSpawn
         CubeSphere cube;
         private Mesh planetSphere;
         public GameObject impostor;
-        public TextMesh infoText;
-        public GameObject infoTextGO;
         public GameObject planetSphereGO;
         public static Color color = new Color(1f, 1f, 0.8f, 0.6f);
         public Environment environment;
@@ -130,33 +128,6 @@ namespace LemonSpawn
          *  0.3 11 1
          * 
         */ 
-        public void UpdateText()
-        {
-            if (infoTextGO == null)
-            {
-                infoTextGO = new GameObject();
-                //infoTextGO = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                infoText = infoTextGO.AddComponent<TextMesh>();
-
-            }
-
-            infoTextGO.SetActive(RenderSettings.RenderText);
-
-            infoText.fontSize = 40;
-            if (World.SzWorld.useSpaceCamera) {
-                infoTextGO.transform.position = pSettings.properties.localCamera.normalized * -250;
-                infoTextGO.transform.rotation = World.MainCameraObject.transform.rotation;
-            infoText.color = color;
-            if (pSettings == null)
-                return;
-            if (pSettings.planetType == null)
-                return;
-            infoText.text = pSettings.name + "\n" + getDistance() + "\nType:" + pSettings.planetType.name;
-
-            }
-
-        }
-
 
 
         public void Instantiate()
@@ -213,7 +184,6 @@ namespace LemonSpawn
             }
             Instantiate();
             pSettings.Update();
-            UpdateText();
             if (planetSphereGO != null)
             planetSphereGO.transform.localPosition = Vector3.zero;
 //            planetSphereGO.transform.position = Vector3.zero;

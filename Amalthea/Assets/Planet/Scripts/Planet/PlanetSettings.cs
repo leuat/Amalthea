@@ -262,7 +262,7 @@ namespace LemonSpawn {
             givenName = Util.getRandomName(r,"Kvorsk");
 
             
-            //sea = new Sea();
+            sea = new Sea();
             hasFlatClouds = true;
             if (forcedPlanetType != null)
                 planetType = PlanetTypes.p.FindPlanetType(forcedPlanetType);

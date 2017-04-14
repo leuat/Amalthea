@@ -912,6 +912,16 @@ namespace LemonSpawn
 
         }
 
+        public static Vector3 Max(Vector3 a, Vector3 o)
+        {
+            return new Vector3(Mathf.Max(o.x, a.x), Mathf.Max(o.y, a.y), Mathf.Max(o.z, a.z));
+        }
+        public static Vector3 Min(Vector3 a, Vector3 o)
+        {
+            return new Vector3(Mathf.Min(o.x, a.x), Mathf.Min(o.y, a.y), Mathf.Min(o.z, a.z));
+        }
+
+
         public static double LerpDegrees(double start, double end, double amount)
     {
         double difference = Math.Abs(end - start);

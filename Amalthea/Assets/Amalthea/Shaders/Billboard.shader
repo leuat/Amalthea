@@ -1,7 +1,9 @@
-﻿// Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
+﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
+// Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
 // Upgrade NOTE: replaced '_World2Object' with 'unity_WorldToObject'
 
-Shader "LemonSpawn/GS Billboard"
+Shader "LemonSpawn/Billboard"
 {
 	Properties
 	{
@@ -15,7 +17,7 @@ Shader "LemonSpawn/GS Billboard"
 	{
 		Tags{ "RenderType" = "Transparent" "Queue" = "Transparent+100" }
 		LOD 200
-		Blend One One
+		Blend srcalpha oneminussrcalpha
 		cull off
 		Zwrite off
 		Ztest off
@@ -54,8 +56,9 @@ Shader "LemonSpawn/GS Billboard"
 
 	float _Size;
 	float4x4 _VP;
-	Texture2D _SpriteTex;
-	SamplerState sampler_SpriteTex;
+	//Texture2D _SpriteTex;
+	//SamplerState sampler_SpriteTex;
+	sampler _SpriteTex;
 	uniform float3 upVector;
 
 	// **************************************************************
@@ -85,7 +88,7 @@ Shader "LemonSpawn/GS Billboard"
 		look = normalize(look);
 		float3 right = cross(up, look);
 
-		float halfS = 1 * _Size *p[0].tex0.x;
+		float halfS = 1.5 * _Size *max(p[0].tex0.x, 0.5);
 
 		float4 v[4];
 		v[0] = float4(p[0].pos + halfS * right - halfS * up, 1.0f);
@@ -93,7 +96,7 @@ Shader "LemonSpawn/GS Billboard"
 		v[2] = float4(p[0].pos - halfS * right - halfS * up, 1.0f);
 		v[3] = float4(p[0].pos - halfS * right + halfS * up, 1.0f);
 
-		float4x4 vp = mul(UNITY_MATRIX_MVP, unity_WorldToObject);
+		float4x4 vp = UNITY_MATRIX_MVP;//UnityObjectToClipPos(unity_WorldToObject);
 		FS_INPUT pIn;
 		pIn.pos = mul(vp, v[0]);
 		pIn.tex0 = float2(1.0f, 0.0f);
@@ -120,14 +123,16 @@ Shader "LemonSpawn/GS Billboard"
 	float4 FS_Main(FS_INPUT input) : COLOR
 	{
 
-		float d= length(input.tex0 - float2(0.5, 0.5));
-		float val = exp(-d*d*500)*1.2;
+
+		float4 val = tex2D(_SpriteTex, input.tex0);
 		float3 c = input.normal;
-	/*	c.x = c.x*c.x;
-		c.y = c.y*c.y;
-		c.z = c.z*c.z;*/
-		float4 col = float4(c*val, val);
-		return col;
+		val.x *= c.x;
+		val.y *= c.y;
+		val.z *= c.z;
+		val *= 2;
+		val.a = max(val.x, val.y);
+		val.a =max(val.a, val.z);
+		return val;
 	}
 
 		ENDCG

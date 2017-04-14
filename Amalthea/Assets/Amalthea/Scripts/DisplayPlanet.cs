@@ -13,9 +13,7 @@ namespace Amalthea
         public List<DisplayPlanet> children = new List<DisplayPlanet>();
         public static DisplayPlanet performSelect = null;
         public Planet planet;
-        //        public LemonSpawn.SerializedPlanet serializedPlanet;
         public GameObject go;
-        public GameObject textMesh;
         public float timer = 0;
         public List<Vector3> orbitLines = new List<Vector3>();
         private static Material lineRenderer;
@@ -67,7 +65,7 @@ namespace Amalthea
             miniCamera.clearFlags = CameraClearFlags.SolidColor;
 
             miniCamera.backgroundColor = new Color(0, 0, 0, 0);// Color.black;
-
+            
             miniCamera.Render();
 
             texImage = Util.GetRTPixels(renderTexture, texImage);
@@ -215,6 +213,11 @@ namespace Amalthea
             {
                 ms = 2.0f / SSVSettings.PlanetSizeScale;
                 prevRadius = planet.lsPlanet.pSettings.transform.parent.gameObject.GetComponent<LemonSpawn.PlanetSettings>().radius;
+            }
+            if (planet.lsPlanet.pSettings.category == LemonSpawn.PlanetSettings.Categories.Planet)
+            {
+                ms = 1.0f;// / SSVSettings.PlanetSizeScale;
+                prevRadius = planet.lsPlanet.pSettings.transform.parent.gameObject.GetComponent<LemonSpawn.PlanetSettings>().radius*2;
             }
             // Scales moons
             return pos * SSVSettings.SolarSystemScale * ms + pos.normalized * prevRadius;

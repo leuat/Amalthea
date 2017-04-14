@@ -1,4 +1,6 @@
-﻿Shader "LemonSpawn/CrashShader" {
+﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
+Shader "LemonSpawn/CrashShader" {
 	Properties {
 		_MainTex ("Base (RGB)", 2D) = "white" {}
 	}
@@ -49,7 +51,7 @@ SubShader {
              {
                  v2f o;
 
-                 o.pos = mul( UNITY_MATRIX_MVP, v.vertex);
+                 o.pos = UnityObjectToClipPos( v.vertex);
                  o.uv = v.texcoord;
                  o.normal = normalize(v.normal).xyz;
                  o.texcoord = v.texcoord;

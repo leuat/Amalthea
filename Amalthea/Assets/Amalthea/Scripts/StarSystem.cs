@@ -186,10 +186,10 @@ namespace Amalthea
             return name;
         }
 
-        public StarSystem(int i, int s, Vector3 p,float t, float r, float pNoPlanets)
+        public StarSystem(int i, int sd, Vector3 p,float t, float r, float pNoPlanets)
         {
             radius = r;
-            seed = s;
+            seed = sd;
             id = i;
             position = p;
             temperature = t;
@@ -198,24 +198,27 @@ namespace Amalthea
             color = LemonSpawn.Constants.colorTemperatureToRGB(t);
             name = "";
             density = 1400;
-            mass =  (float)(4 / 3.0 * Mathf.PI * density * Mathf.Pow((float)LemonSpawn.Constants.sunR, 3) * Mathf.Pow(1000, 3)/LemonSpawn.Constants.massSun);
+            mass =  (float)(4 / 3.0 * Mathf.PI * density * Mathf.Pow((float)LemonSpawn.Constants.sunR*radius, 3) * Mathf.Pow(1000, 3)/LemonSpawn.Constants.massSun);
         }
 
-    public string getCategory()
+        public string getCategory()
         {
             string s = "";
             if (temperature <= 2000)
                 s = s + "cool ";
-            if (temperature > 10000)
+            if (temperature > 8000)
                 s = s + "hot ";
 
-            if (mass<0.01)
+            if (mass<0.001)
             {
                 s += "brown dwarf";
             }
-            if (mass >= 0.01 && mass<0.5)
+            if (mass >= 0.001 && mass<0.5)
             {
-                s += "red dwarf";
+                if (temperature < 4500) 
+                    s += "red dward";
+                else
+                    s += "white dwarf";
             }
             if (mass >= 0.5 && mass < 5)
             {
@@ -232,6 +235,46 @@ namespace Amalthea
 
             return s;
     }
+
+
+        public static LemonSpawn.LSMesh CreateMesh(string name, List<StarSystem> list, float val1, float val2, System.Random rnd, Material m, Color overrideColor, int layer)
+        {
+            LemonSpawn.LSMesh lsMesh = new LemonSpawn.LSMesh();
+            int i = 0;
+            Vector3 oc = new Vector3(overrideColor.r, overrideColor.g, overrideColor.b);
+            Vector3 min = Vector3.one * 1E20f;
+            Vector3 max = Vector3.one * -1E20f;
+            foreach (StarSystem s in list)
+            {
+                lsMesh.vertexList.Add(s.position);
+                lsMesh.faceList.Add(i);
+                lsMesh.faceList.Add(i);
+                lsMesh.faceList.Add(i);
+                if (oc.magnitude==0)
+                lsMesh.normalList.Add(new Vector3(s.color.r, s.color.g, s.color.b));
+                else
+                    lsMesh.normalList.Add(oc);
+
+                float size = s.radius * val1 + (float)rnd.NextDouble() * val2;
+                max = LemonSpawn.Util.Max(s.position + Vector3.one * size, max);
+                min = LemonSpawn.Util.Max(s.position - Vector3.one * size, min);
+
+                lsMesh.uvList.Add(new Vector2(size, 0));
+                lsMesh.tangentList.Add(Vector4.zero);
+                i++;
+            }
+            lsMesh.createMesh(false);
+            lsMesh.mesh.name = "mesh";
+            lsMesh.mesh.bounds = new Bounds((max + min) * 0.5f, (max - min));
+         //   markingMaterial = (Material)Resources.Load("StarMarkingMaterial");
+
+            LemonSpawn.Util.DestroyGameObject(name);
+
+            GameObject go = lsMesh.Realize(name, m, layer, "normal", false);
+            go.layer = layer;
+            return lsMesh;
+
+        }
     }
 
     [System.Serializable]
@@ -241,11 +284,33 @@ namespace Amalthea
         public List<StarSystem> stars = new List<StarSystem>();
         public Mesh mesh;
         public LemonSpawn.LSMesh lsMesh;
+
+        public LemonSpawn.LSMesh lsMeshNebulae;
+
         public GameObject galaxyGO;
         public Material galaxyMaterial;
+        public Material nebulaeMaterial;
         public int category = 0;
 
 
+
+        public void GenerateNebulae(int no, System.Random rnd, int lyWidth, int ba, int width)
+        {
+//            lsMeshNebulae = new LemonSpawn.LSMesh();
+            List<StarSystem> ls = new List<StarSystem>();
+            for (int i=0;i<no;i++) {
+                Vector3 pos = LemonSpawn.Util.randomVector(rnd, lyWidth, lyWidth, lyWidth) - Vector3.one * lyWidth / 2;
+                StarSystem ss = new StarSystem(i, 1, pos, 1, 1, 0);
+                ss.color = new Color(1-(float)rnd.NextDouble()*0.5f, 1-(float)rnd.NextDouble() * 0.5f, 1-(float)rnd.NextDouble() * 0.5f)*(0.1f+ 0.35f*(float)rnd.NextDouble());
+                ls.Add(ss);
+            }
+
+            nebulaeMaterial = (Material)Resources.Load("NebulaeMaterial");
+            lsMeshNebulae = StarSystem.CreateMesh("nebulae", ls, ba, width, rnd, nebulaeMaterial, Color.black,12);
+
+
+        
+    }
 
 
         public void Generate(int no, int se, float lyWidth)
@@ -254,41 +319,19 @@ namespace Amalthea
             System.Random rnd = new System.Random(seed);
             stars.Clear();
             // Always one in zero
-            stars.Add(new StarSystem(0, rnd.Next(), Vector3.zero, 5800, 1, 9));
+            stars.Add(new StarSystem(0, rnd.Next(), Vector3.zero, 3800, 1, 9));
             for (int i = 0; i < no - 1; i++)
             {
                 int noPlanets = 2 + rnd.Next() % 9;
                 float starT = Mathf.Pow((float)rnd.NextDouble(), 2);
-                float starR = Mathf.Pow((float)rnd.NextDouble(), 2);
+                float starR = Mathf.Pow((float)rnd.NextDouble(), 4);
                 StarSystem s = new StarSystem(i+1, rnd.Next(), LemonSpawn.Util.randomVector(rnd, lyWidth, lyWidth, lyWidth) - Vector3.one * lyWidth / 2,
                      2000 +starT* 12000f, 0.1f + starR * 10f, noPlanets);
                 stars.Add(s);
             }
-            CreateMesh();
-        }
-
-        public void CreateMesh()
-        {
-            lsMesh = new LemonSpawn.LSMesh();
-            int i = 0;
-            foreach (StarSystem s in stars)
-            {
-                lsMesh.vertexList.Add(s.position);
-                lsMesh.faceList.Add(i);
-                lsMesh.faceList.Add(i);
-                lsMesh.faceList.Add(i);
-                lsMesh.normalList.Add(new Vector3(s.color.r, s.color.g, s.color.b));
-                lsMesh.uvList.Add(new Vector2(s.radius*0.5f, 0));
-                lsMesh.tangentList.Add(Vector4.zero);
-                i++;
-            }
-            lsMesh.createMesh(false);
-            mesh = lsMesh.mesh;
-            mesh.name = "GalaxyMesh";
             galaxyMaterial = (Material)Resources.Load("StarMaterial");
-            galaxyGO = lsMesh.Realize("Galaxy",galaxyMaterial, 0, "normal", false);
-            galaxyGO.layer = 12;
-
+            StarSystem.CreateMesh("galaxy", stars, 0.5f, 0, rnd, galaxyMaterial, Color.black,12);
+            GenerateNebulae(2000, rnd, 4000, 10, 350);
         }
 
 
@@ -315,14 +358,21 @@ namespace Amalthea
         public Galaxy galaxy = new Galaxy();
         public List<StarSystem> knownSystems = new List<StarSystem>();
         public List<StarSystem> localSystems = new List<StarSystem>();
-        private Material markingMaterial = null; 
+        private Material markingMaterial = null;
+        private Material sunGlareMaterial = null;
+        private StarSystem currentSystem;
 
         public void Update(Vector3 currentPos, Vector3 up)
         {
             localSystems = galaxy.FindLocalSystems(currentPos, 500f);
             galaxy.galaxyMaterial.SetVector("upVector", up);
+            if (galaxy.nebulaeMaterial)
+            galaxy.nebulaeMaterial.SetVector("upVector", up);
             if (markingMaterial != null)
                markingMaterial.SetVector("upVector", up);
+            if (sunGlareMaterial)
+                sunGlareMaterial.SetVector("upVector", up);
+
         }
 
         public void AddToKnown(StarSystem s)
@@ -334,40 +384,37 @@ namespace Amalthea
 
         public void InterStellar()
         {
-            CreateMesh("knownMarker", knownSystems, Color.cyan, 0.5f, 0.5f);
+            if (markingMaterial == null)
+                markingMaterial = (Material)Resources.Load("StarMarkingMaterial");
+             StarSystem.CreateMesh("knownMarker", knownSystems, 10,0, new System.Random(), markingMaterial, Color.cyan,12);
+
+            LemonSpawn.Util.DestroyGameObject("sunGlare");
+        
         }
 
-        public void InterPlanetary()
+        private void CreateSunGlare()
         {
+            Color color = 0.6f * currentSystem.color;
+            color.a = 1;
+            List<StarSystem> ls = new List<StarSystem>();
+            StarSystem s1 = new StarSystem(0, 0, Vector3.zero, 1, currentSystem.radius, 1);
+            s1.color = color;
+            ls.Add(s1);
+            StarSystem s2 = new StarSystem(0, 0, Vector3.zero, 1, currentSystem.radius*10, 1);
+            s2.color = color * 0.3f;
+            ls.Add(s2);
+            sunGlareMaterial = (Material)Resources.Load("StarGlow");
+            StarSystem.CreateMesh("ASunGlare", ls, 2000, 0, new System.Random(), sunGlareMaterial, Color.black,0);
+        }
+
+        public void InterPlanetary(StarSystem newSystem)
+        {
+            currentSystem = newSystem;
             LemonSpawn.Util.DestroyGameObject("knownMarker");
+            CreateSunGlare();
         }
 
-        public void CreateMesh(string name, List<StarSystem> list, Color c, float val1, float val2)
-        {
-            LemonSpawn.LSMesh lsMesh = new LemonSpawn.LSMesh();
-            int i = 0;
-            Vector3 col = new Vector3(c.r, c.g, c.b);
-            foreach (StarSystem s in list)
-            {
-                lsMesh.vertexList.Add(s.position);
-                lsMesh.faceList.Add(i);
-                lsMesh.faceList.Add(i);
-                lsMesh.faceList.Add(i);
-                lsMesh.normalList.Add(col);
-                lsMesh.uvList.Add(new Vector2(val1,val2));
-                lsMesh.tangentList.Add(Vector4.zero);
-                i++;
-            }
-            lsMesh.createMesh(false);
-            lsMesh.mesh.name = "mesh";
-            markingMaterial = (Material)Resources.Load("StarMarkingMaterial");
-
-            LemonSpawn.Util.DestroyGameObject(name);
-
-            GameObject go = lsMesh.Realize(name, markingMaterial, 12, "normal", false);
-            go.layer = 12;
-
-        }
+        
 
 
     }

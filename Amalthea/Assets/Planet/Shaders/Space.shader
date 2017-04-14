@@ -1,4 +1,6 @@
-﻿// Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
+﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
+// Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
 
 // Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
 
@@ -162,7 +164,7 @@ Shader "LemonSpawn/Space"
 			v2f vert(appdata_base v)
 			{
     			v2f OUT;
-    			OUT.pos = mul(UNITY_MATRIX_MVP, v.vertex);
+    			OUT.pos = UnityObjectToClipPos(v.vertex);
     			OUT.uv = v.texcoord.xy;
     			
     			float3 v3CameraPos = _WorldSpaceCameraPos - v3Translate;	// The camera's current position

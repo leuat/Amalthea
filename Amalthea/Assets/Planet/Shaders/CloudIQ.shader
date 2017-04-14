@@ -1,4 +1,6 @@
-﻿// Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
+﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
+// Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
 // Upgrade NOTE: replaced '_World2Object' with 'unity_WorldToObject'
 
 Shader "LemonSpawn/CloudID" {
@@ -58,7 +60,7 @@ Shader "LemonSpawn/CloudID" {
              v2f vert (appdata_base v)
              {
                  v2f o;
-                 o.pos = mul( UNITY_MATRIX_MVP, v.vertex);
+                 o.pos = UnityObjectToClipPos( v.vertex);
                  o.uv = v.texcoord;
 
 				 o.uv.xy = pos2uv(v.vertex.xyz);

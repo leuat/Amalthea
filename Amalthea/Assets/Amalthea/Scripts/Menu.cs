@@ -171,8 +171,12 @@ namespace Amalthea
                 }
                 timer += Mathf.Sign(targetTimer-timer) * 0.1f;
                 timer = Mathf.Clamp(timer, 0, 1);
-//                Debug.Log(timer);
+                //                Debug.Log(timer);
+                c = layout.colorBackground*(1+timer);
+                c.a = 0.9f;
+                GUI.color = c;
                 GUI.DrawTexture(r, layout.background);
+                GUI.color = Color.white;
                 if (text == null || text == "")
                 {
                     //                    GUI.color = Color.white;

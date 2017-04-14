@@ -1,3 +1,5 @@
+// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
 // Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
 
 #ifndef GeometryShaderExtra
@@ -247,7 +249,7 @@ void setupCross(point gIn vert[1], inout TriangleStream<v2f_scast> triStream)
 																	 // Position in view space
 	for (i = 0; i < TAM; i++) { 
 		tmpV[i].vertex = outV[i].pos;
-		outV[i].pos = mul(UNITY_MATRIX_MVP, outV[i].pos); 
+		outV[i].pos = UnityObjectToClipPos(outV[i].pos); 
 	}
 
 #ifdef L_FRAG_PASS

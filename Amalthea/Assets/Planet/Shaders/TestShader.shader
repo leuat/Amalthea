@@ -1,4 +1,6 @@
-﻿Shader "Custom/SolidColor" {
+﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
+Shader "Custom/SolidColor" {
 	SubShader{
 		Pass{
 
@@ -38,7 +40,7 @@
 
 	v2f vert(appdata_base v) {
 		v2f o;
-		o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
+		o.pos = UnityObjectToClipPos(v.vertex);
 
 		// 5.) The TRANSFER_VERTEX_TO_FRAGMENT macro populates the chosen LIGHTING_COORDS in the v2f structure
 		// with appropriate values to sample from the shadow/lighting map

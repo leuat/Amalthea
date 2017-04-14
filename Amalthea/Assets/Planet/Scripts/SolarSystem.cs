@@ -153,7 +153,7 @@ namespace LemonSpawn
             float lum = Constants.LumFromT(star.pSettings.getActualRadius()*1000, star.pSettings.temperature);
                                //            noPlanets = 0;
                                //            Debug.Log("Transform:" + transform);
-            float R = (float)(0.4 + rnd.NextDouble()*0.5);
+            float R = (float)(0.2 + rnd.NextDouble()*0.5);
 
             /*            double M = star.pSettings.getMass();
                         float ve = Mathf.Sqrt((float)(2 * Constants.G * M / (1 * Constants.AU)));
@@ -168,7 +168,7 @@ namespace LemonSpawn
                 float max = 40000;
                 if (rnd.NextDouble() > 0.8)
                     max *= 3;
-                Planet p = AddPlanet(star, 0,R, rnd, transform, PlanetSettings.Categories.Planet, lum,i, 2000, max,25, "Planet " + (i+1),false);
+                Planet p = AddPlanet(star, 0,R, rnd, star.pSettings.transform, PlanetSettings.Categories.Planet, lum,i, 2000, max,25, "Planet " + (i+1),false);
                 int noMoons = rnd.Next() % (int)(Mathf.Log(p.pSettings.getActualRadius()*0.5f));
                 float Rm = (float)(0.0002f + rnd.NextDouble() * 0.0004f);
 //                Debug.Log("radius " + p.pSettings.getActualRadius() + " name " + p.pSettings.givenName + " with mass " + p.pSettings.getMass());
