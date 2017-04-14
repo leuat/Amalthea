@@ -63,10 +63,12 @@ namespace Amalthea
             //            miniCamera.rect = new Rect(0, 0, 0.2, 0.2);
             miniCamera.farClipPlane = 100000;
             miniCamera.clearFlags = CameraClearFlags.SolidColor;
-
+			miniCamera.cullingMask = GameObject.Find ("Camera").GetComponent<Camera> ().cullingMask;
             miniCamera.backgroundColor = new Color(0, 0, 0, 0);// Color.black;
-            
+			GameObject sc = GameObject.Find("StarCamera");
+//			sc.SetActive(false);
             miniCamera.Render();
+//			sc.SetActive(true);
 
             texImage = Util.GetRTPixels(renderTexture, texImage);
             miniCamera.enabled = false;

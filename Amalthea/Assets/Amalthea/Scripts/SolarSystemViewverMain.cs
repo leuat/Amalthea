@@ -463,7 +463,10 @@ namespace Amalthea {
             euler += mouseAccel * 10f;
 //            Debug.Log(theta);
             mainCamera.transform.RotateAround(focusPointCur, mainCamera.transform.up, mouseAccel.x);
-            starCamera.transform.RotateAround(focusPointCurStar, starCamera.transform.up, mouseAccel.x);
+
+			Vector3 starFocus = focusPointCurStar;// + focusPointCur * SSVSettings.starCameraScale;
+
+            starCamera.transform.RotateAround(starFocus, starCamera.transform.up, mouseAccel.x);
 //            Debug.Log(selectedSystem.position);
 
 
@@ -477,11 +480,13 @@ namespace Amalthea {
 
 
             mainCamera.transform.RotateAround(focusPointCur, mainCamera.transform.right, mouseAccel.y);
-            mainCamera.transform.LookAt(focusPointCur);
 
-            starCamera.transform.RotateAround(focusPointCurStar, starCamera.transform.right, mouseAccel.y);
-            starCamera.transform.LookAt(focusPointCurStar);
-
+			starCamera.transform.RotateAround(starFocus, starCamera.transform.right, mouseAccel.y);
+			mainCamera.transform.LookAt(focusPointCur);
+			starCamera.transform.LookAt(starFocus);
+			if (currentMode == Mode.InterPlanetary)
+			starCamera.transform.rotation = mainCamera.transform.rotation;
+	//			starCamera.transform.forward = mainCamera.transform.forward
 
 /*            if (currentMode == Mode.Move)
             {
@@ -785,7 +790,7 @@ namespace Amalthea {
             
             Vector3 posS = starCamera.transform.position;
 
-            if (selectedSystem != null && MainCamera.transform.position.magnitude>SSVSettings.StarCamFixDistance)
+			if (selectedSystem != null && MainCamera.transform.position.magnitude>SSVSettings.StarCamFixDistance)
             {
                 posS -= selectedSystem.position;
                 
