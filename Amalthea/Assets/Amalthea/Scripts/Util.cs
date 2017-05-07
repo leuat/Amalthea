@@ -7,11 +7,7 @@ using UnityEngine.UI;
 
 namespace Amalthea {
 
-    [System.Serializable]
-    public class BaseCollection
-    {
-        public string name;
-    }
+   
 
     [System.Serializable]
     public class XMLSerializable

@@ -131,7 +131,7 @@ namespace LemonSpawn
             return p;
         }
 
-
+#if AMALTHEA
         public void GenerateSolarSystem(Amalthea.StarSystem starSystem)
         {
             System.Random rnd = new System.Random(starSystem.seed);
@@ -185,6 +185,7 @@ namespace LemonSpawn
 
         }
 
+#endif
         public SolarSystem(GameObject pSun, Mesh s, Transform t, int skybox)
         {
             sun = pSun;
@@ -434,6 +435,8 @@ namespace LemonSpawn
                 }
 
                 Planet p = InitializeObject(ps);
+                // Set serialized object as well
+                p.pSettings.properties.serializedPlanet = sp;
                 if (ps.category == PlanetSettings.Categories.Star && World.CurrentApp == Verification.MCAstName)
                     continue;
 
@@ -507,7 +510,8 @@ namespace LemonSpawn
             if (s == 6) skybox = "Skybox9";
 */
 			string skybox = "Skybox" + s;
-            UnityEngine.RenderSettings.skybox = (Material)Resources.Load(skybox);
+            Debug.Log("Ignoring setting skybox " + s);
+//            UnityEngine.RenderSettings.skybox = (Material)Resources.Load(skybox);
 
         }
 

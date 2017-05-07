@@ -5,68 +5,12 @@ using System.Xml.Serialization;
 using UnityEngine;
 
 
-namespace Amalthea
+namespace LemonSpawn
 {
 
 
     [System.Serializable]
-    public class ResourceType : LemonSpawn.BaseCollection
-    {
-        public Color color = Color.white;
-        public ResourceType() { }
-        public ResourceType(string n, Color c)
-        {
-            name = n;
-            color = c;
-        }
-    }
-
-    [System.Serializable]
-    public class Resource
-    {
-        public ResourceType resourceType;
-        public float amount;
-
-        public Resource(ResourceType rt, float v)
-        {
-            resourceType = rt;
-            amount = v;
-        }
-    }
-
-    [System.Serializable]
-    public class MinableResource
-    {
-        public Resource resource;
-        public Vector3 position = Vector3.zero;
-    }
-
-    [System.Serializable]
-    public class CityType : LemonSpawn.BaseCollection
-    {
-        public Color color = Color.yellow;
-        public CityType(string n, Color c)
-        {
-            name = n;
-            color = c;
-        }
-        public CityType() { }
-    }
-
-    [System.Serializable]
-    public class City
-    {
-        public int seed;
-        public Vector3 position;
-        public string name;
-        public float level;
-        public CityType cityType;
-
-
-    }
-
-    [System.Serializable]
-    public class TypeCollection<T> where T : LemonSpawn.BaseCollection
+    public class TypeCollection<T> where T : BaseCollection
     {
         public List<T> list = new List<T>();
         public T Get(string n)
@@ -82,15 +26,10 @@ namespace Amalthea
     [System.Serializable]
     public class Definitions
     {
-        public TypeCollection<CityType> cityTypes = new TypeCollection<CityType>();
-        public TypeCollection<ResourceType> resourceTypes = new TypeCollection<ResourceType>();
         public TypeCollection<StellarCategory> stellarCategories = new TypeCollection<StellarCategory>();
 
         public void InitTemp()
         {
-            cityTypes.list.Add(new CityType("Civic", new Color(1, 1, 0.4f)));
-            resourceTypes.list.Add(new ResourceType("Iron", new Color(0.5f, 0.5f, 0.5f)));
-
             stellarCategories.list.Add(new StellarCategory("Moon", new Color(0.3f, 0.5f, 1.0f, 0.5f), 1f));
             stellarCategories.list.Add(new StellarCategory("Planet", new Color(1.0f, 0.8f, 0.3f, 0.5f), 1.2f));
             stellarCategories.list.Add(new StellarCategory("Star", new Color(1.0f, 0.3f, 0.3f, 0.5f), 1.2f));
@@ -120,6 +59,7 @@ namespace Amalthea
 
         public static void Initialize()
         {
+            definitions.InitTemp();
             definitions = (Definitions)Definitions.DeSerialize("definitions.xml");
         }
         public static void Save()
@@ -129,8 +69,25 @@ namespace Amalthea
         }
 
     }
+
+    public class PlanetInstance
+    {
+        public SerializedPlanet serializedPlanet;
+        public Planet lsPlanet;
+        public SettingsTypes planetType;
+        public StellarCategory stellarCategory;
+
+        public PlanetInstance(Planet p, StellarCategory sc) {
+            lsPlanet = p;
+            planetType = p.pSettings.planetType;
+            serializedPlanet = p.pSettings.properties.serializedPlanet;
+            stellarCategory = sc;
+        }
+    }
+
+
     [System.Serializable]
-    public class StellarCategory : LemonSpawn.BaseCollection
+    public class StellarCategory : BaseCollection
     {
         public Color color;
         public float width;
@@ -141,25 +98,6 @@ namespace Amalthea
             color = c;
             width = w;
         }
-    }
-
-
-    [System.Serializable]
-    public class SerializedPlanet
-    {
-        public int seed;
-        public Vector3 position = Vector3.zero;
-        public float rotation = 0;
-        public float radius;
-        public string planetTypeName;
-    }
-
-    public class Planet
-    {
-        public SerializedPlanet serializedPlanet;
-        public LemonSpawn.Planet lsPlanet;
-        public LemonSpawn.PlanetType planetType;
-        public StellarCategory stellarCategory;
     }
 
 
@@ -320,7 +258,7 @@ namespace Amalthea
             }
             galaxyMaterial = (Material)Resources.Load("StarMaterial");
             StarSystem.CreateMesh("galaxy", stars, 0.5f, 0, rnd, galaxyMaterial, Color.black,12);
-            GenerateNebulae(2000, rnd, 4000, 10, 350);
+//            GenerateNebulae(2000, rnd, 4000, 10, 350);
         }
 
 
@@ -342,7 +280,7 @@ namespace Amalthea
     }
 
 
-    class APlayer {
+    public class APlayer {
         int galaxySeed;
         public Galaxy galaxy = new Galaxy();
         public List<StarSystem> knownSystems = new List<StarSystem>();
@@ -354,13 +292,6 @@ namespace Amalthea
         public void Update(Vector3 currentPos, Vector3 up)
         {
             localSystems = galaxy.FindLocalSystems(currentPos, 500f);
-            galaxy.galaxyMaterial.SetVector("upVector", up);
-            if (galaxy.nebulaeMaterial)
-            galaxy.nebulaeMaterial.SetVector("upVector", up);
-            if (markingMaterial != null)
-               markingMaterial.SetVector("upVector", up);
-            if (sunGlareMaterial)
-                sunGlareMaterial.SetVector("upVector", up);
 
         }
 

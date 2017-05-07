@@ -12,7 +12,7 @@ public class MainMenu : World {
         base.Start();
         //       mainCamera.GetComponent<SpaceCamera>().enabled = false;
         LemonSpawn.RenderSettings.MoveCam = false;
-        Globals.Initialize();
+        Amalthea.Globals.Initialize();
 
 
     }

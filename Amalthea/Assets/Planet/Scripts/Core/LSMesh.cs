@@ -225,12 +225,12 @@ namespace LemonSpawn {
 
 
             mesh.vertices = vertexList.ToArray(); 
-            if (!isPoints)
-			mesh.triangles = faceList.ToArray();
+//            if (!isPoints)
+			    mesh.triangles = faceList.ToArray();
 			mesh.uv = uvList.ToArray();
 			mesh.normals = normalList.ToArray();
-            if (!isPoints)
-			mesh.tangents = tangentList.ToArray();
+  //          if (!isPoints)
+			    mesh.tangents = tangentList.ToArray();
             if (isPoints)
                 mesh.SetIndices(mesh.triangles, MeshTopology.Points, 0);
 
@@ -254,10 +254,11 @@ namespace LemonSpawn {
 			if (m==null)
 				return null;
 			GameObject go = new GameObject(name);
-            if (World.SzWorld.useSpaceCamera) {
+            if (World.SzWorld != null && World.SzWorld.useSpaceCamera) {
                 go.tag = tag;
                 go.layer = layer;
             }
+
 			if (LMesh.parent != null)
 				go.transform.parent = LMesh.parent.transform;
 			go.AddComponent<MeshFilter>();   

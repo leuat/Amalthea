@@ -165,7 +165,7 @@ namespace LemonSpawn {
             EditorUtility.SetDirty(target);
         }
 
-        [MenuItem("GameObject/LemonSpawn/Planet")]      
+        [UnityEditor.MenuItem("GameObject/LemonSpawn/Planet")]      
         static void CreatePlanet () {
             GameObject p = new GameObject("Planet");
             if (Selection.activeGameObject != null)
@@ -175,7 +175,7 @@ namespace LemonSpawn {
      //       ps.cloudSettings = p.AddComponent<CloudSettings>();
             //      p.AddComponent<CloudSettings>();        
         }
-
+        
 
     }
 #endif

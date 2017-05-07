@@ -54,7 +54,7 @@ namespace LemonSpawn
 				private static bool outputVerified = false;
 //				public static Output output = null;
 				// Define menu item
-				[MenuItem ("Window/LemonSpawn/LemonSpawn Generator")]
+				[UnityEditor.MenuItem ("Window/LemonSpawn/LemonSpawn Generator")]
 				static void Init ()
 				{
 //						window = EditorWindow.GetWindow (typeof(LemonSpawnEditor));

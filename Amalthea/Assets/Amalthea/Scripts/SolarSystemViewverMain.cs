@@ -7,7 +7,7 @@ using System;
 
 namespace Amalthea {
 
-	public class SSVSettings {
+	public class SSVSettings  {
 		public static float SolarSystemScale = 1000.0f;
 	public static float PlanetSizeScale = 1.0f / 100f;
 //        public static float PlanetSizeScale = (float)(500.0f/RenderSettings.AU);
@@ -732,11 +732,13 @@ namespace Amalthea {
             //            linesObject = new GameObject("Lines");
             //          CreateAxis();
 
+
             player.galaxy.Generate(50000, 0, 3000);
             currentSystem = player.galaxy.stars[0];
             player.AddToKnown(currentSystem);
             solarSystem.GenerateSolarSystem(currentSystem);
             selectedSystem = currentSystem;
+
 
 
 

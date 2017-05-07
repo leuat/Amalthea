@@ -1,4 +1,9 @@
-﻿Shader "LemonSpawn/BillboardStar"
+﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
+// Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
+// Upgrade NOTE: replaced '_World2Object' with 'unity_WorldToObject'
+
+Shader "LemonSpawn/Billboard"
 {
 	Properties
 	{
@@ -12,11 +17,11 @@
 	{
 		Tags{ "RenderType" = "Transparent" "Queue" = "Transparent+100" }
 		LOD 200
-		Blend One One
+		Blend srcalpha oneminussrcalpha
 		cull off
 		Zwrite off
 		Ztest off
-
+		
 		LOD 200
 
 		CGPROGRAM
@@ -51,8 +56,9 @@
 
 	float _Size;
 	float4x4 _VP;
-	Texture2D _SpriteTex;
-	SamplerState sampler_SpriteTex;
+	//Texture2D _SpriteTex;
+	//SamplerState sampler_SpriteTex;
+	sampler _SpriteTex;
 	uniform float3 upVector;
 
 	// **************************************************************
@@ -82,7 +88,7 @@
 		look = normalize(look);
 		float3 right = cross(up, look);
 
-		float halfS = 1.5 * _Size *max(p[0].tex0.x, 1);
+		float halfS = 1.5 * _Size *max(p[0].tex0.x, 0.5);
 
 		float4 v[4];
 		v[0] = float4(p[0].pos + halfS * right - halfS * up, 1.0f);
@@ -117,14 +123,16 @@
 	float4 FS_Main(FS_INPUT input) : COLOR
 	{
 
-		float d = length(input.tex0 - float2(0.5, 0.5));
-	float val = exp(-d*d * 500)*1.2;
-	float3 c = input.normal;
-	/*	c.x = c.x*c.x;
-	c.y = c.y*c.y;
-	c.z = c.z*c.z;*/
-	float4 col = float4(c*val, val);
-	return col;
+
+		float4 val = tex2D(_SpriteTex, input.tex0);
+		float3 c = input.normal;
+		val.x *= c.x;
+		val.y *= c.y;
+		val.z *= c.z;
+		val *= 2;
+		val.a = max(val.x, val.y);
+		val.a =max(val.a, val.z);
+		return val;
 	}
 
 		ENDCG

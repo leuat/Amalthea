@@ -21,10 +21,15 @@ using System;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
+using UnityEngine.UI;
 
 namespace LemonSpawn
 {
-
+    [System.Serializable]
+    public class BaseCollection
+    {
+        public string name;
+    }
     public class MaterialList
     {
         public string mat;
@@ -404,7 +409,7 @@ namespace LemonSpawn
         //				static Vector3 N = new Vector3 ();
 
 
-        
+
 
         public static float swissTurbulence(Vector3 p, float scalex, float scaley, int octaves, float lacunarity, float warp, float offset, float gain, float powscale, float background)
         {
@@ -584,7 +589,7 @@ namespace LemonSpawn
         {
 
             GameObject go = GameObject.Find(name);
-            if (go!=null)
+            if (go != null)
                 GameObject.Destroy(go);
 
         }
@@ -734,9 +739,9 @@ namespace LemonSpawn
                     if (unknownCollection.GetType().IsArray)
                     {
                         object[] collectionAsArray = (object[])unknownCollection;//unknownCollection as Array[];
-                      
+
                         obj = collectionAsArray[collectionElementIndex];
-                        
+
                     }
                     else
                     {
@@ -823,7 +828,7 @@ namespace LemonSpawn
                     //   try to process the collection as array
                     if (unknownCollection.GetType().IsArray)
                     {
-                        object[] collectionAsArray = (object[])unknownCollection; 
+                        object[] collectionAsArray = (object[])unknownCollection;
                         obj = collectionAsArray[collectionElementIndex];
                     }
                     else
@@ -923,35 +928,92 @@ namespace LemonSpawn
 
 
         public static double LerpDegrees(double start, double end, double amount)
-    {
-        double difference = Math.Abs(end - start);
-        if (difference > Mathf.PI)
         {
-            // We need to add on to one of the values.
-            if (end > start)
+            double difference = Math.Abs(end - start);
+            if (difference > Mathf.PI)
             {
-                // We'll add it on to start...
-                    start += 2*Mathf.PI;
+                // We need to add on to one of the values.
+                if (end > start)
+                {
+                    // We'll add it on to start...
+                    start += 2 * Mathf.PI;
+                }
+                else
+                {
+                    // Add it on to end.
+                    end += 2 * Mathf.PI;
+                }
             }
-            else
-            {
-                // Add it on to end.
-                    end += 2*Mathf.PI;
-            }
+
+            // Interpolate it.
+            double value = (start + ((end - start) * amount));
+
+            // Wrap it..
+            double rangeZero = 2 * Mathf.PI;
+
+            if (value >= 0 && value <= 2 * Mathf.PI)
+                return value;
+
+            return (value % rangeZero);
         }
 
-        // Interpolate it.
-        double value = (start + ((end - start) * amount));
+        static public Texture2D GetRTPixels(RenderTexture rt, Texture2D tex)
+        {
+            // Remember currently active render texture
+            RenderTexture currentActiveRT = RenderTexture.active;
 
-        // Wrap it..
-            double rangeZero = 2*Mathf.PI;
+            // Set the supplied RenderTexture as the active one
+            RenderTexture.active = rt;
 
-            if (value >= 0 && value <= 2*Mathf.PI)
-            return value;
+            // Create a new Texture2D and read the RenderTexture image into it
+            if (tex == null)
+                tex = new Texture2D(rt.width, rt.height, TextureFormat.RGB24, false);
+            tex.ReadPixels(new Rect(0, 0, tex.width, tex.height), 0, 0);
+            tex.Apply();
 
-        return (value % rangeZero);
-    }
+            // Restorie previously active render texture
+            RenderTexture.active = currentActiveRT;
+            return tex;
+        }
 
+
+        public static Texture2D createSolidTexture(Color c)
+        {
+            Texture2D t = new Texture2D(1, 1, TextureFormat.ARGB32, false);
+            t.SetPixel(0, 0, c);
+            t.Apply();
+            return t;
+        }
+
+        public static Texture2D createFrameTexture(Color cf, Color cb, int size, int margin)
+        {
+            Texture2D t = new Texture2D(size, size, TextureFormat.ARGB32, false);
+            for (int i = 0; i < size; i++)
+            {
+                for (int j = 0; j < size; j++)
+                {
+                    Color c = cb;
+                    if (i <= margin || i > size - 1 - margin) c = cf;
+                    if (j <= margin || j > size - 1 - margin) c = cf;
+                    t.SetPixel(i, j, c);
+
+                }
+            }
+            t.Apply();
+            return t;
+        }
+
+        public static void SetCanvasFont(GameObject go, Font font)
+        {
+            Text t = go.GetComponent<Text>();
+            if (t != null)
+                t.font = font;
+
+            foreach (Transform child in go.transform)
+            {
+                SetCanvasFont(child.gameObject, font);
+            }
+        }
 
     }
 

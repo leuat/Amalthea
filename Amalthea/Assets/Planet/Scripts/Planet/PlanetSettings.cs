@@ -33,7 +33,7 @@ namespace LemonSpawn {
         public GameObject terrainObject, parent, environmentObject;
         public Vector3 localCamera;
         public Planet parentPlanet;
-
+        public SerializedPlanet serializedPlanet;
         public List<Frame> Frames = new List<Frame>();
         public Plane[] cameraPlanes;
         public GPUSurface gpuSurface;
@@ -162,6 +162,8 @@ namespace LemonSpawn {
 
         public float getOrbitalPeriod()
         {
+            if (properties.parentPlanet == null)
+                return 0;
             double M = properties.parentPlanet.pSettings.getMass();
             double ve = Mathf.Sqrt((float)(2 * Constants.G * M / (properties.distance * Constants.AU)));
             return (float)(2 * Mathf.PI * properties.distance * Constants.AU / ve);///Constants.secondsPerYear);
@@ -274,6 +276,8 @@ namespace LemonSpawn {
             planetTypeName = planetType.name;
             planetType.Realize(r);
             planetType.setParameters(this, r);
+
+
             //radius*=RenderSettings.GlobalRadiusScale;
             //Debug.Log(atmosphereDensity);
         }
