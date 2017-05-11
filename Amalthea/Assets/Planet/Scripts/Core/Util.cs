@@ -1015,6 +1015,38 @@ namespace LemonSpawn
             }
         }
 
-    }
+        public static List<string> FindFilesInDirectory(string dir, string fileType)
+        {
+            DirectoryInfo info = new DirectoryInfo(dir + ".");
+            List<string> list = new List<string>();
+            if (!info.Exists)
+            {
+                UnityEngine.Debug.Log("Could not open directory " + dir);
+                return list;
+            }
+            FileInfo[] fileInfo = info.GetFiles();
+            foreach (FileInfo f in fileInfo)
+            {
+                if (!f.Name.ToLower().Contains(fileType.ToLower()))
+                    continue;
+                string[] lst = f.Name.Split('.');
+                if (lst[1].Trim().ToLower() == fileType.Trim().ToLower())
+                {
 
+
+                    string text = lst[0].Trim().ToLower();
+                    if (!Verification.VerifyXML(RenderSettings.path + RenderSettings.dataDir + text + ".xml", Verification.MCAstName))
+                        continue;
+
+
+                    string name = f.Name;
+                    list.Add(name);
+
+                }
+
+            }
+            return list;
+        }
+
+    }
 }

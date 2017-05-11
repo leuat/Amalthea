@@ -26,7 +26,7 @@ namespace LemonSpawn
         // Update is called once per frame
         public override void Update()
         {
-
+            UpdatePositions();
         }
 
         public DisplayPlanet findDisplayPlanet(LemonSpawn.Planet p)
@@ -52,14 +52,13 @@ namespace LemonSpawn
         {
             // First, find the sun
             //            DisplayPlanet sun = dPlanets[0];
-            dpSun = dPlanets[0];// findDisplayPlanetWithparent(null);
-                                //            Debug.Log(dpSun);
+            
+            dpSun = findDisplayPlanetWithparent(null);
             dpSun.children.Clear();
             foreach (DisplayPlanet dp in dPlanets)
             {
                 if (dp.planet.lsPlanet.pSettings.properties.parentPlanet == dpSun.planet.lsPlanet)
                 {
-                    //                  Debug.Log("Adding child " + dp.planet.lsPlanet.pSettings.name);
                     dpSun.children.Add(dp);
                 }
                 if (dp.planet.lsPlanet.pSettings.category == LemonSpawn.PlanetSettings.Categories.Planet)
@@ -73,8 +72,6 @@ namespace LemonSpawn
                     }
 
             }
-            //            Debug.Log("CHILDREN COUNT" + dpSun.children.Count);
-            // Find all who have this as a parent
         }
         /*
         public void RenderDisplayPlanetLabels(Camera MainCamera)
@@ -167,6 +164,9 @@ namespace LemonSpawn
 
         }
 
+
+
+
         public void DestroyAllGameObjects()
         {
 
@@ -177,6 +177,74 @@ namespace LemonSpawn
             }
         }
 
+        public void CreateOrbitalLines()
+        {
+            foreach (DisplayPlanet dp in dPlanets)
+                dp.CreateOrbitsFromRadius(SSVAppSettings.MaxOrbitalLines);
+
+        }
+
+
+        protected DisplayPlanet FindDisplayPlanetFromGameObject(GameObject go)
+        {
+            foreach (DisplayPlanet dp in dPlanets)
+            {
+                if (dp.planet.lsPlanet.pSettings.gameObject == go)
+                    return dp;
+            }
+            return null;
+        }
+
+
+        public void UpdatePositions()
+        {
+            foreach (DisplayPlanet dp in dPlanets)
+            {
+                dp.UpdatePosition();
+            }
+        }
+        
+        // This one is needed for flat xml objects
+        public void OrganizePlanetGameObjectsByName()
+        {
+            
+            foreach (DisplayPlanet dp in dPlanets)
+            {
+                GameObject g = dp.planet.lsPlanet.pSettings.gameObject;
+                string n = g.name;
+                //Debug.Log(g.name);
+                if (n.ToLower().Contains("planet") && !n.ToLower().Contains("moon"))
+                {
+                    g.transform.parent = GameObject.Find("The star").transform;
+                }
+                if (n.ToLower().Contains("moon"))
+                {
+                    string[] lst = n.Split(' ');
+                    string parentPlanet = lst[3] + " " + lst[4];
+                    //string parent = ""
+                    g.transform.parent = GameObject.Find(parentPlanet).transform;
+                }
+                // ALSO set parent planet link (for menu)
+                if (g.transform.parent != null)
+                {
+                    DisplayPlanet dparent = FindDisplayPlanetFromGameObject(g.transform.parent.gameObject);
+                    if (dparent != null)
+                    {
+                        dp.planet.lsPlanet.pSettings.properties.parentPlanet = dparent.planet.lsPlanet;
+
+                        dp.planet.lsPlanet.pSettings.properties.distance = (float)dp.planet.lsPlanet.pSettings.gameObject.transform.position.magnitude;
+                        dp.planet.lsPlanet.pSettings.properties.pos = dp.planet.lsPlanet.pSettings.properties.pos - dparent.planet.lsPlanet.pSettings.properties.pos;
+                        dp.planet.lsPlanet.pSettings.properties.orgPos = dp.planet.lsPlanet.pSettings.properties.pos;
+                        dp.planet.lsPlanet.pSettings.properties.distance = (float)dp.planet.lsPlanet.pSettings.properties.pos.Length();
+                    }
+                    // Also update properties distance
+
+
+                }
+                
+            }
+
+        }
 
 
     }

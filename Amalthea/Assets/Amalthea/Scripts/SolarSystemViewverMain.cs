@@ -645,7 +645,6 @@ namespace Amalthea {
         }
 
 
-
         private void CreateLine(Vector3 f, Vector3 t, float c1, float c2, float w)
         {
 
@@ -745,6 +744,7 @@ namespace Amalthea {
             PopulateWorld();
             CreateMainMenu ();
             Update();
+
             CreatePlanetMenu(true);
             starCamera.transform.position = currentSystem.position + MainCamera.transform.position.normalized*SSVSettings.StarCamFixDistance * SSVSettings.starCameraScale;
             //           MainCamera.transform.position = (starCamera.transform.position - currentSystem.position) / SSVSettings.starCameraScale;

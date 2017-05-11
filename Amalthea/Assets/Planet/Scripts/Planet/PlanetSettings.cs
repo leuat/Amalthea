@@ -19,7 +19,7 @@ namespace LemonSpawn {
         public float albedo = 0.3f;
         public float t0 = 0;
         public bool autoOrient = false; // Auto orient to face direction
-        public Quaternion rotationMatrix;
+        public Quaternion rotationMatrix = Quaternion.identity;
         public float rotationSpeed = 0;
         public void setRotation(float x, float z)
         {
@@ -180,6 +180,8 @@ namespace LemonSpawn {
         }
         public Vector3 getOrbit(float t)
         {
+//            if (Random.value>0.99)
+  //          Debug.Log(properties.distance);
             return properties.rotationMatrix * new Vector3(Mathf.Cos(t + properties.t0), 0, Mathf.Sin(t + properties.t0)) * properties.distance;
 
         }

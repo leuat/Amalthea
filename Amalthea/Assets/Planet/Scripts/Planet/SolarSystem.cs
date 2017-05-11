@@ -422,10 +422,16 @@ namespace LemonSpawn
                 WorldMC.Slider.SetActive(RenderSettings.isVideo);
             InitializeSurfaces();
             //Debug.Log("WHOO");
+
+            Util.DestroyGameObject("SolarSystem");
+            
+            GameObject parent = new GameObject("SolarSystem");
+
+
             foreach (SerializedPlanet sp in sz.Planets)
             {
                 GameObject go = new GameObject(sp.name);
-                go.transform.parent = transform;
+                go.transform.parent = parent.transform;
                 //sz.global_radius_scale = RenderSettings.GlobalRadiusScale;
                 PlanetSettings ps = sp.DeSerialize(go, cnt++, scale);
                 if (randomizeSeeds)

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using System.IO;
 
 namespace LemonSpawn
 {
@@ -326,93 +327,40 @@ namespace LemonSpawn
         private Vector3 cameraAdd = Vector3.zero;
 
 
-/*        private void UpdateCamera()
-        {
-            float s = 1.0f;
-            float theta = 0.0f;
-            float phi = 0.0f;
-
-            //            if (Input.GetMouseButton(1))
-            {
-                //                Debug.Log("TEST");
-                //              theta = s * Input.GetAxis("Mouse X");
-                //            phi = s * Input.GetAxis("Mouse Y") * -1.0f;
-                theta = s * Input.GetAxis("Horizontal");
-                phi = s * Input.GetAxis("Vertical") * -1.0f;
-            }
-            mouseAccel += new Vector3(theta, phi, 0);
-            float t = 0.1f;
-            focusPointCur = (focusPoint * t + focusPointCur * (1 - t));
-
-            //focusPointCurStar = (selectedSystem.position * t + focusPointCurStar * (1 - t));
-
-            mouseAccel *= 0.65f;
-
-            euler += mouseAccel * 10f;
-            //            Debug.Log(theta);
-            mainCamera.transform.RotateAround(focusPointCur, mainCamera.transform.up, mouseAccel.x);
-
-            Vector3 starFocus = focusPointCurStar;// + focusPointCur * SSVSettings.starCameraScale;
-
-            starCamera.transform.RotateAround(starFocus, starCamera.transform.up, mouseAccel.x);
-            //            Debug.Log(selectedSystem.position);
 
 
 
-            if ((Vector3.Dot(mainCamera.transform.forward, Vector3.up)) > 0.99)
-                if (mouseAccel.y < 0)
-                    mouseAccel.y = 0;
-            if ((Vector3.Dot(mainCamera.transform.forward, Vector3.up)) < -0.99)
-                if (mouseAccel.y > 0)
-                    mouseAccel.y = 0;
 
-
-            mainCamera.transform.RotateAround(focusPointCur, mainCamera.transform.right, mouseAccel.y);
-
-            starCamera.transform.RotateAround(starFocus, starCamera.transform.right, mouseAccel.y);
-            mainCamera.transform.LookAt(focusPointCur);
-            starCamera.transform.LookAt(starFocus);
-            if (currentMode == Mode.InterPlanetary)
-                starCamera.transform.rotation = mainCamera.transform.rotation;
-            //			starCamera.transform.forward = mainCamera.transform.forward
-
-        }
-*/
-
-        
-
-
-
-/*        public void CreateFakeOrbits(int steps, float stepLength)
-        {
-            foreach (SerializedPlanet sp in szWorld.Planets)
-            {
-                int frame = 0;
-
-                float t0 = Random.value * 2 * Mathf.PI;
-                float radius = new Vector3((float)sp.pos_x, (float)sp.pos_y, (float)sp.pos_z).magnitude;
-                float modifiedStepLength = stepLength / Mathf.Sqrt(radius);
-                float rot = Random.value * 30f + 10f;
-                sp.Frames.Clear();
-                for (int i = 0; i < steps; i++)
+        /*        public void CreateFakeOrbits(int steps, float stepLength)
                 {
-                    float perturb = Mathf.Cos(i / (float)steps * 30.234f);
-                    float rad = radius * (0.2f * perturb + 1);
-                    Vector3 pos = new Vector3(Mathf.Cos(t0), 0, Mathf.Sin(t0)) * rad;
-                    Frame f = new Frame();
-                    f.pos_x = pos.x;
-                    f.pos_y = pos.y;
-                    f.pos_z = pos.z;
-                    f.rotation = frame / rot;
-                    f.id = frame;
-                    sp.Frames.Add(f);
-                    frame++;
-                    t0 += modifiedStepLength;
-                }
-            }
-        }
+                    foreach (SerializedPlanet sp in szWorld.Planets)
+                    {
+                        int frame = 0;
 
-        */
+                        float t0 = Random.value * 2 * Mathf.PI;
+                        float radius = new Vector3((float)sp.pos_x, (float)sp.pos_y, (float)sp.pos_z).magnitude;
+                        float modifiedStepLength = stepLength / Mathf.Sqrt(radius);
+                        float rot = Random.value * 30f + 10f;
+                        sp.Frames.Clear();
+                        for (int i = 0; i < steps; i++)
+                        {
+                            float perturb = Mathf.Cos(i / (float)steps * 30.234f);
+                            float rad = radius * (0.2f * perturb + 1);
+                            Vector3 pos = new Vector3(Mathf.Cos(t0), 0, Mathf.Sin(t0)) * rad;
+                            Frame f = new Frame();
+                            f.pos_x = pos.x;
+                            f.pos_y = pos.y;
+                            f.pos_z = pos.z;
+                            f.rotation = frame / rot;
+                            f.id = frame;
+                            sp.Frames.Add(f);
+                            frame++;
+                            t0 += modifiedStepLength;
+                        }
+                    }
+                }
+
+                */
         private void CreateLine(Vector3 f, Vector3 t, float c1, float c2, float w)
         {
 
@@ -445,27 +393,12 @@ namespace LemonSpawn
 
         public static GameObject satellite = null;
 
-        public void TestSlapDash()
-        {
-            SlapDash d = new SlapDash();
-            System.Random rnd = new System.Random(4);
-            foreach (Language l in d.languages)
-            {
-                string s = "";
-
-                for (int i = 0; i < 100; i++)
-                    s += l.GenerateWord(rnd) + "  ";
-                Debug.Log(s);
-
-            }
-
-
-        }
 
         public override void Start()
         {
-            //            TestSlapDash();
             base.Start();
+            SSVAppSettings.useAbsolutePositions = true;
+            RenderSettings.planetCubeSphere = false;
             SSVAppSettings.GUIFont = (Font)Resources.Load("Fonts/LektonCode");
             SSVAppSettings.guiStyle.font = SSVAppSettings.GUIFont;
 
@@ -481,7 +414,6 @@ namespace LemonSpawn
             solarSystem = new SolarSystem(sun, sphere, transform, (int)szWorld.skybox);
             PlanetTypes.Initialize();
             SetupCloseCamera();
-            PopulateFileCombobox("ComboBoxLoadFile", "xml");
             SzWorld = szWorld;
             slider = GameObject.Find("Slider");
 
@@ -507,7 +439,6 @@ namespace LemonSpawn
 
             CreateMainMenu();
 
-            //			LoadData ();
         }
 
 
@@ -515,8 +446,6 @@ namespace LemonSpawn
         public override void Update()
         {
             base.Update();
-            
-
             UpdatePlay();
             ForceSpaceCraft();
 
@@ -604,11 +533,29 @@ namespace LemonSpawn
 
         }
 
+        void CreateLoadFileMenu(MenuItem loadMenu, string fileType) { 
+            List<string> flist = Util.FindFilesInDirectory(RenderSettings.path + RenderSettings.dataDir, fileType);
+            foreach (string s in flist)
+            {
+                MenuItem file = new MenuItem(loadMenu, "File Menu", s.Replace(".xml",""), null, SSVAppSettings.menuSizeText + new Vector2(1.2f, 0), false, 2, loadMenu.layout, LoadSolarSystemFromXML, s);
+                loadMenu.children.Add(file);
+            }
+
+
+        }
+
+
         MenuItem CreateFileMenu(MenuLayout mLayout)
         {
             MenuItem m = new MenuItem(mainMenu, "File Menu", "File", null, SSVAppSettings.menuSizeText, true, 1, mLayout, null, null);
-            m.children.Add(new MenuItem(m, "File Menu", "Load", null, SSVAppSettings.menuSizeText, true, 1, mLayout, null, null));
-            m.children.Add(new MenuItem(m, "File Menu", "Save", null, SSVAppSettings.menuSizeText, true, 1, mLayout, null, null));
+            MenuItem load = new MenuItem(m, "File Menu", "Load", null, SSVAppSettings.menuSizeText, false, 1, mLayout, null, null);
+            CreateLoadFileMenu(load, "xml");
+            m.children.Add(load);
+
+
+
+
+            //m.children.Add(new MenuItem(m, "File Menu", "Save", null, SSVAppSettings.menuSizeText, true, 1, mLayout, null, null));
 
             return m;
         }
@@ -630,7 +577,7 @@ namespace LemonSpawn
             s.normal.textColor = c * 4;
             s.alignment = TextAnchor.MiddleCenter;
             MenuLayout mLayout = new MenuLayout(16, s, c, c * 0.4f, MenuLayout.MenuStyle.SolidFrame);
-            mLayout.background = (Texture2D)Resources.Load("GUIButton1");
+            mLayout.background = (Texture2D)Resources.Load("GUI/GUIButton1");
             mainMenu = new MenuItem(null, "Main Menu", "", null, SSVAppSettings.menuSizeText, false, 1, mLayout, null, null);
 
             mainMenu.children.Add(CreateFileMenu(mLayout));
@@ -646,34 +593,66 @@ namespace LemonSpawn
         {
             RenderLabels();
             if (mainMenu != null)
-                mainMenu.Render(new Vector2(0.02f, -0.1f) * Screen.height);
+                mainMenu.Render(new Vector2(0.02f, 0.1f) * Screen.height);
 
         }
 
-        public void LoadFileFromMenu()
+
+        public void LoadSolarSystemFromXML(System.Object o)
         {
-            DeFocus();
-
-            int idx = GameObject.Find("ComboBoxLoadFile").GetComponent<UnityEngine.UI.Dropdown>().value;
-            string name = GameObject.Find("ComboBoxLoadFile").GetComponent<Dropdown>().options[idx].text;
-            if (name == "-")
-                return;
-            name = RenderSettings.dataDir + name + ".xml";
-
+            string name = (string)o;
+            name = RenderSettings.dataDir + name;// + ".xml";
             LoadFromXMLFile(name);
 
 
             szWorld.useSpaceCamera = false;
             PopulateOverviewList("Overview");
             PopulateWorld();
+            data.OrganizePlanetGameObjectsByName();
             //foreach (DisplayPlanet dp in data.dPlanets)
             //    dp.CreateOrbitFromFrames(100);
 
-            Slide();
+//            Slide();
+
             data.CreatePlanetHierarchy();
-            CreatePlanetMenu(false);
+            Update();
+
+            CreatePlanetMenu(true);
+            data.CreateOrbitalLines();
+
         }
 
+        public void OnPostRender()
+        {
+//            Debug.Log("MEEEH");
+            foreach (DisplayPlanet dp in data.dPlanets)
+                dp.RenderGLOrbits();
+        }
+
+        /*        public void LoadFileFromMenu()
+                {
+                    DeFocus();
+
+                    int idx = GameObject.Find("ComboBoxLoadFile").GetComponent<UnityEngine.UI.Dropdown>().value;
+                    string name = GameObject.Find("ComboBoxLoadFile").GetComponent<Dropdown>().options[idx].text;
+                    if (name == "-")
+                        return;
+                    name = RenderSettings.dataDir + name + ".xml";
+
+                    LoadFromXMLFile(name);
+
+
+                    szWorld.useSpaceCamera = false;
+                    PopulateOverviewList("Overview");
+                    PopulateWorld();
+                    //foreach (DisplayPlanet dp in data.dPlanets)
+                    //    dp.CreateOrbitFromFrames(100);
+
+                    Slide();
+                    data.CreatePlanetHierarchy();
+                    CreatePlanetMenu(false);
+                }
+                */
 
 
         public void Slide()

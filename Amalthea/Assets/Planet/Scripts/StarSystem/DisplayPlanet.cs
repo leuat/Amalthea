@@ -62,14 +62,15 @@ namespace LemonSpawn
             miniCamera.transform.LookAt(planet.lsPlanet.pSettings.transform.position);
             miniCamera.targetTexture = renderTexture;
             //            miniCamera.rect = new Rect(0, 0, 0.2, 0.2);
-            miniCamera.farClipPlane = 100000;
+            miniCamera.farClipPlane = 1000f;
+            miniCamera.nearClipPlane = 0.1f;
             miniCamera.clearFlags = CameraClearFlags.SolidColor;
 			miniCamera.cullingMask = GameObject.Find ("Camera").GetComponent<Camera> ().cullingMask;
             miniCamera.backgroundColor = new Color(0, 0, 0, 0);// Color.black;
 			GameObject sc = GameObject.Find("StarCamera");
 //			sc.SetActive(false);
             miniCamera.Render();
-//			sc.SetActive(true);
+	//		sc.SetActive(true);
 
             texImage = Util.GetRTPixels(renderTexture, texImage);
             miniCamera.enabled = false;
@@ -96,8 +97,16 @@ namespace LemonSpawn
         {
             go = g;
             planet = p;
+            if (p.lsPlanet.pSettings.category == LemonSpawn.PlanetSettings.Categories.Planet)
+                planet.stellarCategory = Globals.definitions.stellarCategories.Get("Planet");
+            if (p.lsPlanet.pSettings.category == LemonSpawn.PlanetSettings.Categories.Moon)
+                planet.stellarCategory = Globals.definitions.stellarCategories.Get("Moon");
+            if (p.lsPlanet.pSettings.category == LemonSpawn.PlanetSettings.Categories.Star)
+                planet.stellarCategory = Globals.definitions.stellarCategories.Get("Star");
 
-            
+
+            if (planet.stellarCategory == null)
+                planet.stellarCategory = Globals.definitions.stellarCategories.Get("UFO");
         }
 
         public void DestroyOrbits()
@@ -155,13 +164,16 @@ namespace LemonSpawn
         }
 
 
-        public void RenderGLOrbits(int maxLines)
+        public void RenderGLOrbits()
         {
 
             Vector3 center = planet.lsPlanet.pSettings.transform.parent.position;
             float d = (planet.lsPlanet.pSettings.transform.position - center).magnitude;
             if (lineRenderer == null)
                 lineRenderer = new Material(Shader.Find("Particles/Alpha Blended"));
+
+//            Debug.Log(lineRenderer.shader);
+
             lineRenderer.SetPass(0);
             GL.Begin(GL.LINES);
             GL.Color(orbitColor);
@@ -181,19 +193,18 @@ namespace LemonSpawn
         }
 
 
-        public void CreateOrbits(int maxLines)
+        public void CreateOrbitsFromRadius(int maxLines)
         {
 
             DestroyOrbits();
 
             //if (planet.pSettings.category == PlanetSettings.Categories.Moon)
             //    return;
-
             orbitColor = planet.stellarCategory.color * (0.5f + 1.0f * UnityEngine.Random.value);
             orbitColor.a = 0.5f;
 
             Vector3 center = planet.lsPlanet.pSettings.transform.parent.position;
-            float d = (planet.lsPlanet.pSettings.transform.position - center).magnitude;
+            //float d = (planet.lsPlanet.pSettings.transform.position - center).magnitude;
             //Quaternion q = Quaternion.Euler(planet.lsPlanet.pSettings.eulerX, 0, planet.lsPlanet.pSettings.eulerZ);
             for (int i = 0; i < maxLines; i++)
             {
@@ -203,7 +214,6 @@ namespace LemonSpawn
                 Vector3 p = planet.lsPlanet.pSettings.getOrbit(t0);// *SSVSettings.SolarSystemScale;
                 Vector3 dp = getDisplayPosition(p);
 
-                //planet.lsPlanet.pSettings.properties.rotationMatrix* new Vector3(Mathf.Cos(t0), 0, Mathf.Sin(t0))*d;
                 orbitLines.Add(dp);
 
 
@@ -222,19 +232,21 @@ namespace LemonSpawn
             if (planet.lsPlanet.pSettings.category == LemonSpawn.PlanetSettings.Categories.Planet)
             {
                 ms = 1.0f;// / SSVSettings.PlanetSizeScale;
-                prevRadius = planet.lsPlanet.pSettings.transform.parent.gameObject.GetComponent<LemonSpawn.PlanetSettings>().radius*2;
+                if (planet.lsPlanet.pSettings.transform.parent != null)
+                {
+                    prevRadius = planet.lsPlanet.pSettings.transform.parent.gameObject.GetComponent<LemonSpawn.PlanetSettings>().radius * 2;
+                }
             }
             // Scales moons
+//            Debug.Log(pos + " for " + planet.lsPlanet.pSettings.gameObject.name);
             return pos * SSVSettings.SolarSystemScale * ms + pos.normalized * prevRadius;
 
         }
 
         public void UpdatePosition()
         {
-            planet.lsPlanet.pSettings.properties.pos *= SSVSettings.SolarSystemScale;
-            planet.lsPlanet.pSettings.transform.position = planet.lsPlanet.pSettings.properties.pos.toVectorf();
-            go.transform.position = planet.lsPlanet.pSettings.properties.pos.toVectorf();
-            //MaintainOrbits();
+            Vector3 p = getDisplayPosition(planet.lsPlanet.pSettings.properties.pos.toVectorf());
+            planet.lsPlanet.pSettings.transform.localPosition = p;
         }
 
         public void UpdatePosition(float t, Vector3 cam)

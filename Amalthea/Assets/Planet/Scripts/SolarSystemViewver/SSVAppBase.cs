@@ -17,9 +17,11 @@ namespace LemonSpawn
         public static float MiniCamDist = 3;
         public static float MiniCamFOV = 60;
         public static float MiniCamSize = 0.1f;
-
-        public static Vector2 menuSizeText = new Vector2(0.2f, 0.2f) * Screen.height;
-        public static Vector2 menuSizeImage = new Vector2(0.2f, 0.2f) * Screen.height;
+        public static int MaxOrbitalLines = 60;
+        public static bool useAbsolutePositions = false;
+        public static Vector2 menuSizeText = new Vector2(0.2f, 0.1f) * Screen.height;
+        public static Vector2 menuSizeImage = new Vector2(0.2f, 0.1f) * Screen.height;
+        public static Vector2 menuSizePlanet = new Vector2(0.1f, 0.1f) * Screen.height;
 
 
         public static Font GUIFont;
@@ -42,7 +44,7 @@ namespace LemonSpawn
         public GameObject starCamera;
         protected static AudioSource audioSource;
         protected GameObject pnlInfo = null;
-        protected CameraRotator cameraRotator;
+        protected CameraRotator cameraRotator, starCameraRotator;
         // Use this for initialization
         public override void Start()
         {
@@ -50,6 +52,7 @@ namespace LemonSpawn
 
             data.Initialize();
             cameraRotator = new CameraRotator(MainCamera);
+            starCameraRotator = new CameraRotator(starCamera.GetComponent<Camera>());
             pnlInfo = GameObject.Find("pnlInfo");
             pnlInfo.SetActive(false);
             Globals.definitions.InitTemp();
@@ -83,13 +86,27 @@ namespace LemonSpawn
         {
             data.Update();
             cameraRotator.UpdateCamera();
+            starCameraRotator.UpdateCamera();
             UpdateFocus();
             UpdateZoom();
             solarSystem.Update();
 
+        
             if (RenderSettings.UseThreading)
                 ThreadQueue.MaintainThreadQueue();
+
+//            if (data.dpSun == null)
+//             if (((int)Time.time) % 10 == 0)
+  //              CreatePlanetMenu(true);
+
         }
+/*
+        public void OnPostRender()
+        {
+            foreach (DisplayPlanet dp in data.dPlanets)
+                dp.RenderGLOrbits();
+        }
+        */
 
         public static void PlaySound(string sound, float amp)
         {
@@ -163,6 +180,9 @@ namespace LemonSpawn
                         }
             */
         }
+
+
+
         protected void PopulateWorld()
         {
             data.DestroyAllGameObjects();
@@ -174,15 +194,18 @@ namespace LemonSpawn
             foreach (Planet p in solarSystem.planets)
             {
                 GameObject go = p.pSettings.gameObject;
+                p.pSettings.properties.orgPos = p.pSettings.properties.pos;
+                //Debug.Log(p.pSettings.properties.pos.toVectorf());
+               // Vector3 coolpos = new Vector3((float)p.pSettings.properties.pos.x, (float)p.pSettings.properties.pos.y, (float)p.pSettings.properties.pos.z);
+                //go.transform.position = coolpos * SSVSettings.SolarSystemScale;
+                //Vector3 coolPos = Vector3.zero;
 
-                Vector3 coolpos = new Vector3((float)p.pSettings.properties.pos.x, (float)p.pSettings.properties.pos.y, (float)p.pSettings.properties.pos.z);
-                go.transform.position = coolpos * SSVSettings.SolarSystemScale;
-                p.pSettings.properties.pos = new DVector(coolpos);
+                //p.pSettings.properties.pos = new DVector(coolpos);
                 //go.transform.localScale = Vector3.one * SSVSettings.PlanetSizeScale * p.pSettings.radius;
                 //p.pSettings.atmoDensity = 0;
 
                 GameObject hidden = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                hidden.transform.position = coolpos * SSVSettings.SolarSystemScale;
+                //hidden.transform.position = coolpos * SSVSettings.SolarSystemScale;
                 hidden.transform.localScale = Vector3.one * p.pSettings.radius * 2f;
                 hidden.transform.parent = p.pSettings.transform;
                 //if (p.pSettings.planetTypeName=="star" || p.pSettings.planetTypeName=="spacecraft")
@@ -191,10 +214,20 @@ namespace LemonSpawn
                 hidden.GetComponent<MeshRenderer>().material = (Material)Resources.Load("HiddenMaterial");
 
                 PlanetInstance pi = new LemonSpawn.PlanetInstance(p, Globals.definitions.stellarCategories.Get("planet"));
-                data.dPlanets.Add(new DisplayPlanet(hidden, pi));
+                DisplayPlanet dp = new DisplayPlanet(hidden, pi);
+                data.dPlanets.Add(dp);
+
+//                dp.UpdatePosition();
+                //Vector3 pos = dp.getDisplayPosition(coolpos);
+                //Debug.Log(pos);
+                //go.transform.localPosition = pos;
+               
             }
 
         }
+
+
+
         protected void CreatePlanetMenu(bool isInterPlanetary)
         {
             mainMenu.deleteFromChildren("SolarSystem");
@@ -203,7 +236,7 @@ namespace LemonSpawn
                 foreach (DisplayPlanet dp in data.dPlanets)
                     dp.CreatePlanetCamera();
 
-                data.dpSun.CreateMenu("SolarSystem", mainMenu, SSVAppSettings.menuSizeImage, true, 0.75f, mainMenu.layout, SelectPlanetMenu);
+                data.dpSun.CreateMenu("SolarSystem", mainMenu, SSVAppSettings.menuSizePlanet, true, 0.75f, mainMenu.layout, SelectPlanetMenu);
             }
             mainMenu.replaceItem("SolarSystem", 0);
         }
