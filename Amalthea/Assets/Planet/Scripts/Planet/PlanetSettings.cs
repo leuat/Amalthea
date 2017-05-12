@@ -21,6 +21,7 @@ namespace LemonSpawn {
         public bool autoOrient = false; // Auto orient to face direction
         public Quaternion rotationMatrix = Quaternion.identity;
         public float rotationSpeed = 0;
+        public float distortionIntensity = 0; // Used for black holes
         public void setRotation(float x, float z)
         {
             rotationMatrix = Quaternion.Euler(x, 0, z);
@@ -42,7 +43,7 @@ namespace LemonSpawn {
     // Public settings
     public class PlanetSettings : MonoBehaviour {
 
-        public enum Categories { Planet, Moon, Star, Spacecraft};
+        public enum Categories { Planet, Moon, Star, Spacecraft, BlackHole};
 
         [Header("Planet settings")]
         public int seed;

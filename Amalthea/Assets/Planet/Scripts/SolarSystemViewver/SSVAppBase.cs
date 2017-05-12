@@ -18,10 +18,14 @@ namespace LemonSpawn
         public static float MiniCamFOV = 60;
         public static float MiniCamSize = 0.1f;
         public static int MaxOrbitalLines = 60;
+        public static int FontSize = 12 * Screen.height / 512;
         public static bool useAbsolutePositions = false;
         public static Vector2 menuSizeText = new Vector2(0.2f, 0.1f) * Screen.height;
         public static Vector2 menuSizeImage = new Vector2(0.2f, 0.1f) * Screen.height;
         public static Vector2 menuSizePlanet = new Vector2(0.1f, 0.1f) * Screen.height;
+
+        public static string audioClickPlanet = "GUI40Click";
+        public static string audioHoverMenu = "GUIPop";
 
 
         public static Font GUIFont;
@@ -63,7 +67,7 @@ namespace LemonSpawn
 
             RenderSettings.UseThreading = true;
             RenderSettings.reCalculateQuads = false;
-            RenderSettings.GlobalRadiusScale = SSVSettings.PlanetSizeScale;
+            RenderSettings.GlobalRadiusScale = SSVAppSettings.PlanetSizeScale;
             // Debug.Log(RenderSettings.GlobalRadiusScale);
             //RenderSettings.GlobalRadiusScale = 1;
             RenderSettings.maxQuadNodeLevel = m_maxQuadNodeLevel;
@@ -82,6 +86,44 @@ namespace LemonSpawn
 
 
         // Update is called once per frame
+
+        protected void UpdateBlackHoleEffect()
+        {
+            Vector3 pos = MainCamera.WorldToScreenPoint(Vector3.zero);
+            if (pos.z > 0 && data.dpSun != null && data.dpSun.planet.lsPlanet.pSettings.properties.distortionIntensity != 0)
+            {
+                mainCamera.GetComponent<BlackHoleEffect>().enabled = true;
+                BlackHoleEffect.centerPoint = new Vector3(pos.x, pos.y);
+                BlackHoleEffect.centerPoint.x /= Screen.width;
+                BlackHoleEffect.centerPoint.y /= Screen.height;
+                BlackHoleEffect.intensity = data.dpSun.planet.lsPlanet.pSettings.properties.distortionIntensity;
+                BlackHoleEffect.size = 1.0f / mainCamera.transform.position.magnitude;
+
+                // Set cameras
+            }
+            else
+            {
+                BlackHoleEffect.intensity = 0;
+                mainCamera.GetComponent<BlackHoleEffect>().enabled = false;
+            }
+
+            float add = 0;
+            if (data.dpSun != null)
+                add = data.dpSun.planet.lsPlanet.pSettings.radius * 1;
+
+            MainCamera.nearClipPlane = MainCamera.transform.position.magnitude + add;
+            Camera NearCam = GameObject.Find("FrontBlackHoleCamera").GetComponent<Camera>();
+            NearCam.farClipPlane = MainCamera.nearClipPlane;
+
+            NearCam.enabled = true;
+            if (NearCam.farClipPlane < 0)
+            {
+                NearCam.enabled = false;
+                MainCamera.nearClipPlane = 0.1f;
+            }
+
+        }
+
         public override void Update()
         {
             data.Update();
@@ -95,18 +137,15 @@ namespace LemonSpawn
             if (RenderSettings.UseThreading)
                 ThreadQueue.MaintainThreadQueue();
 
-//            if (data.dpSun == null)
-//             if (((int)Time.time) % 10 == 0)
-  //              CreatePlanetMenu(true);
-
+            UpdateBlackHoleEffect();
         }
-/*
-        public void OnPostRender()
-        {
-            foreach (DisplayPlanet dp in data.dPlanets)
-                dp.RenderGLOrbits();
-        }
-        */
+        /*
+                public void OnPostRender()
+                {
+                    foreach (DisplayPlanet dp in data.dPlanets)
+                        dp.RenderGLOrbits();
+                }
+                */
 
         public static void PlaySound(string sound, float amp)
         {
@@ -169,7 +208,7 @@ namespace LemonSpawn
 
             if (trigger)
             {
-                PlaySound(SSVSettings.audioClickPlanet, 0.5f);
+                PlaySound(SSVAppSettings.audioClickPlanet, 0.5f);
                 dp.Trigger();
             }
 
@@ -241,6 +280,14 @@ namespace LemonSpawn
             mainMenu.replaceItem("SolarSystem", 0);
         }
 
+
+        public void OnPostRender()
+        {
+            foreach (DisplayPlanet dp in data.dPlanets)
+                dp.RenderGLOrbits();
+        }
+
+
         public void SelectPlanetMenu(System.Object o)
         {
             SelectPlanet((DisplayPlanet)o);
@@ -268,7 +315,7 @@ namespace LemonSpawn
 
             Vector3 posS = starCamera.transform.position;
 
-            if (data.selectedSystem != null && MainCamera.transform.position.magnitude > SSVSettings.StarCamFixDistance)
+            if (data.selectedSystem != null && MainCamera.transform.position.magnitude > SSVAppSettings.StarCamFixDistance)
             {
                 posS -= data.selectedSystem.position;
 

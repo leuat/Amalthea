@@ -74,12 +74,14 @@ namespace LemonSpawn
                 ps.category = PlanetSettings.Categories.Spacecraft;
             if (category == "planet")
                 ps.category = PlanetSettings.Categories.Planet;
+            if (category == "black hole")
+                ps.category = PlanetSettings.Categories.BlackHole;
 
-/*            if (planetType.ToLower() == "star" || planetType.ToLower() == "spacecraft")
-            {
-                ps.planetTypeName = planetType;
-            }
-            else*/
+            /*            if (planetType.ToLower() == "star" || planetType.ToLower() == "spacecraft")
+                        {
+                            ps.planetTypeName = planetType;
+                        }
+                        else*/
             if (ps.category == PlanetSettings.Categories.Moon || ps.category == PlanetSettings.Categories.Planet)
                 ps.Randomize(count, planetType);
     
@@ -284,6 +286,8 @@ namespace LemonSpawn
                 foreach (Planet p in pl)
                 {
                     p.pSettings.properties.pos = p.pSettings.properties.orgPos;
+                    if (p.pSettings.properties.parentPlanet != null)
+                        p.pSettings.properties.pos -= p.pSettings.properties.parentPlanet.pSettings.properties.pos;
   //                  Debug.Log(p.pSettings.properties.pos.toVectorf().x);
                 }
                 return;

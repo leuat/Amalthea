@@ -10,175 +10,12 @@ namespace LemonSpawn
 
     public class SSVSettings
     {
-        public static float SolarSystemScale = 500.0f;
-        public static float PlanetSizeScale = 1.0f / 50f;
-        //        public static float PlanetSizeScale = (float)(500.0f/RenderSettings.AU);
         public static int OrbitalLineSegments = 100;
-        public static Vector2 OrbitalLineWidth = new Vector2(1.63f, 1.63f);
         public static float currentFrame = 0;
         public static float LineScale = 1;
-        public static Color orbitLinesColor = new Color(0.3f, 0.7f, 1.0f, 1.0f);
-        public static Color spaceCraftColor = new Color(1.0f, 0.5f, 0.2f, 1f);
-        public static Color moonColor = new Color(0.5f, 0.7f, 1.0f, 0.9f);
-        public static Color planetColor = new Color(0.9f, 0.7f, 0.3f, 0.9f);
-        public static string audioClickPlanet = "GUI40Click";
-        public static string audioHoverMenu = "GUIPop";
-        public static float StarCamFixDistance = 20000;
-        public static bool shadowText = true;
-        public static string MainFont = "LektonCode";
-        public static GameObject extraGameObject;
-        public static float MiniCamDist = 3;
-        public static float MiniCamFOV = 60;
-        public static float MiniCamSize = 0.1f;
 
 
-    }
-
-    //    exp(1/2)  * exp(-1/2) = 
-    /*
-        public class DisplayPlanetMCAST {
-            public Planet planet;
-            public SerializedPlanet serializedPlanet;
-            public GameObject go;
-            public GameObject textMesh;
-            public List<GameObject> orbitLines = new List<GameObject>();
-    //        public bool isMoon = false;
-
-            /*		private void CreateOrbitCircles() {
-                        float radius = (float)planet.lsPlanet.pSettings.properties.pos.Length () * SSVSettings.SolarSystemScale;
-                        for (int i = 0; i < SSVSettings.OrbitalLineSegments; i++) {
-                            float t0 = 2 * Mathf.PI / (float)SSVSettings.OrbitalLineSegments * (float)i;
-                            float t1 = 2 * Mathf.PI / (float)SSVSettings.OrbitalLineSegments * (float)(i+1);
-                            Vector3 from = new Vector3 (Mathf.Cos (t0), 0, Mathf.Sin (t0)) * radius;
-                            Vector3 to = new Vector3 (Mathf.Cos (t1), 0, Mathf.Sin (t1)) * radius;
-
-                            GameObject g = new GameObject ();
-                            g.transform.parent = SolarSystemViewverMain.linesObject.transform;
-                            LineRenderer lr = g.AddComponent<LineRenderer> ();
-                            lr.material = (Material)Resources.Load ("LineMaterial");
-                            lr.SetWidth (SSVSettings.OrbitalLineWidth.x, SSVSettings.OrbitalLineWidth.y);
-                            lr.SetPosition (0, from);
-                            lr.SetPosition (1, to);
-                            orbitLines.Add (g);
-                        }
-                    }
-            */
-    /*        public void CreateTextMesh() {
-                textMesh = new GameObject();
-                textMesh.transform.parent = go.transform;
-                textMesh.transform.localPosition = new Vector3(0,0,0);
-
-                GUIText tm = textMesh.AddComponent<GUIText>();
-                tm.color = new Color(0.3f, 0.6f, 1.0f,1.0f);
-                tm.text = planet.lsPlanet.pSettings.name + "HALLA";
-                tm.fontSize = 10;
-            //    tm.font = (Font)Resources.Load("CaviarDreams");
-            }
-            */
-
-    /*
-    public void MaintainOrbits() {
-        int maxFrames = serializedPlanet.Frames.Count;
-        int currentFrame = (int)(SSVSettings.currentFrame*maxFrames);
-        Color c = SSVSettings.orbitLinesColor;
-        if (planet.lsPlanet.pSettings.category == PlanetSettings.Categories.Spacecraft)
-            c = SSVSettings.spaceCraftColor;
-
-        int h = orbitLines.Count / 1;
-
-        for (int i=0;i<orbitLines.Count;i++) {
-            int f1 = (int)Mathf.Clamp((i-h)*SSVSettings.LineScale +currentFrame  ,0,maxFrames);
-            int f2 = (int)Mathf.Clamp((i+1-h) * SSVSettings.LineScale + currentFrame , 0, maxFrames);
-            if (f1 >= serializedPlanet.Frames.Count || f1<0)
-                break;
-            if (f2 >= serializedPlanet.Frames.Count || f2 < 0)
-                break;
-            LineRenderer lr = orbitLines[i].GetComponent<LineRenderer>();
-            Frame sp = serializedPlanet.Frames[f1];
-            Frame sp2 = serializedPlanet.Frames[f2];
-            DVector from = new DVector (sp.pos_x, sp.pos_y,sp.pos_z) * SSVSettings.SolarSystemScale;
-            DVector to = new DVector (sp2.pos_x, sp2.pos_y,sp2.pos_z) * SSVSettings.SolarSystemScale;
-
-
-            lr.SetPosition (0, from.toVectorf());
-            lr.SetPosition (1, to.toVectorf());
-
-            float colorScale = Mathf.Abs(i-orbitLines.Count/2)/(float)orbitLines.Count*2;
-            Color col = c*(1-colorScale);
-            col.a = 1;
-            lr.SetColors(col,col);
-        }
-    }
-
-    public void DestroyOrbits() {
-        foreach (GameObject go in orbitLines) {
-            GameObject.Destroy(go);
-            }
-        orbitLines.Clear();
-
-
-    }
-
-    public void SetWidth(float w)
-    {
-        foreach (GameObject g in orbitLines)
-        {
-            LineRenderer lr = g.GetComponent<LineRenderer>();
-            lr.SetWidth(SSVSettings.OrbitalLineWidth.x*w, SSVSettings.OrbitalLineWidth.y*w);
-        }
-    }
-
-
-    public void CreateOrbitFromFrames(int maxLines) {
-
-        DestroyOrbits();
-
-        if (serializedPlanet.Frames.Count<2)
-            return;     
-
-        if (planet.lsPlanet.pSettings.category == PlanetSettings.Categories.Moon)
-            return;
-
-        for (int i = 0; i < maxLines; i++) {
-            if (i+1>=serializedPlanet.Frames.Count)
-                break;
-            Frame sp = serializedPlanet.Frames[i];
-            Frame sp2 = serializedPlanet.Frames[i+1];
-            DVector from = new DVector (sp.pos_x, sp.pos_y,sp.pos_z) * SSVSettings.SolarSystemScale;
-            DVector to = new DVector (sp2.pos_x, sp2.pos_y,sp2.pos_z) * SSVSettings.SolarSystemScale;
-
-            GameObject g = new GameObject ();
-            g.transform.parent = SolarSystemViewverMain.linesObject.transform;
-            LineRenderer lr = g.AddComponent<LineRenderer> ();
-            lr.material = new Material(Shader.Find("Particles/Additive"));//(Material)Resources.Load ("LineMaterial");
-            lr.SetWidth (SSVSettings.OrbitalLineWidth.x, SSVSettings.OrbitalLineWidth.y);
-            lr.SetPosition (0, from.toVectorf());
-            lr.SetPosition (1, to.toVectorf());
-            orbitLines.Add (g);
-        }
-    }
-
-
-
-    public DisplayPlanetMCAST(GameObject g, Planet p, SerializedPlanet sp) {
-        go = g;
-        planet = p;
-        serializedPlanet = sp;
-//            CreateTextMesh();
-        //CreateOrbitFromFrames ();
-        //if (planet.lsPlanet.pSettings.name.ToLower().Contains("moon"))
-        //    isMoon = true;
-    }
-
-    public void UpdatePosition() {
-        planet.lsPlanet.pSettings.properties.pos*=SSVSettings.SolarSystemScale;
-        planet.lsPlanet.pSettings.transform.position = planet.lsPlanet.pSettings.properties.pos.toVectorf();
-        go.transform.position = planet.lsPlanet.pSettings.properties.pos.toVectorf();
-        MaintainOrbits();
-    }
-
-}
-*/
+    }    
     public class SolarSystemViewverMain : SSVAppBase
     {
 
@@ -198,13 +35,33 @@ namespace LemonSpawn
             infoText2 += "Temperature      : " + (int)star.temperature + "K\n";
             //               infoText2 += dp.planet.lsPlanet.pSettings.planetType.PlanetInfo;
             setText("txtPlanetInfo", infoText2);
-
         }
+        private void DisplayBHInfo(StarSystem star)
+        {
+            setText("txtPlanetType", "Black hole");
+            setText("txtPlanetName", star.getName());
+            setText("txtPlanetName2", "(" + star.noPlanets + " planets" + ")");
+            string infoText2 = "";
+            //                int displayRadius2 = (int)((dp.planet.lsPlanet.pSettings.getActualRadius()) / LemonSpawn.RenderSettings.GlobalRadiusScale * currentScale);
+            infoText2 += "Radius           : " + star.radius.ToString("0.00") + " sun radii" + "\n";
+            //          infoText += "Displayed Radius : " + displayRadius / radius + " x original radius\n";
+            infoText2 += "Mass             : " + star.mass + " sun masses" + "\n";
+            //            infoText += "Displayed Radius : " + displayRadius + " km \n";
+            infoText2 += "Event horizon (Not done)   : " + (int)star.temperature + "K\n";
+            //               infoText2 += dp.planet.lsPlanet.pSettings.planetType.PlanetInfo;
+            setText("txtPlanetInfo", infoText2);
+        }
+
         public override void DisplayObjectText(DisplayPlanet dp)
         {
             if (dp.planet.lsPlanet.pSettings.category == LemonSpawn.PlanetSettings.Categories.Star)
             {
                 DisplayStarInfo(data.currentSystem);
+                return;
+            }
+            if (dp.planet.lsPlanet.pSettings.category == LemonSpawn.PlanetSettings.Categories.BlackHole)
+            {
+                DisplayBHInfo(data.currentSystem);
                 return;
             }
             else
@@ -224,7 +81,7 @@ namespace LemonSpawn
             string infoText = "";
             int radius = (int)(dp.planet.lsPlanet.pSettings.getActualRadius());
             int displayRadius = (int)((dp.planet.lsPlanet.pSettings.getActualRadius()) / LemonSpawn.RenderSettings.GlobalRadiusScale * currentScale);
-            float orbit = (dp.planet.lsPlanet.pSettings.properties.pos.toVectorf().magnitude);///(float)SSVSettings.SolarSystemScale);
+            float orbit = (dp.planet.lsPlanet.pSettings.properties.pos.toVectorf().magnitude);///(float)SSVAppSettings.SolarSystemScale);
             infoText += "Orbital distance : " + orbit + "Au\n\n";
             infoText += "Orbital period   : " + LemonSpawn.Constants.getFormattedTimeFromSeconds(dp.planet.lsPlanet.pSettings.getOrbitalPeriod()) + "\n";
             infoText += "Radius           : " + radius + "km\n";
@@ -280,15 +137,15 @@ namespace LemonSpawn
         }
 
 
-        public void SlideScaleLines()
+/*        public void SlideScaleLines()
         {
             Slider slider = GameObject.Find("SliderScaleLines").GetComponent<Slider>();
 
-            SSVSettings.LineScale = slider.value * 10;
+            SSVAppSettings.LineScale = slider.value * 10;
             //   foreach (DisplayPlanetMCAST dp in dPlanets)
             //       dp.MaintainOrbits();
         }
-
+        */
 
         private float currentScale = 1;
 
@@ -404,7 +261,7 @@ namespace LemonSpawn
 
             CurrentApp = Verification.SolarSystemViewerName;
 
-            SSVSettings.extraGameObject = new GameObject("extra");
+            SSVAppSettings.extraGameObject = new GameObject("extra");
 
 
             satellite = GameObject.Find("Satellite");
@@ -516,7 +373,7 @@ namespace LemonSpawn
                     Vector3 dir = (winner.go.transform.position - spaceCraft.go.transform.position) * -1;
                     float dist2 = dir.magnitude;
                     float scale = winner.go.transform.parent.transform.localScale.x * winner.planet.lsPlanet.pSettings.radius * 2f;
-                    //scale = SSVSettings.SolarSystemScale;
+                    //scale = SSVAppSettings.SolarSystemScale;
 
                     if (dist2 < scale && spaceCraft.planet.lsPlanet.pSettings.radius < winner.planet.lsPlanet.pSettings.radius)
                     {
@@ -525,7 +382,7 @@ namespace LemonSpawn
                         //                        Debug.Log(spaceCraft.planet.lsPlanet.pSettings.radius + " vs " + winner.planet.lsPlanet.pSettings.radius);
 
                         spaceCraft.planet.lsPlanet.pSettings.gameObject.transform.position = winner.go.transform.position +
-                           dir.normalized * (scale * 1.0001f + 1 * dist2 * SSVSettings.SolarSystemScale / 10.0f);
+                           dir.normalized * (scale * 1.0001f + 1 * dist2 * SSVAppSettings.SolarSystemScale / 10.0f);
                     }
                 }
 
@@ -572,8 +429,8 @@ namespace LemonSpawn
         {
             Color c = new Color(0.3f, 0.6f, 1.0f, 1.0f);
             GUIStyle s = new GUIStyle();
-            s.font = (Font)Resources.Load(SSVSettings.MainFont);
-            s.fontSize = 16;
+            s.font = (Font)Resources.Load(SSVAppSettings.MainFont);
+            s.fontSize = SSVAppSettings.FontSize;
             s.normal.textColor = c * 4;
             s.alignment = TextAnchor.MiddleCenter;
             MenuLayout mLayout = new MenuLayout(16, s, c, c * 0.4f, MenuLayout.MenuStyle.SolidFrame);
@@ -612,7 +469,7 @@ namespace LemonSpawn
             //foreach (DisplayPlanet dp in data.dPlanets)
             //    dp.CreateOrbitFromFrames(100);
 
-//            Slide();
+            Slide();
 
             data.CreatePlanetHierarchy();
             Update();
@@ -622,37 +479,6 @@ namespace LemonSpawn
 
         }
 
-        public void OnPostRender()
-        {
-//            Debug.Log("MEEEH");
-            foreach (DisplayPlanet dp in data.dPlanets)
-                dp.RenderGLOrbits();
-        }
-
-        /*        public void LoadFileFromMenu()
-                {
-                    DeFocus();
-
-                    int idx = GameObject.Find("ComboBoxLoadFile").GetComponent<UnityEngine.UI.Dropdown>().value;
-                    string name = GameObject.Find("ComboBoxLoadFile").GetComponent<Dropdown>().options[idx].text;
-                    if (name == "-")
-                        return;
-                    name = RenderSettings.dataDir + name + ".xml";
-
-                    LoadFromXMLFile(name);
-
-
-                    szWorld.useSpaceCamera = false;
-                    PopulateOverviewList("Overview");
-                    PopulateWorld();
-                    //foreach (DisplayPlanet dp in data.dPlanets)
-                    //    dp.CreateOrbitFromFrames(100);
-
-                    Slide();
-                    data.CreatePlanetHierarchy();
-                    CreatePlanetMenu(false);
-                }
-                */
 
 
         public void Slide()

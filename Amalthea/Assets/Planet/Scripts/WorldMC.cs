@@ -120,7 +120,7 @@ namespace LemonSpawn
 
         public bool isInCrash = false;
 
-        public void Slide()
+/*        public void Slide()
         {
             double v = slider.GetComponent<Slider>().value;
             currentCamera = szWorld.getInterpolatedCamera(v/sliderScale, solarSystem.planets);
@@ -135,7 +135,7 @@ namespace LemonSpawn
             }
         }
 
-
+            */
 
 
         private void setPlaySpeed(double v)
@@ -677,7 +677,7 @@ namespace LemonSpawn
             displaySettingsPanel();
             PopulateSettingsFromGUI();
             closeSettingsPanel();
-            Slide();
+  //          Slide();
 
         }
 

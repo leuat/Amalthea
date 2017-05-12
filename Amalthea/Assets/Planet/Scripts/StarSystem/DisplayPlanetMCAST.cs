@@ -31,14 +31,14 @@ namespace LemonSpawn
                     break;
                 Frame sp = serializedPlanet.Frames[i];
                 Frame sp2 = serializedPlanet.Frames[i + 1];
-                DVector from = new DVector(sp.pos_x, sp.pos_y, sp.pos_z) * SSVSettings.SolarSystemScale;
-                DVector to = new DVector(sp2.pos_x, sp2.pos_y, sp2.pos_z) * SSVSettings.SolarSystemScale;
+                DVector from = new DVector(sp.pos_x, sp.pos_y, sp.pos_z) * SSVAppSettings.SolarSystemScale;
+                DVector to = new DVector(sp2.pos_x, sp2.pos_y, sp2.pos_z) * SSVAppSettings.SolarSystemScale;
 
                 GameObject g = new GameObject();
 //                g.transform.parent = SolarSystemViewverMain.linesObject.transform;
                 LineRenderer lr = g.AddComponent<LineRenderer>();
                 lr.material = new Material(Shader.Find("Particles/Additive"));//(Material)Resources.Load ("LineMaterial");
-                lr.SetWidth(SSVSettings.OrbitalLineWidth.x, SSVSettings.OrbitalLineWidth.y);
+//                lr.SetWidth(SSVAppSettings.OrbitalLineWidth.x, SSVAppSettings.OrbitalLineWidth.y);
                 lr.SetPosition(0, from.toVectorf());
                 lr.SetPosition(1, to.toVectorf());
                 //orbitLines.Add(g);
@@ -51,17 +51,17 @@ namespace LemonSpawn
         /*        public void MaintainOrbits()
                 {
                     int maxFrames = serializedPlanet.Frames.Count;
-                    int currentFrame = (int)(SSVSettings.currentFrame * maxFrames);
-                    Color c = SSVSettings.orbitLinesColor;
+                    int currentFrame = (int)(SSVAppSettings.currentFrame * maxFrames);
+                    Color c = SSVAppSettings.orbitLinesColor;
                     if (planet.pSettings.category == PlanetSettings.Categories.Spacecraft)
-                        c = SSVSettings.spaceCraftColor;
+                        c = SSVAppSettings.spaceCraftColor;
 
                     int h = orbitLines.Count / 1;
 
                     for (int i = 0; i < orbitLines.Count; i++)
                     {
-                        int f1 = (int)Mathf.Clamp((i - h) * SSVSettings.LineScale + currentFrame, 0, maxFrames);
-                        int f2 = (int)Mathf.Clamp((i + 1 - h) * SSVSettings.LineScale + currentFrame, 0, maxFrames);
+                        int f1 = (int)Mathf.Clamp((i - h) * SSVAppSettings.LineScale + currentFrame, 0, maxFrames);
+                        int f2 = (int)Mathf.Clamp((i + 1 - h) * SSVAppSettings.LineScale + currentFrame, 0, maxFrames);
                         if (f1 >= serializedPlanet.Frames.Count || f1 < 0)
                             break;
                         if (f2 >= serializedPlanet.Frames.Count || f2 < 0)
@@ -69,8 +69,8 @@ namespace LemonSpawn
                         LineRenderer lr = orbitLines[i].GetComponent<LineRenderer>();
                         Frame sp = serializedPlanet.Frames[f1];
                         Frame sp2 = serializedPlanet.Frames[f2];
-                        DVector from = new DVector(sp.pos_x, sp.pos_y, sp.pos_z) * SSVSettings.SolarSystemScale;
-                        DVector to = new DVector(sp2.pos_x, sp2.pos_y, sp2.pos_z) * SSVSettings.SolarSystemScale;
+                        DVector from = new DVector(sp.pos_x, sp.pos_y, sp.pos_z) * SSVAppSettings.SolarSystemScale;
+                        DVector to = new DVector(sp2.pos_x, sp2.pos_y, sp2.pos_z) * SSVAppSettings.SolarSystemScale;
 
 
                         lr.SetPosition(0, from.toVectorf());

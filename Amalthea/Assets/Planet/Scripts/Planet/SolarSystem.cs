@@ -273,6 +273,8 @@ namespace LemonSpawn
         {
             if (ps.category == PlanetSettings.Categories.Star)
                 return new Star(ps);
+            if (ps.category == PlanetSettings.Categories.BlackHole)
+                return new BlackHole(ps);
             if (ps.category == PlanetSettings.Categories.Spacecraft)
                 return new Satellite(ps);
 

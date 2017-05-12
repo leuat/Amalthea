@@ -33,6 +33,7 @@ namespace LemonSpawn
             stellarCategories.list.Add(new StellarCategory("Moon", new Color(0.3f, 0.5f, 1.0f, 0.5f), 1f));
             stellarCategories.list.Add(new StellarCategory("Planet", new Color(1.0f, 0.8f, 0.3f, 0.5f), 1.2f));
             stellarCategories.list.Add(new StellarCategory("Star", new Color(1.0f, 0.3f, 0.3f, 0.5f), 1.2f));
+            stellarCategories.list.Add(new StellarCategory("BlackHole", new Color(0.3f, 0.5f, 1.0f, 0.6f), 1.2f));
             stellarCategories.list.Add(new StellarCategory("UFO", new Color(0.6f, 0.6f, 0.6f, 0.5f), 1.2f));
         }
 

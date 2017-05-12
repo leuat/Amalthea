@@ -154,7 +154,7 @@ namespace LemonSpawn
                     openTime = 0.4f;
                     expand = true;
                     if (timer == 0)
-                        SolarSystemViewverMain.PlaySound(SSVSettings.audioHoverMenu, 0.3f);
+                        SolarSystemViewverMain.PlaySound(SSVAppSettings.audioHoverMenu, 0.3f);
                     targetTimer = 1;
                 }
                 else

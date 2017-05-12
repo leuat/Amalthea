@@ -1,5 +1,4 @@
-﻿
-Shader "LemonSpawn/Billboard"
+﻿Shader "LemonSpawn/BlackHoleOld"
 {
 	Properties
 	{
@@ -16,9 +15,8 @@ Shader "LemonSpawn/Billboard"
 		Blend srcalpha oneminussrcalpha
 		cull off
 		Zwrite off
-		Ztest off
-		
-		LOD 200
+		Ztest on
+
 
 		CGPROGRAM
 #pragma target 5.0
@@ -113,20 +111,57 @@ Shader "LemonSpawn/Billboard"
 	}
 
 
+	float2 lensPoint(float strength, float radius, float2 t) {
+//		CVector C2DImage::lensPoint(float strength, float radius, int x, int
+	//		y) {
+
+			float Ds = 1.0;
+			float Dd = 0.5;
+			float Dds = Dd + Ds;
+
+
+			float2 alpha = float2(0, 0);
+			float2 eta = float2 (t.x, t.y);
+			float w = 25;
+			//  float xx = 10.0/float(w);///Dd;
+			int n = 0;
+			float scale = 0.01;
+			for (int i = 0; i<w; i++)
+				for (int j = 0; j<w; j++) {
+
+					float2 etam = scale*float2(float(i - w / 2), float(j - w / 2));
+					etam = etam + eta;
+					float2 diff = eta - etam;
+					
+					float pointSource = -clamp(1 - (8 * length(etam - float2(0.5, 0.5))), 0, 1);
+
+						alpha = alpha + normalize(diff) * 1.0 * pointSource*strength;
+
+					n += 1.0;
+				}
+
+			alpha = alpha*1.0 * Dds / Ds / (n);
+
+			return alpha;
+	}
 
 	// Fragment Shader -----------------------------------------------
 	float4 FS_Main(FS_INPUT input) : COLOR
 	{
-
-
-		float4 val = tex2D(_SpriteTex, input.tex0);
+		float2 t = input.tex0;
+		float add = _Time;
+		float2 alpha = lensPoint(2, 0, input.tex0);
+		float4 val = tex2D(_SpriteTex, input.tex0 + alpha);
 		float3 c = input.normal;
+
+
 		val.x *= c.x;
 		val.y *= c.y;
 		val.z *= c.z;
-		val *= 2;
+		//		val.z=d;
 		val.a = max(val.x, val.y);
-		val.a =max(val.a, val.z);
+		val.a = max(val.a, val.z);
+		//		val.x=clamp
 		return val;
 	}
 

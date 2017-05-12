@@ -150,9 +150,9 @@ Shader "LemonSpawn/Star" {
 			float val = (getNoiseOctaves(pos*73.23, 1, 1, 7,1))*1.0 -0.0;
 
 			float s = 0.8;
-			float t1 = getNoiseOctaves(pos * 4.5, 2, 0, 1,0.83456) - s;
+			float t1 = getNoiseOctaves(pos * 4.5, 4.23, 0, 4,0.83456) - s;
 			t1 = max(t1, 0.0);
-			val = val - t1;
+			val = val - t1*2;
 
 			float t2 = getNoiseOctaves(pos * 2.123, 1.5, 1, 8,1.2354) - 0.6;
 			t2 = max(t2, 0.0);
@@ -160,8 +160,9 @@ Shader "LemonSpawn/Star" {
 
 			float theta = 1.0 - pow(dot(normalize(viewDirection), pos),0.4);
 //			pColor = vec4(unColor + total - theta, 1.0);
-			val -= theta;
-			val *= 1.2;
+			val -= theta*1;
+			//val *= 2.9;
+			val = val * 2;
 			c.a = 1;
 			c.rgb = _Color.xyz*val;
 

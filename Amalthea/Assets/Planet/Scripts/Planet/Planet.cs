@@ -63,7 +63,8 @@ namespace LemonSpawn
 //            double rot = (f0.rotation + (f1.rotation - f0.rotation) * dt);
             double rot = Util.LerpDegrees(f0.rotation, f1.rotation, dt);
 
-            Debug.Log("Lerping");
+            if (pSettings.properties.parentPlanet != null)
+                pos = pos - pSettings.properties.parentPlanet.pSettings.properties.pos;
             pSettings.properties.pos = pos;
             pSettings.rotation = rot;
 

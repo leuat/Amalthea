@@ -7,7 +7,8 @@ namespace LemonSpawn {
     public class Star : Planet {
 
         private Material starMaterial;
-                       
+
+        private Billboards corona = new Billboards();  
         public Star()
         {
 
@@ -33,13 +34,30 @@ namespace LemonSpawn {
             mr.material = starMaterial;
             //pSettings.radius*=RenderSettings.GlobalRadiusScale;
 
+            // Test for BH!
+            pSettings.properties.distortionIntensity = 0;
             GameObject go = obj;
             go.name = "star";
             go.transform.localScale = Vector3.one * pSettings.radius;
 
-            //Debug.Log("Heisann");
-
+            pSettings.properties.extraColor = Constants.colorTemperatureToRGB(pSettings.temperature);
             starMaterial.SetColor("_Color", pSettings.properties.extraColor);
+            CreateCorona();
+
+
+        }
+
+        protected void CreateCorona()
+        {
+            float r = pSettings.radius*3;
+            Vector3 color = new Vector3(pSettings.properties.extraColor.r, pSettings.properties.extraColor.g, pSettings.properties.extraColor.b) ;
+
+//            color = Vector3.one;
+            // Skal være 2
+            corona.billboards.Add(new LemonSpawn.Billboard(Vector3.zero, new Vector2(2*r,2*r), color));
+            corona.billboards.Add(new LemonSpawn.Billboard(Vector3.zero, new Vector2(10*r, 10*r), color*0.3f));
+             
+            corona.Realize("Solar Corona", (Material)Resources.Load("Corona"), 9);
 
         }
 

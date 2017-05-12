@@ -47,7 +47,7 @@ namespace LemonSpawn
             if (miniCamera == null)
             {
                 miniCameraGO = new GameObject();
-                miniCameraGO.transform.parent = SSVSettings.extraGameObject.transform;
+                miniCameraGO.transform.parent = SSVAppSettings.extraGameObject.transform;
 
                 miniCamera = miniCameraGO.AddComponent<Camera>();
                 //miniCamera.rect = new Rect(0.01f, 1 - 0.5f, 0.2f, 0.2f);
@@ -56,9 +56,9 @@ namespace LemonSpawn
             miniCamera.enabled = true;
 
             miniCamera.transform.position = planet.lsPlanet.pSettings.transform.position -
-            (planet.lsPlanet.pSettings.transform.position.normalized + miniCamera.transform.right * 15 - Vector3.up * 15).normalized * SSVSettings.MiniCamDist * planet.lsPlanet.pSettings.radius;
+            (planet.lsPlanet.pSettings.transform.position.normalized + miniCamera.transform.right * 15 - Vector3.up * 15).normalized * SSVAppSettings.MiniCamDist * planet.lsPlanet.pSettings.radius;
             miniCamera.transform.up = new Vector3(0.5f, 1, 0).normalized;
-            miniCamera.fieldOfView = SSVSettings.MiniCamFOV;
+            miniCamera.fieldOfView = SSVAppSettings.MiniCamFOV;
             miniCamera.transform.LookAt(planet.lsPlanet.pSettings.transform.position);
             miniCamera.targetTexture = renderTexture;
             //            miniCamera.rect = new Rect(0, 0, 0.2, 0.2);
@@ -83,7 +83,7 @@ namespace LemonSpawn
             if (miniCamera == null)
                 return;
 /*            miniCamera.transform.position = planet.lsPlanet.pSettings.transform.position +
-                Vector3.left * SSVSettings.MiniCamDist * planet.lsPlanet.pSettings.radius;
+                Vector3.left * SSVAppSettings.MiniCamDist * planet.lsPlanet.pSettings.radius;
             miniCamera.transform.LookAt(planet.lsPlanet.pSettings.transform.position);*/
         }
 
@@ -103,6 +103,8 @@ namespace LemonSpawn
                 planet.stellarCategory = Globals.definitions.stellarCategories.Get("Moon");
             if (p.lsPlanet.pSettings.category == LemonSpawn.PlanetSettings.Categories.Star)
                 planet.stellarCategory = Globals.definitions.stellarCategories.Get("Star");
+            if (p.lsPlanet.pSettings.category == LemonSpawn.PlanetSettings.Categories.BlackHole)
+                planet.stellarCategory = Globals.definitions.stellarCategories.Get("BlackHole");
 
 
             if (planet.stellarCategory == null)
@@ -211,7 +213,7 @@ namespace LemonSpawn
                 float t0 = (float)i / (maxLines + 1) * 2 * Mathf.PI;
 
 
-                Vector3 p = planet.lsPlanet.pSettings.getOrbit(t0);// *SSVSettings.SolarSystemScale;
+                Vector3 p = planet.lsPlanet.pSettings.getOrbit(t0);// *SSVAppSettings.SolarSystemScale;
                 Vector3 dp = getDisplayPosition(p);
 
                 orbitLines.Add(dp);
@@ -226,20 +228,23 @@ namespace LemonSpawn
             float prevRadius = 0;
             if (planet.lsPlanet.pSettings.category == LemonSpawn.PlanetSettings.Categories.Moon)
             {
-                ms = 2.0f / SSVSettings.PlanetSizeScale;
+                ms = 2.0f / SSVAppSettings.PlanetSizeScale;
                 prevRadius = planet.lsPlanet.pSettings.transform.parent.gameObject.GetComponent<LemonSpawn.PlanetSettings>().radius;
             }
             if (planet.lsPlanet.pSettings.category == LemonSpawn.PlanetSettings.Categories.Planet)
             {
-                ms = 1.0f;// / SSVSettings.PlanetSizeScale;
+                ms = 1.0f;// / SSVAppSettings.PlanetSizeScale;
                 if (planet.lsPlanet.pSettings.transform.parent != null)
                 {
-                    prevRadius = planet.lsPlanet.pSettings.transform.parent.gameObject.GetComponent<LemonSpawn.PlanetSettings>().radius * 2;
+                    float scale = 2;
+                    if (planet.lsPlanet.pSettings.properties.parentPlanet.pSettings.category == PlanetSettings.Categories.BlackHole)
+                        scale = 10;
+                        prevRadius = planet.lsPlanet.pSettings.transform.parent.gameObject.GetComponent<LemonSpawn.PlanetSettings>().radius * scale;
                 }
             }
             // Scales moons
 //            Debug.Log(pos + " for " + planet.lsPlanet.pSettings.gameObject.name);
-            return pos * SSVSettings.SolarSystemScale * ms + pos.normalized * prevRadius;
+            return pos * SSVAppSettings.SolarSystemScale * ms + pos.normalized * prevRadius;
 
         }
 

@@ -111,21 +111,20 @@ namespace LemonSpawn
                 GUIStyle guiStyle = SSVAppSettings.guiStyle;
 
 
-                guiStyle.normal.textColor = SSVSettings.planetColor;
+                guiStyle.normal.textColor = dp.planet.stellarCategory.color;
+                Color c = dp.planet.stellarCategory.color;
                 if (dp.planet.lsPlanet.pSettings.category == LemonSpawn.PlanetSettings.Categories.Moon)
                 {
-                    Color c = SSVSettings.moonColor;
                     c.a = Mathf.Clamp(1 - 0.001f * (dp.go.transform.position - mainCamera.transform.position).magnitude, 0, 1);
                     guiStyle.normal.textColor = c;
                 }
                 if (dp.planet.lsPlanet.pSettings.category == LemonSpawn.PlanetSettings.Categories.Planet)
                 {
-                    Color c = SSVSettings.planetColor;
                     c.a = Mathf.Clamp(1 - 0.00005f * (dp.go.transform.position - mainCamera.transform.position).magnitude, 0, 1);
                     guiStyle.normal.textColor = c;
                 }
-                if (dp.planet.lsPlanet.pSettings.category == LemonSpawn.PlanetSettings.Categories.Spacecraft)
-                    guiStyle.normal.textColor = SSVSettings.spaceCraftColor;
+//                if (dp.planet.lsPlanet.pSettings.category == LemonSpawn.PlanetSettings.Categories.Spacecraft)
+  //                  guiStyle.normal.textColor = SSVSettings.spaceCraftColor;
 
                 guiStyle.normal.textColor = guiStyle.normal.textColor * (1 + dp.timer);
 
@@ -142,7 +141,7 @@ namespace LemonSpawn
                 {
                     float ha = 30;
                     float gf = guiStyle.fontSize / 2;
-                    Color c = guiStyle.normal.textColor;
+                    c = guiStyle.normal.textColor;
                     guiStyle.normal.textColor = black;
                     int a = 2;
                     GUI.Label(new Rect(pos.x - gf * dp.planet.lsPlanet.pSettings.givenName.Length / 2 + a, Screen.height - pos.y - ha - gf + a, 250, 130), dp.planet.lsPlanet.pSettings.givenName, guiStyle);
@@ -215,7 +214,7 @@ namespace LemonSpawn
                 //Debug.Log(g.name);
                 if (n.ToLower().Contains("planet") && !n.ToLower().Contains("moon"))
                 {
-                    g.transform.parent = GameObject.Find("The star").transform;
+                    g.transform.parent = findDisplayPlanetWithparent(null).planet.lsPlanet.pSettings.transform;//   GameObject.Find("The star").transform;
                 }
                 if (n.ToLower().Contains("moon"))
                 {
