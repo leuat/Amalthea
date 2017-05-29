@@ -15,11 +15,21 @@ namespace LemonSpawn
 
         private Camera mainCamera;
 
+        public Camera Camera()
+        {
+            return mainCamera;
+        }
+
         public CameraRotator(Camera cam)
         {
             mainCamera = cam;
         }
 
+
+        public void ForceCamera(CameraRotator cr)
+        {
+            mainCamera.transform.rotation = cr.Camera().transform.rotation;
+        }
 
         public void UpdateCamera()
         {

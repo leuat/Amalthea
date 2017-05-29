@@ -99,6 +99,10 @@ namespace LemonSpawn
             PlanetTypes.currentSettings = PlanetTypes.p.FindPlanetType(idx);
             PopulatePlanetGUI();
             SetNewPlanetType();
+//            Debug.Log("WTF");
+            solarSystem.planets[0].pSettings.planetType = PlanetTypes.currentSettings;
+
+
 
         }
 

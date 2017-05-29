@@ -152,9 +152,10 @@ namespace LemonSpawn
         public void SlideScale()
         {
             Slider slider = GameObject.Find("SliderScale").GetComponent<Slider>();
-            foreach (DisplayPlanetMCAST dp in data.dPlanets)
+            foreach (DisplayPlanet dp in data.dPlanets)
             {
-
+                if (dp.planet.lsPlanet.pSettings.category == LemonSpawn.PlanetSettings.Categories.Star )
+                    continue;
                 currentScale = slider.value * 10;
 
                 //                int radius = (int)(dp.planet.lsPlanet.pSettings.getActualRadius());
@@ -165,14 +166,18 @@ namespace LemonSpawn
 
 
 
-                Vector3 newScale = Vector3.one * (0.00f + currentScale);
-                dp.go.transform.localScale = Vector3.one * dp.planet.lsPlanet.pSettings.radius * 2.0f;
-                //dp.SetWidth(newScale.x);
-                dp.planet.lsPlanet.pSettings.transform.localScale = newScale;
-                if (dp.planet.lsPlanet.pSettings.gameObject != null)
-                    dp.planet.lsPlanet.pSettings.gameObject.transform.localScale = newScale;
-                if (dp.planet.lsPlanet.pSettings.properties.terrainObject != null)
-                    dp.planet.lsPlanet.pSettings.properties.terrainObject.transform.localScale = newScale;
+                                Vector3 newScale = Vector3.one * (0.00f + currentScale);
+                /*                dp.go.transform.localScale = Vector3.one * dp.planet.lsPlanet.pSettings.radius * 2.0f;
+                                //dp.SetWidth(newScale.x);
+                                dp.planet.lsPlanet.pSettings.transform.localScale = newScale;
+                                if (dp.planet.lsPlanet.pSettings.gameObject != null)
+                                    dp.planet.lsPlanet.pSettings.gameObject.transform.localScale = newScale;
+
+                                if (dp.planet.lsPlanet.pSettings.properties.terrainObject != null)
+                                    dp.planet.lsPlanet.pSettings.properties.terrainObject.transform.localScale = newScale;
+                                    */
+
+                Util.ReScaleDetach(dp.planet.lsPlanet.pSettings.gameObject, newScale);
             }
             Slide();
         }
@@ -221,23 +226,19 @@ namespace LemonSpawn
         private void CreateLine(Vector3 f, Vector3 t, float c1, float c2, float w)
         {
 
-            Color c = new Color(0.3f, 0.4f, 1.0f, 1.0f);
-            GameObject g = new GameObject();
-            LineRenderer lr = g.AddComponent<LineRenderer>();
-            lr.material = new Material(Shader.Find("Particles/Additive"));//(Material)Resources.Load ("LineMaterial");
-            lr.SetWidth(w, w);
-            lr.SetPosition(0, f);
-            lr.SetPosition(1, t);
-            Color cc1 = c * c1;
-            Color cc2 = c * c2;
-            cc1.a = 0.4f;
-            cc2.a = 0.4f;
-            lr.SetColors(cc1, cc2);
+            Color c = new Color(0.3f, 0.4f, 1.0f, 0.5f);
+
+            GLLines l = new GLLines();
+            l.points.Add(f);
+            l.points.Add(t);
+            l.color = c;
+            data.glr.lines.Add(l);
+
         }
 
         private void CreateAxis()
         {
-            float w = 10000;
+            float w = 30000;
 
             CreateLine(Vector3.zero, Vector3.up * w, 1, 0.2f, 5);
             CreateLine(Vector3.zero, Vector3.up * w * -1, 1, 0.2f, 5);
@@ -278,7 +279,7 @@ namespace LemonSpawn
 
             CreateAxis();
 
-            data.player.galaxy.Generate(50000, 0, 3000);
+            data.player.galaxy.Generate(50000, 1, 3000);
             data.currentSystem = data.player.galaxy.stars[0];
             data.player.AddToKnown(data.currentSystem);
             //solarSystem.GenerateSolarSystem(currentSystem);
@@ -302,9 +303,11 @@ namespace LemonSpawn
 
         public override void Update()
         {
+                
             base.Update();
             UpdatePlay();
-            ForceSpaceCraft();
+            if (Initialized)
+                ForceSpaceCraft();
 
             if (Input.GetKey(KeyCode.Escape))
             {
@@ -448,23 +451,35 @@ namespace LemonSpawn
 
         protected void OnGUI()
         {
-            RenderLabels();
+
             if (mainMenu != null)
                 mainMenu.Render(new Vector2(0.02f, 0.1f) * Screen.height);
+
+            if (!Initialized)
+                return;
+            RenderLabels();
 
         }
 
 
         public void LoadSolarSystemFromXML(System.Object o)
         {
+            Initialized = false;
+//            solarSystem = new SolarSystem(sun, sphere, transform, (int)szWorld.skybox);
+
             string name = (string)o;
             name = RenderSettings.dataDir + name;// + ".xml";
+            data.DestroyAllGameObjects();
             LoadFromXMLFile(name);
 
 
             szWorld.useSpaceCamera = false;
             PopulateOverviewList("Overview");
             PopulateWorld();
+
+
+            //            Debug.Log(solarSystem.planets.Count);
+
             data.OrganizePlanetGameObjectsByName();
             //foreach (DisplayPlanet dp in data.dPlanets)
             //    dp.CreateOrbitFromFrames(100);
@@ -472,11 +487,15 @@ namespace LemonSpawn
             Slide();
 
             data.CreatePlanetHierarchy();
-            Update();
+            //Update();
+            solarSystem.Update();
 
             CreatePlanetMenu(true);
             data.CreateOrbitalLines();
 
+            CreateAxis();
+            Initialized = true;
+            //Debug.Log("")
         }
 
 

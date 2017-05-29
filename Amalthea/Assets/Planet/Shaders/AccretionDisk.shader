@@ -78,7 +78,7 @@
 //		float3 t2 =15*float3(tangent.x,rad.x,0);
 		float3 t2 = 25 * float3(r+ s*tangent.x, 0, r+s*tangent.z);
 
-		float c = getNoiseOctaves(t2,10,1,5,_Time*0.1);
+		float c = getNoiseOctaves(t2,10,1,5,_Time*0.5);
 		//	c = clamp(c, 0, 0.65)*1.15;
 
 		float radius = 0.4;

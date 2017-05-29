@@ -154,9 +154,7 @@ namespace LemonSpawn
     {
         public List<SerializedPlanet> Planets = new List<SerializedPlanet>();
         public List<SerializedCamera> Cameras = new List<SerializedCamera>();
-        public float sun_col_r = 1;
-        public float sun_col_g = 1;
-        public float sun_col_b = 0.8f;
+        public bool hasLengthContraction = false;
         public float sun_intensity = 0.1f;
         public float resolutionScale = 1.0f;
         public float global_radius_scale = 1;

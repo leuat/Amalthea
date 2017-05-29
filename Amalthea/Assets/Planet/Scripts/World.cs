@@ -18,7 +18,7 @@ namespace LemonSpawn {
 		public float Velocity;
 		public float Height;
 		public float scale = 1000;
-		
+        public Vector3 moveDirection;		
 		
 	}
 	public enum RenderType { Normal, Overview }
@@ -41,6 +41,7 @@ namespace LemonSpawn {
         public static bool MoveCam = false;
 		public static bool RenderText = false;
         public static bool logScale = false;
+        public static Vector3 lengthContraction = Vector3.one;
         public static bool planetCubeSphere = true;
 		public static int waterMaxQuadNodeLever = 3;
 		public static float RingProbability = 0.5f;
@@ -50,6 +51,8 @@ namespace LemonSpawn {
 		public static bool GPUSurface = true;
 		public static float version = 0.01f;
         public static float powScale = 0.75f;
+        public static Vector3 stretch = Vector3.one;
+
         public static SerializedWorld currentSZWorld;
         public static bool debug = true;
 		public static float MinCameraHeight = 1.5f;
@@ -212,6 +215,8 @@ namespace LemonSpawn {
         public static bool hasScene = false;
         public static SerializedWorld SzWorld;
 
+        public static SRColorDistorter srColorDistorter = null;
+
         public bool followVehicle = false;
 		protected int extraTimer = 10;
         
@@ -231,6 +236,7 @@ namespace LemonSpawn {
         public virtual void OnGUI() {
 			GUI.Label(new Rect(0, 0, 100, 100), "FPS: "+(int)(1.0f / Time.smoothDeltaTime)); 
         }
+
 
         private string GetScreenshotFilename(string dir, out string pureFile) {
 			string OutputDir = RenderSettings.path + dir;
@@ -329,7 +335,7 @@ namespace LemonSpawn {
 
 			solarSystem.LoadWorld(xml, false, false, this, randomizeSeeds);
 			szWorld.IterateCamera();
-			solarSystem.space.color = new Color(szWorld.sun_col_r,szWorld.sun_col_g,szWorld.sun_col_b);
+//			solarSystem.space.color = new Color(szWorld.sun_col_r,szWorld.sun_col_g,szWorld.sun_col_b);
             solarSystem.space.hdr = szWorld.sun_intensity;
           
 
@@ -471,6 +477,7 @@ namespace LemonSpawn {
 
 
             PlanetTypes.Initialize();
+            solarSystem.ClearStarSystem();
             if (initializeFromScene)
                 solarSystem.InitializeFromScene();
             Application.runInBackground = true;
@@ -554,10 +561,70 @@ namespace LemonSpawn {
 			if (RenderSettings.RenderMenu)
 				Log();
 
-
+            if (szWorld.hasLengthContraction)
+                SetLengthContraction();
 
 
 		}
+
+        protected Vector3 oldMoveDirection = Vector3.zero;
+        protected Vector3 moveDir;
+
+        protected void SetLengthContraction()
+        {
+            float c = 500;
+            float v = Mathf.Min(stats.Velocity,c*0.99f);
+
+            if (oldMoveDirection.magnitude == 0)
+                oldMoveDirection = SpaceCamera.getPos().toVectorf();
+
+            moveDir = moveDir*0.95f + 0.05f*(SpaceCamera.getPos().toVectorf() - oldMoveDirection);
+
+
+
+            float gamma = 1 / Mathf.Sqrt(1 - (v * v) / (c * c));
+            //            Debug.Log(gamma);
+
+
+//            moveDir = stats.moveDirection;
+
+            Vector3 contr = moveDir.normalized;// - stats.moveDirection.normalized / gamma;
+
+            float epsilon = 1;
+            Vector3 val = moveDir*0.01f;
+
+            contr.x = 1.0f/((Mathf.Abs(val.x))*gamma + epsilon);
+            contr.y = 1.0f / ((Mathf.Abs(val.y))*gamma + epsilon);
+            contr.z = 1.0f / ((Mathf.Abs(val.z))*gamma + epsilon);
+
+//            contr.x = 1/contr.x;
+
+
+            RenderSettings.lengthContraction = contr;
+            Debug.Log(moveDir);
+            //            Debug.Log(contr.x + ", " +contr.y + ", " + contr.z);
+            oldMoveDirection = SpaceCamera.getPos().toVectorf();
+
+
+            //            closeCamera.transform.localScale = contr;
+            //          mainCamera.transform.localScale = contr;
+
+            SRColorDistorter.moveDirection = moveDir;
+//            SRColorDistorter.focusPoint = MainCamera.Pro
+            SRColorDistorter.lightSpeed = c;
+
+            /*            Vector3 pos = MainCamera.WorldToScreenPoint(moveDir);
+                        //if (pos.z > 0 && data.dpSun != null && data.dpSun.planet.lsPlanet.pSettings.properties.distortionIntensity != 0)
+                        {
+                            SRColorDistorter.focusPoint = new Vector3(pos.x/Screen.width, pos.y/Screen.height);
+                        }
+                        */
+
+            SRColorDistorter.viewDirection = MainCamera.transform.forward;
+            SRColorDistorter.up = MainCamera.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height,0)).direction;
+            SRColorDistorter.right = MainCamera.ScreenPointToRay(new Vector3(Screen.width , Screen.height/2,0)).direction;
+
+        }
 
 
         protected virtual void Log() {

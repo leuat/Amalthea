@@ -256,6 +256,31 @@ namespace LemonSpawn
 
         }
 
+
+        public static void ReScaleDetach(GameObject go, Vector3 scale) {
+            Transform parent = go.transform.parent;
+
+            go.transform.parent = null;
+
+            List<GameObject> children = new List<GameObject>();
+            foreach (Transform t in go.transform)
+            {
+                children.Add(t.gameObject);
+                t.transform.parent = null;
+            }
+            // Set scale
+            go.transform.localScale = scale;
+
+
+            // Reattach children
+
+            foreach (GameObject g in children)
+                g.transform.parent = go.transform;
+
+            go.transform.parent = parent;
+
+        }
+
         public static float getRidgedMf2(Vector3 p, float frequency, int octaves, float lacunarity, float warp, float offset, float gain, float initialOffset, string name, float seed)
         {
 

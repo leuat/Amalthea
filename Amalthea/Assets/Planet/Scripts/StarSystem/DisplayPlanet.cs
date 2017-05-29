@@ -13,12 +13,12 @@ namespace LemonSpawn
         public List<DisplayPlanet> children = new List<DisplayPlanet>();
         public static DisplayPlanet performSelect = null;
         public PlanetInstance planet;
+        public GLLines lines = null;
        
         public GameObject go;
         public float timer = 0;
-        public List<Vector3> orbitLines = new List<Vector3>();
-        private static Material lineRenderer;
-        public Color orbitColor;
+//        public List<Vector3> orbitLines = new List<Vector3>();
+//        public Color orbitColor;
         public Camera miniCamera;
         public GameObject miniCameraGO;
         RenderTexture renderTexture = new RenderTexture(128, 128, 16, RenderTextureFormat.Default);
@@ -111,12 +111,12 @@ namespace LemonSpawn
                 planet.stellarCategory = Globals.definitions.stellarCategories.Get("UFO");
         }
 
-        public void DestroyOrbits()
+/*        public void DestroyOrbits()
         {
             orbitLines.Clear();
 
         }
-
+        */
 
 
         public void DrawGUI(Vector3 rect, float size)
@@ -166,44 +166,17 @@ namespace LemonSpawn
         }
 
 
-        public void RenderGLOrbits()
+        public void CreateOrbitsFromRadius(int maxLines, GLLineRenderer glr)
         {
 
-            Vector3 center = planet.lsPlanet.pSettings.transform.parent.position;
-            float d = (planet.lsPlanet.pSettings.transform.position - center).magnitude;
-            if (lineRenderer == null)
-                lineRenderer = new Material(Shader.Find("Particles/Alpha Blended"));
+            //DestroyOrbits();
 
-//            Debug.Log(lineRenderer.shader);
-
-            lineRenderer.SetPass(0);
-            GL.Begin(GL.LINES);
-            GL.Color(orbitColor);
-
-            for (int i = 0; i < orbitLines.Count; i++)
-            {
-                Vector3 from = orbitLines[i] + center;
-                Vector3 to = orbitLines[(i + 1) % orbitLines.Count] + center;
-
-
-
-                //            lineMat.SetPass(0);
-                GL.Vertex3(from.x, from.y, from.z);
-                GL.Vertex3(to.x, to.y, to.z);
-            }
-            GL.End();
-        }
-
-
-        public void CreateOrbitsFromRadius(int maxLines)
-        {
-
-            DestroyOrbits();
+            lines = new GLLines();
 
             //if (planet.pSettings.category == PlanetSettings.Categories.Moon)
             //    return;
-            orbitColor = planet.stellarCategory.color * (0.5f + 1.0f * UnityEngine.Random.value);
-            orbitColor.a = 0.5f;
+            lines.color = planet.stellarCategory.color * (0.5f + 1.0f * UnityEngine.Random.value);
+            lines.color.a = 0.5f;
 
             Vector3 center = planet.lsPlanet.pSettings.transform.parent.position;
             //float d = (planet.lsPlanet.pSettings.transform.position - center).magnitude;
@@ -216,22 +189,23 @@ namespace LemonSpawn
                 Vector3 p = planet.lsPlanet.pSettings.getOrbit(t0);// *SSVAppSettings.SolarSystemScale;
                 Vector3 dp = getDisplayPosition(p);
 
-                orbitLines.Add(dp);
+                lines.points.Add(dp);
 
 
             }
+            glr.lines.Add(lines);
         }
 
         public Vector3 getDisplayPosition(Vector3 pos)
         {
             float ms = 1;
             float prevRadius = 0;
-            if (planet.lsPlanet.pSettings.category == LemonSpawn.PlanetSettings.Categories.Moon)
+            if (planet.lsPlanet.pSettings.category == LemonSpawn.PlanetSettings.Categories.Moon && planet.lsPlanet.pSettings.properties.parentPlanet!=null)
             {
                 ms = 2.0f / SSVAppSettings.PlanetSizeScale;
-                prevRadius = planet.lsPlanet.pSettings.transform.parent.gameObject.GetComponent<LemonSpawn.PlanetSettings>().radius;
+                prevRadius = planet.lsPlanet.pSettings.properties.parentPlanet.pSettings.radius;
             }
-            if (planet.lsPlanet.pSettings.category == LemonSpawn.PlanetSettings.Categories.Planet)
+            if (planet.lsPlanet.pSettings.category == LemonSpawn.PlanetSettings.Categories.Planet  && planet.lsPlanet.pSettings.properties.parentPlanet!=null)
             {
                 ms = 1.0f;// / SSVAppSettings.PlanetSizeScale;
                 if (planet.lsPlanet.pSettings.transform.parent != null)
@@ -239,7 +213,7 @@ namespace LemonSpawn
                     float scale = 2;
                     if (planet.lsPlanet.pSettings.properties.parentPlanet.pSettings.category == PlanetSettings.Categories.BlackHole)
                         scale = 10;
-                        prevRadius = planet.lsPlanet.pSettings.transform.parent.gameObject.GetComponent<LemonSpawn.PlanetSettings>().radius * scale;
+                        prevRadius = planet.lsPlanet.pSettings.properties.parentPlanet.pSettings.radius * scale;
                 }
             }
             // Scales moons
@@ -252,6 +226,10 @@ namespace LemonSpawn
         {
             Vector3 p = getDisplayPosition(planet.lsPlanet.pSettings.properties.pos.toVectorf());
             planet.lsPlanet.pSettings.transform.localPosition = p;
+            // Displace orbitallines
+            if (lines!=null)
+            lines.displacement = planet.lsPlanet.pSettings.transform.parent.position;
+
         }
 
         public void UpdatePosition(float t, Vector3 cam)

@@ -50,13 +50,13 @@ namespace LemonSpawn
 
         protected void InitializeSkyMeshSphere(float radius)
         {
-            m_sky = new GameObject("Atmosphere");
+            m_sky = new GameObject("Atmosphere 1");
             m_skySphere = new GameObject("Atmosphere Sky");
             m_sky.transform.parent = planetSettings.gameObject.transform;
             m_skySphere.transform.parent = m_sky.transform;
             m_sky.transform.localPosition = Vector3.zero;
 
-            m_sky.transform.localScale = new Vector3(radius, radius, radius);
+            m_sky.transform.localScale = new Vector3(radius*0.99f, radius * 0.99f, radius * 0.99f);
             m_skySphere.AddComponent<MeshRenderer>().material = m_skyMaterial;
             m_skySphere.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             m_skySphere.GetComponent<MeshRenderer>().receiveShadows = false;
@@ -73,7 +73,7 @@ namespace LemonSpawn
 
         protected void InitializeSkyMesh(float radius)
         {
-            m_sky = new GameObject("Atmosphere");
+            m_sky = new GameObject("Atmosphere 2");
             m_skySphere = new GameObject("Atmosphere Sky");
             m_sky.transform.parent = planetSettings.gameObject.transform;
             m_skySphere.transform.parent = m_sky.transform;
@@ -115,6 +115,8 @@ namespace LemonSpawn
             mat.SetColor("_EmissionColor", planetSettings.emissionColor);
             mat.SetFloat("_EmissionScaleUI", 0.2f);
             mat.SetFloat("_Glossiness", planetSettings.specularity);
+            mat.SetVector("lengthContraction", RenderSettings.lengthContraction);
+
 
             mat.SetFloat("liquidThreshold", planetSettings.liquidThreshold);
             mat.SetFloat("topThreshold", planetSettings.topThreshold);

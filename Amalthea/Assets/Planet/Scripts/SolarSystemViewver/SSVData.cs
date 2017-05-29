@@ -13,6 +13,7 @@ namespace LemonSpawn
         public StarSystem currentSystem = null, selectedSystem = null;
         public APlayer player = new APlayer();
         public float currentDistance;
+        public GLLineRenderer glr = new GLLineRenderer();
 
         public enum Mode { InterPlanetary, EditPlanet, Interstellar };
         public Mode currentMode = Mode.InterPlanetary;
@@ -33,6 +34,14 @@ namespace LemonSpawn
         {
             foreach (DisplayPlanet dp in dPlanets)
                 if (dp.planet.lsPlanet == p)
+                    return dp;
+
+            return null;
+        }
+        public DisplayPlanet findDisplayPlanet(string s)
+        {
+            foreach (DisplayPlanet dp in dPlanets)
+                if (dp.planet.lsPlanet.pSettings.name == s)
                     return dp;
 
             return null;
@@ -66,50 +75,21 @@ namespace LemonSpawn
                     {
                         if (sp.planet.lsPlanet.pSettings.properties.parentPlanet == dp.planet.lsPlanet)
                         {
-
                             dp.children.Add(sp);
                         }
                     }
 
             }
         }
-        /*
-        public void RenderDisplayPlanetLabels(Camera MainCamera)
-        {
-            foreach (DisplayPlanet dp in dPlanets)
-            {
-                SSVAppSettings.guiStyle.normal.textColor = SSVSettings.planetColor;
-                if (dp.planet.lsPlanet.pSettings.category == PlanetSettings.Categories.Moon)
-                    SSVAppSettings.guiStyle.normal.textColor = SSVSettings.moonColor;
-                if (dp.planet.lsPlanet.pSettings.category == PlanetSettings.Categories.Spacecraft)
-                    SSVAppSettings.guiStyle.normal.textColor = SSVSettings.spaceCraftColor;
-
-
-                Vector3 pos = MainCamera.WorldToScreenPoint(dp.go.transform.position);
-                int width1 = dp.planet.lsPlanet.pSettings.givenName.Trim().Length;
-                int width2 = dp.planet.lsPlanet.pSettings.name.Trim().Length;
-                int fs = 16 + (int)Mathf.Pow(dp.planet.lsPlanet.pSettings.radius, 0.6f);
-                SSVAppSettings.guiStyle.fontSize = fs;
-                //                if (pos.x >0 && pos.y<Screen.width && pos.y>0 && pos.y<Screen.height)
-                if (pos.z > 0)
-                {
-                    float ha = 50;
-                    GUI.Label(new Rect(pos.x - (width1 / 2) * 10, Screen.height - pos.y - ha, 250, 130), dp.planet.lsPlanet.pSettings.givenName, SSVAppSettings.guiStyle);
-                    SSVAppSettings.guiStyle.fontSize = 12;
-
-                    GUI.Label(new Rect(pos.x - (width2 / 2) * 4, Screen.height - pos.y + (int)(fs * 1.0) - ha, 250, 130), dp.planet.lsPlanet.pSettings.name, SSVAppSettings.guiStyle);
-                }
-
-            }
-        }
-        */
 
         public void RenderSolarSystemLabels(GameObject mainCamera)
         {
+
             foreach (DisplayPlanet dp in dPlanets)
             {
                 GUIStyle guiStyle = SSVAppSettings.guiStyle;
-
+                if (dp.go == null)
+                    continue;
 
                 guiStyle.normal.textColor = dp.planet.stellarCategory.color;
                 Color c = dp.planet.stellarCategory.color;
@@ -168,18 +148,22 @@ namespace LemonSpawn
 
         public void DestroyAllGameObjects()
         {
-
+            glr.Clear();
             foreach (DisplayPlanet dp in dPlanets)
             {
-                dp.DestroyOrbits();
-                GameObject.Destroy(dp.go);
+//                dp.DestroyOrbits();
+                GameObject.DestroyImmediate(dp.go);
             }
+            dpSun = null;
+            dPlanets.Clear();
+            selected = null;
+            
         }
 
         public void CreateOrbitalLines()
         {
             foreach (DisplayPlanet dp in dPlanets)
-                dp.CreateOrbitsFromRadius(SSVAppSettings.MaxOrbitalLines);
+                dp.CreateOrbitsFromRadius(SSVAppSettings.MaxOrbitalLines, glr);
 
         }
 
@@ -206,12 +190,11 @@ namespace LemonSpawn
         // This one is needed for flat xml objects
         public void OrganizePlanetGameObjectsByName()
         {
-            
+
             foreach (DisplayPlanet dp in dPlanets)
             {
                 GameObject g = dp.planet.lsPlanet.pSettings.gameObject;
                 string n = g.name;
-                //Debug.Log(g.name);
                 if (n.ToLower().Contains("planet") && !n.ToLower().Contains("moon"))
                 {
                     g.transform.parent = findDisplayPlanetWithparent(null).planet.lsPlanet.pSettings.transform;//   GameObject.Find("The star").transform;
@@ -221,7 +204,8 @@ namespace LemonSpawn
                     string[] lst = n.Split(' ');
                     string parentPlanet = lst[3] + " " + lst[4];
                     //string parent = ""
-                    g.transform.parent = GameObject.Find(parentPlanet).transform;
+                    g.transform.parent = findDisplayPlanet(parentPlanet).planet.lsPlanet.pSettings.transform;
+                        //GameObject.Find(parentPlanet).transform;
                 }
                 // ALSO set parent planet link (for menu)
                 if (g.transform.parent != null)

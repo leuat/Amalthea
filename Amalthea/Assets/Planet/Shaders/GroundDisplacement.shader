@@ -128,6 +128,7 @@ Shader "LemonSpawn/GroundDisplacement"
 
 
 		float3 normalWorld = normalize(mul(unity_ObjectToWorld, v.vertex).xyz - v3Translate);
+
 		float4 groundVertex = getPlanetSurfaceOnly(v.vertex);
 		v.vertex = groundVertex;
 		UNITY_INITIALIZE_OUTPUT(VertexOutputForwardBase2, o);
@@ -142,6 +143,7 @@ Shader "LemonSpawn/GroundDisplacement"
 		o.posWorld2 = normalWorld;
 		normalWorld = normalWorld;//getPlanetSurfaceNormal(posWorld - v3Translate, t, b, 0.1);
 #endif
+//		posWorld.x = 0;
 		o.posWorld = posWorld.xyz;
 //#if UNITY_SPECCUBE_BOX_PROJECTION
 //#endif
@@ -150,9 +152,22 @@ Shader "LemonSpawn/GroundDisplacement"
 
 		float wh = (length(o.posWorld.xyz - v3Translate) - fInnerRadius);
 
+//		capV.xyz -= v3Translate;
+
+		capV.xyz += v3Translate;
+		capV.x *= lengthContraction.x;
+		capV.y *= lengthContraction.y;
+		capV.z *= lengthContraction.z;
+		//capV.xyz += _WorldSpaceCameraPos;
+			capV.xyz -= v3Translate;
 
 		o.pos = UnityObjectToClipPos(capV);
-
+		//o.pos.xyz -= v3Translate;
+		//o.pos.x *= lengthContraction.x;
+		//o.pos.y *= lengthContraction.y;
+		//o.pos.z *= lengthContraction.z;
+		//o.pos.xyz += v3Translate;
+		
 		//			o.vpos = capV;
 
 		o.tex = TexCoords(v);

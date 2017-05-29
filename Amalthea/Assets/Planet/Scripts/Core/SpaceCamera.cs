@@ -170,7 +170,6 @@ namespace LemonSpawn
             if (Input.GetKey(KeyCode.C))
             {
                 rotateT = Mathf.Max(rotateT - 0.01f, -0.05f) * 0.9f;
-                ;
             }
             rotate = rotate * 0.9f + rotateT * 0.1f;
             rotateT *= 0.9f;
@@ -178,8 +177,12 @@ namespace LemonSpawn
             p *= 10;
             P = P + p * 0.5f;
             P *= 0.8f / (1 + Time.deltaTime);
-		
+
             World.stats.Velocity = P.magnitude;
+            Vector3 old = transform.up;
+//            transform.up = Vector3.up;
+            World.stats.moveDirection = transform.rotation * P;// * 0.1f + World.stats.moveDirection * 0.9f ;
+ //           transform.up = old;
             UpdateCam(P * Time.deltaTime);
 //		World.WorldCamera += P*Time.deltaTime;
 		

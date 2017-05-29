@@ -69,6 +69,8 @@
 	float4 frag(v2f_img i) : COLOR{
 		float4 c = tex2D(_MainTex, i.uv + lensPoint(_bwBlend, 0, i.uv));
 
+		
+
 		return c;
 	}
 		ENDCG

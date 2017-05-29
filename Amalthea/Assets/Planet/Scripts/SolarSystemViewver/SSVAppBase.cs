@@ -49,6 +49,9 @@ namespace LemonSpawn
         protected static AudioSource audioSource;
         protected GameObject pnlInfo = null;
         protected CameraRotator cameraRotator, starCameraRotator;
+        protected bool Initialized = false;
+        
+
         // Use this for initialization
         public override void Start()
         {
@@ -126,12 +129,19 @@ namespace LemonSpawn
 
         public override void Update()
         {
-            data.Update();
+            if (Initialized)
+                data.Update();
+
             cameraRotator.UpdateCamera();
             starCameraRotator.UpdateCamera();
-            UpdateFocus();
-            UpdateZoom();
-            solarSystem.Update();
+            starCameraRotator.ForceCamera(cameraRotator);
+
+            if (Initialized)
+            {
+                UpdateFocus();
+                UpdateZoom();
+                solarSystem.Update();
+            }
 
         
             if (RenderSettings.UseThreading)
@@ -174,8 +184,10 @@ namespace LemonSpawn
             {
                 RaycastHit hit;
                 Ray ray = MainCamera.ScreenPointToRay(Input.mousePosition);
+                Debug.Log("blah " + ray.origin + "  " + ray.direction);
                 if (Physics.Raycast(ray, out hit))
                 {
+                    Debug.Log("HIT" + hit.transform.gameObject.name);
                     foreach (DisplayPlanet dp in data.dPlanets)
                     {
                         if (dp.go == hit.transform.gameObject)
@@ -221,45 +233,33 @@ namespace LemonSpawn
         }
 
 
-
-        protected void PopulateWorld()
+        protected void DestroyAll()
         {
             data.DestroyAllGameObjects();
             data.dPlanets.Clear();
+        }
 
-            //solarSystem.InitializeFromScene();
 
 
+        protected void PopulateWorld()
+        {
+            DestroyAll();
+            //Debug.Break();
             foreach (Planet p in solarSystem.planets)
             {
                 GameObject go = p.pSettings.gameObject;
                 p.pSettings.properties.orgPos = p.pSettings.properties.pos;
-                //Debug.Log(p.pSettings.properties.pos.toVectorf());
-               // Vector3 coolpos = new Vector3((float)p.pSettings.properties.pos.x, (float)p.pSettings.properties.pos.y, (float)p.pSettings.properties.pos.z);
-                //go.transform.position = coolpos * SSVSettings.SolarSystemScale;
-                //Vector3 coolPos = Vector3.zero;
-
-                //p.pSettings.properties.pos = new DVector(coolpos);
-                //go.transform.localScale = Vector3.one * SSVSettings.PlanetSizeScale * p.pSettings.radius;
-                //p.pSettings.atmoDensity = 0;
 
                 GameObject hidden = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                //hidden.transform.position = coolpos * SSVSettings.SolarSystemScale;
                 hidden.transform.localScale = Vector3.one * p.pSettings.radius * 2f;
                 hidden.transform.parent = p.pSettings.transform;
-                //if (p.pSettings.planetTypeName=="star" || p.pSettings.planetTypeName=="spacecraft")
-                //    hidden.SetActive(false);
 
-                hidden.GetComponent<MeshRenderer>().material = (Material)Resources.Load("HiddenMaterial");
+                //hidden.GetComponent<MeshRenderer>().material = (Material)Resources.Load("HiddenMaterial");
 
                 PlanetInstance pi = new LemonSpawn.PlanetInstance(p, Globals.definitions.stellarCategories.Get("planet"));
                 DisplayPlanet dp = new DisplayPlanet(hidden, pi);
                 data.dPlanets.Add(dp);
 
-//                dp.UpdatePosition();
-                //Vector3 pos = dp.getDisplayPosition(coolpos);
-                //Debug.Log(pos);
-                //go.transform.localPosition = pos;
                
             }
 
@@ -283,8 +283,9 @@ namespace LemonSpawn
 
         public void OnPostRender()
         {
-            foreach (DisplayPlanet dp in data.dPlanets)
-                dp.RenderGLOrbits();
+            //            foreach (DisplayPlanet dp in data.dPlanets)
+            //              dp.RenderGLOrbits();
+            data.glr.Render();
         }
 
 

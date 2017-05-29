@@ -118,7 +118,7 @@ namespace LemonSpawn
             name = _name;
             type = COLOR;
             propName = _propname;
-            minMax = new Vector3(0,1,0);
+            minMax = new Vector3(0, 1, 0);
             info = _info;
             group = _group;
             index = _index;
@@ -156,8 +156,8 @@ namespace LemonSpawn
             if (ps == null)
                 return;
             object o = Util.GetPropertyValue(ps, propName);
-       //     Debug.Log(o + " : "+ propName);
-//            return;
+            //     Debug.Log(o + " : "+ propName);
+            //            return;
             if (o is Color)
             {
                 Color v = (Color)o;
@@ -167,7 +167,7 @@ namespace LemonSpawn
             }
             if (o is Color[])
             {
-                Color[] v =((Color[])o);
+                Color[] v = ((Color[])o);
                 //v[index] = realizedValue;
                 //Util.SetPropertyValue(ps, propName, v);
                 v[index] = realizedColor;
@@ -230,6 +230,16 @@ namespace LemonSpawn
                 new Vector3(0, 1, 0),
                 new Vector3(0.65f, 0.75f, 0.85f),
                 "Atmosphere"));
+
+            settingsTypes.Add(
+    new SettingsType("Is Gas Planet",
+    SettingsType.NUMBER,
+    "isGasPlanet",
+       "1 = yes, 0 = no",
+    new Vector3(0, 1, 0),
+    new Vector3(0, 0, 0),
+    "Atmosphere"));
+
 
             settingsTypes.Add(
                 new SettingsType("Outer radius scale",
@@ -635,49 +645,49 @@ new Vector3(14, 14, 14),
               "cloudSettings.LS_CloudSubScale",
               "Value to subtract from cloud, higher value yields scattered clouds.",
               new Vector3(0, 4, 1),
-              new Vector3(0.4f,0.6f, 0.5f),
+              new Vector3(0.4f, 0.6f, 0.5f),
               "Clouds", 0));
-        settingsTypes.Add(
-              new SettingsType("Cloud shadow scale",
-              SettingsType.NUMBER,
-              "cloudSettings.LS_ShadowScale",
-              "Length of internal cloud shadoes",
-              new Vector3(0, 0.05f, 1),
-              new Vector3(0.006f,0.006f, 0.006f),
-              "Clouds", 0));
-        settingsTypes.Add(
-              new SettingsType("Large vortex amplitude",
-              SettingsType.NUMBER,
-              "cloudSettings.LS_LargeVortex",
-              "Large vortex amplitude",
-              new Vector3(-2f, 2f, 1),
-              new Vector3(-0.5f,-0.5f, -0.5f),
-              "Clouds", 0));
-        settingsTypes.Add(
-              new SettingsType("Small vortex amplitude",
-              SettingsType.NUMBER,
-              "cloudSettings.LS_SmallVortex",
-              "Small vortex amplitude",
-              new Vector3(-1f, 1f, 1),
-              new Vector3(0.01f,0.01f, 0.01f),
-              "Clouds", 0));
+            settingsTypes.Add(
+                  new SettingsType("Cloud shadow scale",
+                  SettingsType.NUMBER,
+                  "cloudSettings.LS_ShadowScale",
+                  "Length of internal cloud shadoes",
+                  new Vector3(0, 0.05f, 1),
+                  new Vector3(0.006f, 0.006f, 0.006f),
+                  "Clouds", 0));
+            settingsTypes.Add(
+                  new SettingsType("Large vortex amplitude",
+                  SettingsType.NUMBER,
+                  "cloudSettings.LS_LargeVortex",
+                  "Large vortex amplitude",
+                  new Vector3(-2f, 2f, 1),
+                  new Vector3(-0.5f, -0.5f, -0.5f),
+                  "Clouds", 0));
+            settingsTypes.Add(
+                  new SettingsType("Small vortex amplitude",
+                  SettingsType.NUMBER,
+                  "cloudSettings.LS_SmallVortex",
+                  "Small vortex amplitude",
+                  new Vector3(-1f, 1f, 1),
+                  new Vector3(0.01f, 0.01f, 0.01f),
+                  "Clouds", 0));
 
-        settingsTypes.Add(
-              new SettingsType("Stretch X",
-              SettingsType.NUMBER,
-              "cloudSettings.LS_Stretch",
-              "X-axis stretch component",
-              new Vector3(0, 3f, 1),
-              new Vector3(0.8f,1.1f, 1f),
-              "Clouds", 0));
-        settingsTypes.Add(
-              new SettingsType("Stretch Y",
-              SettingsType.NUMBER,
-              "cloudSettings.LS_Stretch",
-              "Y-axis stretch component",
-              new Vector3(0, 3f, 1),
-              new Vector3(1f,1f, 1f),
-              "Clouds", 1));
+            settingsTypes.Add(
+                  new SettingsType("Stretch X",
+                  SettingsType.NUMBER,
+                  "cloudSettings.LS_Stretch",
+                  "X-axis stretch component",
+                  new Vector3(0, 3f, 1),
+                  new Vector3(0.8f, 1.1f, 1f),
+                  "Clouds", 0));
+            settingsTypes.Add(
+                  new SettingsType("Stretch Y",
+                  SettingsType.NUMBER,
+                  "cloudSettings.LS_Stretch",
+                  "Y-axis stretch component",
+                  new Vector3(0, 3f, 1),
+                  new Vector3(1f, 1f, 1f),
+                  "Clouds", 1));
             settingsTypes.Add(
                   new SettingsType("Stretch Z",
                   SettingsType.NUMBER,
@@ -740,7 +750,7 @@ new Vector3(14, 14, 14),
                  new SettingsType("Environment texture 1",
                  "quadEnvironmentType.Textures",
                  "Texture 1",
-                 "Environment",0));
+                 "Environment", 0));
 
             settingsTypes.Add(
                 new SettingsType("Environment texture 2",
@@ -756,18 +766,18 @@ new Vector3(14, 14, 14),
 
             settingsTypes.Add(new SettingsType("Environment 1 Base colour", "quadEnvironmentType.baseColors", "Environment 1 base color", "Environment",
                   new Color(0.5f, 1, 0.5f),
-                  new Color(0.00f, 0.00f, 0.00f),0
+                  new Color(0.00f, 0.00f, 0.00f), 0
               ));
 
-             settingsTypes.Add(new SettingsType("Environment 2 Base colour", "quadEnvironmentType.baseColors", "Environment 2 base color", "Environment",
-                  new Color(0.5f, 1, 0.5f),
-                  new Color(0.00f, 0.00f, 0.00f),1
-              ));
+            settingsTypes.Add(new SettingsType("Environment 2 Base colour", "quadEnvironmentType.baseColors", "Environment 2 base color", "Environment",
+                 new Color(0.5f, 1, 0.5f),
+                 new Color(0.00f, 0.00f, 0.00f), 1
+             ));
 
-              settingsTypes.Add(new SettingsType("Environment 3 Base colour", "quadEnvironmentType.baseColors", "Environment 3 base color", "Environment",
-                  new Color(0.5f, 1, 0.5f),
-                  new Color(0.00f, 0.00f, 0.00f),2
-              ));
+            settingsTypes.Add(new SettingsType("Environment 3 Base colour", "quadEnvironmentType.baseColors", "Environment 3 base color", "Environment",
+                new Color(0.5f, 1, 0.5f),
+                new Color(0.00f, 0.00f, 0.00f), 2
+            ));
 
             settingsTypes.Add(new SettingsType("Environment 1 Spread colour", "quadEnvironmentType.spreadColors", "Environment 1 spread color", "Environment",
                  new Color(0.5f, 1, 0.0f),
@@ -1035,7 +1045,7 @@ new Vector3(14, 14, 14),
     public class PlanetTypes
     {
 
-      
+
         public List<SettingsTypes> planetTypes = new List<SettingsTypes>();
 
         public static string[] textures = new string[]
@@ -1179,7 +1189,7 @@ new Vector3(14, 14, 14),
 
             if (!File.Exists(fname))
             {
-                
+
                 World.FatalError("Could not find planet types file: " + RenderSettings.planetTypesFilename);
                 return;
             }

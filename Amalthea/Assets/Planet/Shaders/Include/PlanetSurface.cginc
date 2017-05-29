@@ -164,7 +164,7 @@
 		}
 
 		float3 getHeightPosition(in float3 pos, in float scale, float heightScale, float octaves) {
-			return pos*fInnerRadius*(1 + getSurfaceHeight(mul(rotMatrix, pos), scale, octaves)*heightScale);
+			return pos*fInnerRadius *(1 + getSurfaceHeight(mul(rotMatrix, pos), scale, octaves)*heightScale);
 //			return pos*fInnerRadius*(1+getSurfaceHeight(mul(rotMatrix, pos) , scale, octaves)*heightScale);
 			
 		}
@@ -234,6 +234,8 @@
 
 
 		float4 getPlanetSurfaceOnly(in float4 v) {
+
+			
 
 			float4 p = mul(unity_ObjectToWorld, v);
 			p.xyz -= v3Translate;

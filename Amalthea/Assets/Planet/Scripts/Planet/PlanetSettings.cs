@@ -84,13 +84,13 @@ namespace LemonSpawn {
         public float specularity = 0;
         public float density = 5513;
         public string atmosphereString ="normal";
-
+        
 
         public float m_hdrExposure = 1.5f;
         public float m_ESun = 10.0f;            // Sun brightness constant
         public float radius = 5000;
         public float temperature = 300f;
-
+        public float isGasPlanet = 0;
         [Space(10)]
         [Header("Ground settings")]
         public float hillyThreshold = 0.980f;
@@ -262,7 +262,7 @@ namespace LemonSpawn {
 
 
         public void Randomize(int count, string forcedPlanetType) {
-            System.Random r = new System.Random(seed);
+            System.Random r = new System.Random(seed+1);
 
             givenName = Util.getRandomName(r,"Kvorsk");
 

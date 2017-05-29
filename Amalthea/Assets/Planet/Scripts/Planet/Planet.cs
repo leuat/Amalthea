@@ -328,6 +328,11 @@ namespace LemonSpawn
             if (billboardClouds != null)
                 billboardClouds.Update();
 
+            if (World.SzWorld.hasLengthContraction)
+            {
+                LengthContract();
+            }
+
 
             // Fun
 
@@ -335,6 +340,13 @@ namespace LemonSpawn
 //            pSettings.ExpSurfSettings2.x += (Mathf.PerlinNoise(Time.time*0.63452f, 0) - 0.5f) * 0.01f;
 
         }
+
+        protected void LengthContract()
+        {
+
+            //pSettings.gameObject.transform.localScale = RenderSettings.lengthContraction;
+        }
+
 
     }
 

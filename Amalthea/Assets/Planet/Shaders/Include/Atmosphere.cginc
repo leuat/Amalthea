@@ -25,6 +25,7 @@ uniform float time;
 uniform float metallicity;
 uniform float cloudRadius;
 uniform float3 lightDir;
+uniform float3 lengthContraction;
 
 #ifndef PI
 #define PI 3.14159265358979323846264338327
@@ -327,6 +328,8 @@ void getAtmosphere(float4 vertex, out float3 c0, out float3 c1, out float3 t0) {
 	float3 v3CameraPos = _WorldSpaceCameraPos - v3Translate;	// The camera's current position
 	float fCameraHeight = length(v3CameraPos);					// The camera's current height
 	float3 tmp;
+	vertex.xyz = normalize(vertex.xyz)*fInnerRadius;
+
 	if (fCameraHeight < fOuterRadius)
 		SkyFromAtm(vertex, c0, c1, t0);
 	else

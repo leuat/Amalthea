@@ -1,64 +1,100 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-namespace LemonSpawn {
+namespace LemonSpawn
+{
 
 
 
-public class Clouds : Atmosphere {
+    public class Clouds : Atmosphere
+    {
 
-	private CloudSettings m_cloudSettings;
+        private CloudSettings m_cloudSettings;
+        private bool isGasPlanet = false;
 
+        public Clouds(GameObject sun, Mesh m, PlanetSettings ps, CloudSettings cs)
+        {
+            planetSettings = ps;
+            m_sun = sun;
+            m_skyMesh = m;
+            m_cloudSettings = cs;
 
-	public Clouds(GameObject sun, Mesh m, PlanetSettings ps, CloudSettings cs) {
-		planetSettings = ps;
-		m_sun = sun;
-		m_skyMesh = m;
-		m_cloudSettings = cs;
+            InitializeParameters(planetSettings.radius);
 
-		InitializeParameters(planetSettings.radius);
-    
 
             //		m_radius = m_outerRadius;//planetSettings.radius*planetSettings.cloudRadius;	
-            		m_radius = planetSettings.radius*planetSettings.cloudRadius;
+            m_radius = planetSettings.radius * planetSettings.cloudRadius;
             //m_radius = m_outerRadius*0.999f;
-            Material mat = new Material((Material)Resources.Load("Clouds"));
+            Material mat;
+
+                mat = new Material((Material)Resources.Load("Clouds"));
+/*            else
+                mat = new Material((Material)Resources.Load("GasPlanet"));
+                */
+
+            cs.Initialize(mat, ps, sun);
+            cs.addMaterial(ps.atmosphere.m_groundMaterial);
+            //InitializeMesh();
+            //		m_sky = m_cloudObject;
+            m_skyMaterial = m_cloudSettings.material;
+            InitAtmosphereMaterial(m_skyMaterial);
+
+            InitializeSkyMesh(m_radius);
+
+            cs.cloudRadius = m_radius;
 
 
-        cs.Initialize(mat, ps, sun);
-		cs.addMaterial(ps.atmosphere.m_groundMaterial);
-		//InitializeMesh();
-//		m_sky = m_cloudObject;
-		m_skyMaterial = m_cloudSettings.material;
-        InitAtmosphereMaterial(m_skyMaterial);
 
-        InitializeSkyMesh(m_radius);
+            //		m_sky.transform.Rotate(new Vector3(90,0,0));
+        }
 
-        cs.cloudRadius = m_radius;
+        public void UpdateIfGasPlanet()
+        {
+            float newIsGasPlanet = planetSettings.isGasPlanet;
+            bool isNew = newIsGasPlanet == 1;
+            if (isNew != isGasPlanet)
+            {
+                isGasPlanet = isNew;
+                if (!isGasPlanet)
+                    m_skyMaterial = new Material((Material)Resources.Load("Clouds"));
+                
+                else
+                {
+                    m_skyMaterial = new Material((Material)Resources.Load("GasPlanet"));
+                }
+                m_cloudSettings.material = m_skyMaterial;
+                m_skySphere.GetComponent<Renderer>().material = m_skyMaterial;
+                InitAtmosphereMaterial(m_skyMaterial);
+                initGroundMaterial(false, m_skyMaterial);
+             // Debug.Log(planetSettings.m_topColor);
+            }
+
+        }
 
 
+        public override void Update()
+        {
+            //DebugLog();
 
-//		m_sky.transform.Rotate(new Vector3(90,0,0));
-	}
-
-	public override void Update() {
-		//DebugLog();
-
-        if (m_cloudSettings.LS_CloudThickness<=0)
+            if (m_cloudSettings.LS_CloudThickness <= 0)
             {
                 m_sky.SetActive(false);
                 return;
             }
             m_sky.SetActive(true);
 
-		base.Update();
-
-	}
-
+            UpdateIfGasPlanet();
+            initGroundMaterial(false, m_skyMaterial);
 
 
-		
-}
+            base.Update();
+
+        }
+
+
+
+
+    }
 
 
 
@@ -68,7 +104,7 @@ public class Clouds : Atmosphere {
 
         private CloudSettings m_cloudSettings;
 
-		public bool toggleClouds = true;
+        public bool toggleClouds = true;
         VolumetricTexture vtexture = new VolumetricTexture();
 
         public VolumetricClouds(GameObject sun, Mesh m, PlanetSettings ps, CloudSettings cs)
@@ -79,7 +115,7 @@ public class Clouds : Atmosphere {
             m_cloudSettings = cs;
             InitializeParameters(planetSettings.radius);
 
-            
+
 
             //		m_radius = m_outerRadius;//planetSettings.radius*planetSettings.cloudRadius;	
             m_radius = planetSettings.radius * planetSettings.renderedCloudRadius;
@@ -96,7 +132,7 @@ public class Clouds : Atmosphere {
             m_sky = GameObject.Find("cloudBackgroundSphere");
             if (m_sky == null)
                 return;
-//            m_skySphere = new GameObject("Atmosphere Sky");
+            //            m_skySphere = new GameObject("Atmosphere Sky");
 
             m_sky.GetComponent<Renderer>().material = m_skyMaterial;
 

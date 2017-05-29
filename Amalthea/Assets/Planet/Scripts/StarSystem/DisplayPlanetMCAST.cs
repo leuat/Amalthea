@@ -17,7 +17,7 @@ namespace LemonSpawn
         public void CreateOrbitFromFrames(int maxLines)
         {
             return;
-            DestroyOrbits();
+
 
             if (serializedPlanet.Frames.Count < 2)
                 return;

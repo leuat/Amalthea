@@ -351,7 +351,7 @@ namespace LemonSpawn
 
             RenderSettings.ResolutionScale = World.SzWorld.resolutionScale;
 
-            space.color = new Color(World.SzWorld.sun_col_r, World.SzWorld.sun_col_g, World.SzWorld.sun_col_b);
+            //space.color = new Color(World.SzWorld.sun_col_r, World.SzWorld.sun_col_g, World.SzWorld.sun_col_b);
             space.hdr = World.SzWorld.sun_intensity;
         }
 
@@ -366,8 +366,9 @@ namespace LemonSpawn
 
             findClosestPlanet();
 
-//            if (planet != null)
-//                planet.ConstrainCameraExterior();
+            //            if (planet != null)
+            //                planet.ConstrainCameraExterior();
+
 
             foreach (Planet p in planets)
                 p.Update();
@@ -378,7 +379,7 @@ namespace LemonSpawn
                 if (planet.pSettings.atmosphere != null)
                     planet.pSettings.atmosphere.setClippingPlanes();
 
-                UnityEngine.RenderSettings.reflectionIntensity = UnityEngine.RenderSettings.reflectionIntensity * 0.99f + planet.pSettings.m_reflectionIntensity * 0.01f;
+               // UnityEngine.RenderSettings.reflectionIntensity = UnityEngine.RenderSettings.reflectionIntensity * 0.99f + planet.pSettings.m_reflectionIntensity * 0.01f;
 
             }
 
@@ -429,7 +430,7 @@ namespace LemonSpawn
             
             GameObject parent = new GameObject("SolarSystem");
 
-
+            Debug.Log("Creating new solar system");
             foreach (SerializedPlanet sp in sz.Planets)
             {
                 GameObject go = new GameObject(sp.name);
@@ -441,7 +442,6 @@ namespace LemonSpawn
                     ps.seed = (int)(Random.value * 10000f);
                     ps.Randomize(0, sp.planetType);
                 }
-
                 Planet p = InitializeObject(ps);
                 // Set serialized object as well
                 p.pSettings.properties.serializedPlanet = sp;
@@ -463,6 +463,7 @@ namespace LemonSpawn
 
                 planets.Add(p);
             }
+ 
             world.setWorld(sz);
 
         }
@@ -493,14 +494,14 @@ namespace LemonSpawn
         public void ClearStarSystem()
         {
             planets.Clear();
-            for (int i = 0; i < transform.childCount; i++)
+/*            for (int i = 0; i < transform.childCount; i++)
             {
                 GameObject go = transform.GetChild(i).gameObject;
                 if(go.GetComponent<PlanetSettings>()!=null)
                     GameObject.Destroy(go);
                 //	Debug.Log ("Destroying " + go.name);
             }
-
+            */
 
 
         }

@@ -31,10 +31,9 @@ namespace LemonSpawn {
             //psOcean.gameObject = psOcean.terrainObject;
 
             psOcean.atmosphere.m_groundMaterial = m_groundMaterial;
-            //cube = new CubeSphere(psOcean, false);
 
 
-			InitializeParameters(planetSettings.radius);
+            InitializeParameters(planetSettings.radius);
 			m_radius = planetSettings.radius * (1 + planetSettings.liquidThreshold);
 //            if (ocean==null)
   //             ocean = new Ocean();
@@ -42,6 +41,22 @@ namespace LemonSpawn {
             Material m = (Material)Resources.Load("OceanIndie");
 
             m_groundMaterial = new Material(m);
+
+            if (RenderSettings.planetCubeSphere)
+                cube = new CubeSphere(psOcean, false);
+            else
+            {
+                GameObject go = new GameObject("WaterSphere");
+                go.transform.position = Vector3.zero;
+                go.transform.parent = m_go.transform;
+                go.transform.localScale = Vector3.one * m_radius;
+                go.AddComponent<MeshFilter>().mesh = m_sphere;
+                go.AddComponent<MeshRenderer>();
+                go.transform.position = Vector3.zero;
+                go.GetComponent<MeshRenderer>().material = m_groundMaterial;
+
+            }
+
 
 
             psOcean.radius = m_radius;
