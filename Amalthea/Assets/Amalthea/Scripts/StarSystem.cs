@@ -392,8 +392,8 @@ namespace Amalthea
             StarSystem s2 = new StarSystem(0, 0, Vector3.zero, 1, currentSystem.radius*10, 1);
             s2.color = color * 0.3f;
             ls.Add(s2);
-            sunGlareMaterial = (Material)Resources.Load("StarGlow");
-            StarSystem.CreateMesh("ASunGlare", ls, 2000, 0, new System.Random(), sunGlareMaterial, Color.black,0);
+            //sunGlareMaterial = (Material)Resources.Load("StarGlow");
+            //StarSystem.CreateMesh("ASunGlare", ls, 2000, 0, new System.Random(), sunGlareMaterial, Color.black,0);
         }
 
         public void InterPlanetary(StarSystem newSystem)

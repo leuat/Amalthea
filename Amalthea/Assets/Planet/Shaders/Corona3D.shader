@@ -134,6 +134,7 @@ Shader "LemonSpawn/Corona3D" {
 		float phi = acos(pos.z / r);
 		float3 d3 = float3(cos(theta)+add, cos(phi)-add , 1.5324);
 
+		pos *= 130;
 
 		d3.x += 01.4*noise(pos*0.0174);
 		d3.y += 01.4*noise(pos*0.0164);
@@ -144,17 +145,20 @@ Shader "LemonSpawn/Corona3D" {
 		// Damp, holes etc
 
 		val *= 2 * noise(0.03*pos);
+		//val *= 4;
 
 		// Modify with radius
 
 		float mr = length(pos);
+		r = r - 0.66;
 
-		float dr = 5 * clamp(1 - r / or,0,1);
+		float dr = 5 * clamp(1 - r*2,0,1);
 		val = clamp(val * dr,0,1);
+		//val *= 5;
 		//		val = clamp(val * 1.2 * (1-dr) - 0.00, 0, 1);
 
 
-				return val * 1;
+				return val * 0.2;
 			}
 
 
@@ -168,8 +172,10 @@ Shader "LemonSpawn/Corona3D" {
 
 					val += findCorona(pos, outerRadius, add);
 					val = clamp(val, 0, 1);
+					//val += 0.1;
 
 				}
+				//val = 1;
 
 				return val;// 35 * val / cnt;
 			}
@@ -178,7 +184,7 @@ Shader "LemonSpawn/Corona3D" {
 
 			fixed4 frag(v2f i) : COLOR{
 
-				float3 worldSpacePosition = i.worldPosition - v3Translate * 0;
+				float3 worldSpacePosition = i.worldPosition - v3Translate*0 ;
 				float3 viewDirection = normalize(_WorldSpaceCameraPos - worldSpacePosition);
 				float3 centerDirection = normalize(_WorldSpaceCameraPos);
 
@@ -191,19 +197,22 @@ Shader "LemonSpawn/Corona3D" {
 				float3 pos = normalize(worldSpacePosition);
 				float4 c;
 
-				float3 origin = worldSpacePosition;
+				float3 origin = normalize(worldSpacePosition);
 				float3 ray = -viewDirection;
 
-				float innerRadius = 112;
+				float innerRadius = 0.67;// fInnerRadius / length(worldSpacePosition);// / fInnerRadius;
 
 				c = float4(0, 0, 0, 0);
 				float t1, t2;
 
-				float val = integrateCorona(origin, ray, 1, length(worldSpacePosition), innerRadius, _Time*0.4);
-				val *= 1.1*(clamp(abs(dot(i.normal, -viewDirection)) - 0.0,0,1));
+				float val = integrateCorona(origin, ray, 0.01, 1, innerRadius, _Time*0.4);
+				val *= 4.1*pow((clamp(abs(dot(i.normal, -viewDirection)) - 0.0,0,1)),4);
 				c = val*_Color;
-
-
+//				c.a = 1;
+//				c.rgb = float3(1, 0, 0);
+				//c.b = 1;
+//				c.a = 1;
+				
 
 				return c;
 			}

@@ -68,7 +68,7 @@ namespace LemonSpawn {
             // Skal være 2
             corona.billboards.Add(new LemonSpawn.Billboard(Vector3.zero, new Vector2(2*r,2*r), color));
 
-            glare.billboards.Add(new LemonSpawn.Billboard(Vector3.zero, new Vector2(2 * r, 2 * r), color*0.7f));
+            glare.billboards.Add(new LemonSpawn.Billboard(Vector3.zero, new Vector2(1.5f * r, 1.5f * r), color*0.7f));
             glare.billboards.Add(new LemonSpawn.Billboard(Vector3.zero, new Vector2(10*r, 10*r), color*0.3f));
 
             //corona.Realize("Solar Corona", (Material)Resources.Load("Corona"), 0).transform.parent = pSettings.transform.parent;

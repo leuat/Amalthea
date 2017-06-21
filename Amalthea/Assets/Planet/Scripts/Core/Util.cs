@@ -1072,6 +1072,14 @@ namespace LemonSpawn
             }
             return list;
         }
+        static public void ReplaceAllMaterial(GameObject go, Material newMat)
+        {
+            foreach (Transform t in go.transform)
+                ReplaceAllMaterial(t.gameObject, newMat);
 
+            Renderer r = go.GetComponent<Renderer>();
+            if (r != null)
+                r.material = newMat;
+        }
     }
 }

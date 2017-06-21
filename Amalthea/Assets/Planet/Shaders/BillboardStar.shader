@@ -123,6 +123,8 @@
 	/*	c.x = c.x*c.x;
 	c.y = c.y*c.y;
 	c.z = c.z*c.z;*/
+
+
 	float4 col = float4(c*val, val);
 	return col;
 	}

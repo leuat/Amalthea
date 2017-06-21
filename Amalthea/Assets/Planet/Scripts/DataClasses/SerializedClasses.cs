@@ -11,10 +11,12 @@ namespace LemonSpawn
     public class Frame
     {
         public int id;
-        public double rotation;
+        public double rot_x, rot_y, rot_z;
         public double pos_x;
         public double pos_y;
         public double pos_z;
+        public double time;
+        public string displayMessage = "";
         public DVector pos()
         {
             return new DVector(pos_x, pos_y, pos_z);
@@ -22,24 +24,40 @@ namespace LemonSpawn
     }
 
     [System.Serializable]
-    public class SerializedPlanet
+    public class SerializedMCAstObject
     {
-        public float outerRadiusScale = 1.05f;
-        public float radius = 5000;
-        public int seed = 0;
-        public double pos_x, pos_y, pos_z;
-        public double col_x=1, col_y=1, col_z=1;
+        // General properties
         public string name;
-        public string planetType;
         public string category;
-        public double rotation = 0;
+
+        // Planet/star properties
+        public float outerRadiusScale = 1.05f;
+        public float radius = 5000; // Radius of planets
+        public int seed = 0;
+//        public int parentSeed = 0;
+        public double pos_x, pos_y, pos_z;
+        public double rot_x, rot_y, rot_z;
         public float temperature = 200;
-        public List<Frame> Frames = new List<Frame>();
         public float atmosphereDensity = 1;
-        // 		public float atmosphereHeight = 1;
+
+        public List<Frame> Frames = new List<Frame>();
+
+        // Object properties
+        public string objectString = "";
+        public string objectMaterial = "";
+        public float objectScale = 1;
+        public float color_r;
+        public float color_g;
+        public float color_b;
 
 
-        public PlanetSettings DeSerialize(GameObject g, int count, float radiusScale)
+
+        // Child list
+
+        public List<SerializedMCAstObject> Objects;
+
+
+        public PlanetSettings DeSerialize(GameObject g, float radiusScale)
         {
             PlanetSettings ps = g.AddComponent<PlanetSettings>();
             ps.outerRadiusScale = outerRadiusScale;
@@ -47,31 +65,28 @@ namespace LemonSpawn
             ps.properties.pos.x = pos_x;
             ps.properties.pos.y = pos_y;
             ps.properties.pos.z = pos_z;
-            ps.rotation = rotation % (2.0 * Mathf.PI);
+            ps.rotation = rot_y % (2.0 * Mathf.PI);
             ps.temperature = temperature;
             ps.seed = seed;
             ps.properties.Frames = Frames;
             ps.radius = radius;
             if (RenderSettings.logScale) ps.radius = Mathf.Pow(ps.radius,RenderSettings.powScale);
             ps.radius *= radiusScale;
-            ps.properties.extraColor.r = (float)col_x;
-            ps.properties.extraColor.g = (float)col_y;
-            ps.properties.extraColor.b = (float)col_z;
 
             ps.properties.orgPos.Set(ps.properties.pos);
 //            ps.atmosphereDensity = Mathf.Clamp(atmosphereDensity, 0, RenderSettings.maxAtmosphereDensity);
             //	ps.atmosphereHeight = atmosphereHeight;
             foreach (Frame f in Frames)
-                f.rotation = f.rotation % (2.0 * Mathf.PI);
-            if (planetType == null)
-                planetType = "";
+                f.rot_y = f.rot_y % (2.0 * Mathf.PI);
+//            if (planetType == null)
+//                planetType = "";
 
             if (category == "star")
                 ps.category = PlanetSettings.Categories.Star;
             if (category == "moon")
                 ps.category = PlanetSettings.Categories.Moon;
-            if (category == "spacecraft")
-                ps.category = PlanetSettings.Categories.Spacecraft;
+            if (category == "3dobject")
+                ps.category = PlanetSettings.Categories.Object3D;
             if (category == "planet")
                 ps.category = PlanetSettings.Categories.Planet;
             if (category == "black hole")
@@ -83,17 +98,17 @@ namespace LemonSpawn
                         }
                         else*/
             if (ps.category == PlanetSettings.Categories.Moon || ps.category == PlanetSettings.Categories.Planet)
-                ps.Randomize(count, planetType);
+                ps.Randomize();
     
             return ps;
         }
 
-        public SerializedPlanet()
+        public SerializedMCAstObject()
         {
 
         }
 
-        public SerializedPlanet(PlanetSettings ps)
+        public SerializedMCAstObject(PlanetSettings ps)
         {
             outerRadiusScale = ps.outerRadiusScale;
             radius = ps.radius;
@@ -101,13 +116,13 @@ namespace LemonSpawn
             pos_y = ps.properties.pos.y;
             pos_z = ps.properties.pos.z;
             temperature = ps.temperature;
-            rotation = ps.rotation;
+            rot_y = ps.rotation;
             seed = ps.seed;
             atmosphereDensity = ps.atmosphereDensity;
             Frames = ps.properties.Frames;
-            planetType = ps.planetTypeName;
-
-
+            //planetType = ps.planetTypeName;
+            //if (ps.properties.parentPlanet != null)
+            //    parentSeed = ps.properties.parentPlanet.pSettings.seed;
 
         }
 
@@ -129,6 +144,7 @@ namespace LemonSpawn
         //		public float cam_theta, cam_phi;
         public double dir_x, dir_y, dir_z;
         public double up_x, up_y, up_z;
+        public double scale_x, scale_y, scale_z;
         public double fov;
         public double time;
         public int frame;
@@ -152,7 +168,7 @@ namespace LemonSpawn
     [System.Serializable]
     public class SerializedWorld
     {
-        public List<SerializedPlanet> Planets = new List<SerializedPlanet>();
+        public List<SerializedMCAstObject> Objects = new List<SerializedMCAstObject>();
         public List<SerializedCamera> Cameras = new List<SerializedCamera>();
         public bool hasLengthContraction = false;
         public float sun_intensity = 0.1f;
@@ -167,6 +183,7 @@ namespace LemonSpawn
         public float overview_distance = 4;
         public int screenshot_width = 1024;
         public int screenshot_height = 1024;
+        public int maxFrames = 0;
         public bool isVideo()
         {
             if (Cameras.Count > 1)
@@ -175,20 +192,14 @@ namespace LemonSpawn
         }
 
 
-        public int getMaxFrames() {
-            float f = 0;
-            foreach (SerializedPlanet p in Planets)
-                f = Mathf.Max(f, p.Frames.Count);
-            return (int)f;
 
-        }
 
         public void SaveSerializedWorld(string filename, SolarSystem s, string _uuid)
         {
-            Planets.Clear();
+            Objects.Clear();
             foreach (Planet p in s.planets)
             {
-                Planets.Add(new SerializedPlanet(p.pSettings));
+                Objects.Add(new SerializedMCAstObject(p.pSettings));
             }
             uuid = _uuid;
             Serialize(this, filename);
@@ -275,22 +286,25 @@ namespace LemonSpawn
             return p1;
         }
 
+        public int currentFrame;
+
         public void InterpolatePlanetFrames(double t, List<Planet> pl)
         {
 
-            int totalFrames = getMaxFrames();
+            int totalFrames = maxFrames;
             if (totalFrames < 2)
             {
                 foreach (Planet p in pl)
                 {
                     p.pSettings.properties.pos = p.pSettings.properties.orgPos;
-                    if (p.pSettings.properties.parentPlanet != null)
-                        p.pSettings.properties.pos -= p.pSettings.properties.parentPlanet.pSettings.properties.pos;
+                   // if (p.pSettings.properties.parentPlanet != null)
+                   //     p.pSettings.properties.pos -= p.pSettings.properties.parentPlanet.pSettings.properties.pos;
   //                  Debug.Log(p.pSettings.properties.pos.toVectorf().x);
                 }
                 return;
             }
             int frame = (int)(totalFrames*t);
+            currentFrame = frame;
             double dt = (totalFrames*t - frame);
 
             foreach (Planet p in pl)
@@ -433,7 +447,7 @@ namespace LemonSpawn
             serializer.Serialize(textWriter, sz);
             textWriter.Close();
         }
-    }
+    } 
 
 
 }

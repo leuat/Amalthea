@@ -74,7 +74,7 @@ namespace LemonSpawn
 
     public class PlanetInstance
     {
-        public SerializedPlanet serializedPlanet;
+        public SerializedMCAstObject serializedPlanet;
         public Planet lsPlanet;
         public SettingsTypes planetType;
         public StellarCategory stellarCategory;

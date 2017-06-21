@@ -65,12 +65,12 @@ namespace LemonSpawn
                 return;
             }
             else
-    if (dp.planet.lsPlanet.pSettings.category == LemonSpawn.PlanetSettings.Categories.Spacecraft)
+    if (dp.planet.lsPlanet.pSettings.category == LemonSpawn.PlanetSettings.Categories.Object3D)
             {
-                setText("txtPlanetName", "Spacecraft");
-                setText("txtPlanetName2", "Spacecraft");
-                setText("txtPlanetType", "Spacecraft");
-                setText("txtPlanetInfo", "Spacecraft");
+                setText("txtPlanetName", "3D Object");
+                setText("txtPlanetName2", "");
+                setText("txtPlanetType", "");
+                setText("txtPlanetInfo", "");
                 return;
             }
 
@@ -292,7 +292,7 @@ namespace LemonSpawn
                 Debug.Log("RELOADING");
                 SzWorld = RenderSettings.currentSZWorld;
                 szWorld = SzWorld;
-                solarSystem.LoadSZWold(this, szWorld, false, RenderSettings.GlobalRadiusScale);
+                solarSystem.LoadSZWold(this, szWorld, false, RenderSettings.GlobalRadiusScale, true);
             }
 
             CreateMainMenu();
@@ -324,7 +324,7 @@ namespace LemonSpawn
             List<DisplayPlanet> spaceCrafts = new List<DisplayPlanet>();
             foreach (DisplayPlanet dp in data.dPlanets)
             {
-                if (dp.planet.lsPlanet.pSettings.category == PlanetSettings.Categories.Spacecraft ||
+                if (dp.planet.lsPlanet.pSettings.category == PlanetSettings.Categories.Object3D ||
                     dp.planet.lsPlanet.pSettings.category == PlanetSettings.Categories.Moon)
                 {
                     //                    Debug.Log(dp.planet.lsPlanet.pSettings.name);
@@ -380,7 +380,7 @@ namespace LemonSpawn
 
                     if (dist2 < scale && spaceCraft.planet.lsPlanet.pSettings.radius < winner.planet.lsPlanet.pSettings.radius)
                     {
-                        if (spaceCraft.planet.lsPlanet.pSettings.category == PlanetSettings.Categories.Spacecraft)
+                        if (spaceCraft.planet.lsPlanet.pSettings.category == PlanetSettings.Categories.Object3D)
                             dist2 = 0;
                         //                        Debug.Log(spaceCraft.planet.lsPlanet.pSettings.radius + " vs " + winner.planet.lsPlanet.pSettings.radius);
 
@@ -480,7 +480,8 @@ namespace LemonSpawn
 
             //            Debug.Log(solarSystem.planets.Count);
 
-            data.OrganizePlanetGameObjectsByName();
+            //          data.OrganizePlanetGameObjectsByName();
+            data.OrganizeDisplayPlanetsFromGameObject();
             //foreach (DisplayPlanet dp in data.dPlanets)
             //    dp.CreateOrbitFromFrames(100);
 
@@ -495,6 +496,7 @@ namespace LemonSpawn
 
             CreateAxis();
             Initialized = true;
+            Application.Quit();
             //Debug.Log("")
         }
 

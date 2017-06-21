@@ -136,6 +136,11 @@ namespace LemonSpawn
             starCameraRotator.UpdateCamera();
             starCameraRotator.ForceCamera(cameraRotator);
 
+            if (data.selected != null) {
+                cameraRotator.focusPoint = data.selected.planet.lsPlanet.pSettings.transform.position;
+                //starCameraRotator.focusPoint = data.selected.planet.lsPlanet.pSettings.transform.position;
+            }
+
             if (Initialized)
             {
                 UpdateFocus();
@@ -241,6 +246,7 @@ namespace LemonSpawn
 
 
 
+
         protected void PopulateWorld()
         {
             DestroyAll();
@@ -254,10 +260,12 @@ namespace LemonSpawn
                 hidden.transform.localScale = Vector3.one * p.pSettings.radius * 2f;
                 hidden.transform.parent = p.pSettings.transform;
 
-                //hidden.GetComponent<MeshRenderer>().material = (Material)Resources.Load("HiddenMaterial");
+                hidden.GetComponent<MeshRenderer>().material = (Material)Resources.Load("HiddenMaterial");
 
                 PlanetInstance pi = new LemonSpawn.PlanetInstance(p, Globals.definitions.stellarCategories.Get("planet"));
+
                 DisplayPlanet dp = new DisplayPlanet(hidden, pi);
+                dp.parent = data.findDisplayPlanet(dp.planet.lsPlanet.pSettings.transform.parent.gameObject.name);
                 data.dPlanets.Add(dp);
 
                

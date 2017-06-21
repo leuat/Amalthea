@@ -194,9 +194,9 @@ namespace LemonSpawn
         void CreateConfig(string fname)
         {
 
-            SerializedPlanet p = new SerializedPlanet();
+            SerializedMCAstObject p = new SerializedMCAstObject();
             SerializedWorld sz = new SerializedWorld();
-            sz.Planets.Add(p);
+            sz.Objects.Add(p);
 
             SerializedCamera c = new SerializedCamera();
             c.cam_x = 0;
@@ -589,13 +589,13 @@ namespace LemonSpawn
            		return;
 			name =RenderSettings.dataDir + name + ".xml";
 
-            LoadFromXMLFileMCAST(name);
+            LoadFromXMLFileMCAST(name, false, false);
             settings.previousFile = name;
             PopulateOverviewList("Overview");
             slider.GetComponent<Slider>().value = 0;
 
         }
-
+        
         public void FocusOnPlanetFromMenu()
         {
             int idx = GameObject.Find("Overview").GetComponent<Dropdown>().value;
@@ -662,7 +662,7 @@ namespace LemonSpawn
             //	LoadCommandLineXML();
 #endif
         }
-        public void LoadFromXMLFileMCAST(string filename, bool randomizeSeed = false)
+        public void LoadFromXMLFileMCAST(string filename, bool randomizeSeed = false, bool hierarchy=false)
         {
             AddMessage("Loading XML file: " + filename);
 
@@ -671,7 +671,6 @@ namespace LemonSpawn
 				AddMessage("ERROR: File " + filename + " is not a valid MCAst data file. Aborting. ", 2.5f);
 				return;
 			}
-
 
             base.LoadFromXMLFile(filename, randomizeSeed);
             displaySettingsPanel();

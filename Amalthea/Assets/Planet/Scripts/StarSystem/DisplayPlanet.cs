@@ -14,7 +14,7 @@ namespace LemonSpawn
         public static DisplayPlanet performSelect = null;
         public PlanetInstance planet;
         public GLLines lines = null;
-       
+        public string displayMessage = "";
         public GameObject go;
         public float timer = 0;
 //        public List<Vector3> orbitLines = new List<Vector3>();
@@ -217,18 +217,19 @@ namespace LemonSpawn
                 }
             }
             // Scales moons
-//            Debug.Log(pos + " for " + planet.lsPlanet.pSettings.gameObject.name);
+            //            Debug.Log(pos + " for " + planet.lsPlanet.pSettings.gameObject.name);
             return pos * SSVAppSettings.SolarSystemScale * ms + pos.normalized * prevRadius;
 
         }
 
         public void UpdatePosition()
         {
+//            Debug.Log("UpdatePos: " + planet.lsPlanet.pSettings.properties.pos.toVectorf().x);
             Vector3 p = getDisplayPosition(planet.lsPlanet.pSettings.properties.pos.toVectorf());
             planet.lsPlanet.pSettings.transform.localPosition = p;
             // Displace orbitallines
             if (lines!=null)
-            lines.displacement = planet.lsPlanet.pSettings.transform.parent.position;
+                lines.displacement = planet.lsPlanet.pSettings.transform.parent.position;
 
         }
 

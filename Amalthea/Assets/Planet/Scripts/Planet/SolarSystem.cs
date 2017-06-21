@@ -109,7 +109,7 @@ namespace LemonSpawn
 //                ps.properties.extraColor = new Color(0.9f, 0.7f, 0.5f);
 //                Debug.Log(ps.properties.extraColor);
             }
-            ps.Randomize(0, "");
+            ps.Randomize();
 
             go.name = name;// ps.givenName;
             Planet p = InitializeObject(ps);
@@ -120,9 +120,9 @@ namespace LemonSpawn
             if (ps.category == PlanetSettings.Categories.Star)
                 p.Initialize(sun, groundMaterial, (Material)Resources.Load("Sun"), sphere);
             else
-            if (ps.category == PlanetSettings.Categories.Spacecraft)
+            if (ps.category == PlanetSettings.Categories.Object3D)
             {
-                p.Initialize(sun, groundMaterial, (Material)Resources.Load("SpaceCraftMaterial"), sphere);
+                p.Initialize(sun, groundMaterial, (Material)Resources.Load(ps.properties.serializedPlanet.objectMaterial), sphere);
             }
             else
                 p.Initialize(sun, groundMaterial, (Material)Resources.Load("SkyMaterial"), sphere);
@@ -275,8 +275,8 @@ namespace LemonSpawn
                 return new Star(ps);
             if (ps.category == PlanetSettings.Categories.BlackHole)
                 return new BlackHole(ps);
-            if (ps.category == PlanetSettings.Categories.Spacecraft)
-                return new Satellite(ps);
+            if (ps.category == PlanetSettings.Categories.Object3D)
+                return new MCAstObject3D(ps);
 
             return new Planet(ps);
         }
@@ -290,12 +290,11 @@ namespace LemonSpawn
             //            ps.gameObject = go;
             //sz.global_radius_scale = RenderSettings.GlobalRadiusScale;
             ps.transform.parent = transform;
-            Debug.Log("parent in initializeplabet; " + ps.transform.parent);
             p.pSettings.properties.parent = go;
             if (ps.category == PlanetSettings.Categories.Star)
                 p.Initialize(sun, groundMaterial, (Material)Resources.Load("Sun"), sphere);
             else
-            if (ps.category == PlanetSettings.Categories.Spacecraft)
+            if (ps.category == PlanetSettings.Categories.Object3D)
             {
                 p.Initialize(sun, groundMaterial, (Material)Resources.Load("SpaceCraftMaterial"), sphere);
             }
@@ -337,7 +336,7 @@ namespace LemonSpawn
                     if (ps.category == PlanetSettings.Categories.Star)
                         p.Initialize(sun, groundMaterial, (Material)Resources.Load("Sun"), sphere);
                     else
-                    if (ps.category == PlanetSettings.Categories.Spacecraft)
+                    if (ps.category == PlanetSettings.Categories.Object3D)
                     {
                         p.Initialize(sun, groundMaterial, (Material)Resources.Load("SpaceCraftMaterial"), sphere);
                     }
@@ -393,9 +392,20 @@ namespace LemonSpawn
         }
 
 
-        public void LoadSZWold(World world, SerializedWorld sz, bool randomizeSeeds, float scale)
+        private void ForceNoneHierarchy(SerializedMCAstObject so, DVector current)
         {
-            
+            so.pos_x += current.x;
+            so.pos_y += current.y;
+            so.pos_z += current.z;
+            current = current + new DVector(so.pos_x, so.pos_y, so.pos_z);
+            foreach (SerializedMCAstObject nso in so.Objects)
+            {
+                ForceNoneHierarchy(nso, current);
+            }
+        }
+
+        public void LoadSZWold(World world, SerializedWorld sz, bool randomizeSeeds, float scale, bool hierarchy)
+        {
             SetSkybox((int)sz.skybox);
             if (RenderSettings.ignoreXMLResolution)
             {
@@ -413,7 +423,6 @@ namespace LemonSpawn
 
             RenderSettings.ScreenshotX = sz.screenshot_height;
             RenderSettings.ScreenshotY = sz.screenshot_width;
-            int cnt = 0;
             World.hasScene = true;
             RenderSettings.isVideo = sz.isVideo();
             if (RenderSettings.isVideo == true)
@@ -430,45 +439,68 @@ namespace LemonSpawn
             
             GameObject parent = new GameObject("SolarSystem");
 
-            Debug.Log("Creating new solar system");
-            foreach (SerializedPlanet sp in sz.Planets)
+
+
+            foreach (SerializedMCAstObject sp in sz.Objects)
             {
-                GameObject go = new GameObject(sp.name);
-                go.transform.parent = parent.transform;
-                //sz.global_radius_scale = RenderSettings.GlobalRadiusScale;
-                PlanetSettings ps = sp.DeSerialize(go, cnt++, scale);
-                if (randomizeSeeds)
-                {
-                    ps.seed = (int)(Random.value * 10000f);
-                    ps.Randomize(0, sp.planetType);
-                }
-                Planet p = InitializeObject(ps);
-                // Set serialized object as well
-                p.pSettings.properties.serializedPlanet = sp;
-                if (ps.category == PlanetSettings.Categories.Star && World.CurrentApp == Verification.MCAstName)
-                    continue;
+                if (!hierarchy)
+                    ForceNoneHierarchy(sp, new DVector(0,0,0));
 
-                p.pSettings.properties.parent = go;
-
-
-                if (ps.category == PlanetSettings.Categories.Star)
-                    p.Initialize(sun, groundMaterial, (Material)Resources.Load("Sun"), sphere);
-                else
-                if (ps.category == PlanetSettings.Categories.Spacecraft)
-                {
-                    p.Initialize(sun, groundMaterial, (Material)Resources.Load("SpaceCraftMaterial"), sphere);
-                }
-                else
-                    p.Initialize(sun, groundMaterial, (Material)Resources.Load("SkyMaterial"), sphere);
-
-                planets.Add(p);
+                InitializeSZObject(sp, parent, randomizeSeeds, scale, hierarchy);
             }
  
             world.setWorld(sz);
 
         }
 
-        public void LoadWorld(string data, bool isFile, bool ExitOnSave, World world, bool randomizeSeeds = false)
+        private void InitializeSZObject(SerializedMCAstObject sp, GameObject parent, bool randomizeSeeds, float scale, bool hierarchy)
+        {
+            World.SzWorld.maxFrames = Mathf.Max(sp.Frames.Count, World.SzWorld.maxFrames);
+            GameObject go = new GameObject(sp.name);
+            go.transform.parent = parent.transform;
+            //sz.global_radius_scale = RenderSettings.GlobalRadiusScale;
+            PlanetSettings ps = sp.DeSerialize(go, scale);
+            if (randomizeSeeds)
+            {
+                ps.seed = (int)(Random.value * 10000f);
+                ps.Randomize();
+            }
+            Planet p = InitializeObject(ps);
+//            Debug.Log("Initializing : " + sp.category);
+            // Set serialized object as well
+            p.pSettings.properties.serializedPlanet = sp;
+            //if (ps.category == PlanetSettings.Categories.Star && World.CurrentApp == Verification.MCAstName)
+            //    continue;
+
+
+            p.pSettings.properties.parent = go;
+
+
+            if (ps.category == PlanetSettings.Categories.Star)
+                p.Initialize(sun, groundMaterial, (Material)Resources.Load("Sun"), sphere);
+            else
+            if (ps.category == PlanetSettings.Categories.Object3D)
+            {
+                p.Initialize(sun, groundMaterial, (Material)Resources.Load(sp.objectMaterial), sphere);
+            }
+            else
+                p.Initialize(sun, groundMaterial, (Material)Resources.Load("SkyMaterial"), sphere);
+
+            planets.Add(p);
+            GameObject newP = p.pSettings.gameObject;
+            if (!hierarchy)
+                newP = parent;
+            foreach (SerializedMCAstObject child in sp.Objects)
+            {
+               
+
+                InitializeSZObject(child, newP, randomizeSeeds, scale, hierarchy);
+            }
+
+
+        }
+
+        public void LoadWorld(string data, bool isFile, bool ExitOnSave, World world, bool randomizeSeeds = false, bool hierarchy=false)
         {
             ClearStarSystem();
             SerializedWorld sz;
@@ -489,7 +521,7 @@ namespace LemonSpawn
             RenderSettings.ExitSaveOnRendered = ExitOnSave;
             RenderSettings.extraText = "";
 
-            LoadSZWold(world, sz, randomizeSeeds, RenderSettings.GlobalRadiusScale);
+            LoadSZWold(world, sz, randomizeSeeds, RenderSettings.GlobalRadiusScale, hierarchy);
         }
         public void ClearStarSystem()
         {

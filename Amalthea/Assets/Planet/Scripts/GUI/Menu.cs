@@ -151,7 +151,8 @@ namespace LemonSpawn
                 {
                     //clearChildren();
                    // if (openTime<10000)
-                    openTime = 0.4f;
+                   // Open expanded time
+                    openTime = 1.0f;
                     expand = true;
                     if (timer == 0)
                         SolarSystemViewverMain.PlaySound(SSVAppSettings.audioHoverMenu, 0.3f);

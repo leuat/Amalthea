@@ -61,12 +61,21 @@ namespace LemonSpawn
             DVector pos = f0.pos() + (f1.pos() - f0.pos()) * dt;
 
 //            double rot = (f0.rotation + (f1.rotation - f0.rotation) * dt);
-            double rot = Util.LerpDegrees(f0.rotation, f1.rotation, dt);
+            double rot = Util.LerpDegrees(f0.rot_y, f1.rot_y, dt);
 
-            if (pSettings.properties.parentPlanet != null)
-                pos = pos - pSettings.properties.parentPlanet.pSettings.properties.pos;
+//            if (pSettings.properties.parentPlanet != null)
+//                pos = pos - pSettings.properties.parentPlanet.pSettings.properties.pos;
             pSettings.properties.pos = pos;
             pSettings.rotation = rot;
+
+            if (pSettings.category == PlanetSettings.Categories.Object3D)
+            {
+                float scale = 360.0f / 2 * Mathf.PI;
+                double rotx = Util.LerpDegrees(f0.rot_x, f1.rot_x, dt);
+                double rotz = Util.LerpDegrees(f0.rot_z, f1.rot_z, dt);
+                pSettings.transform.rotation = Quaternion.Euler((float)rotx*scale, (float)rot*scale, (float)rotz*scale);
+
+            }
 
             // IF auto :
             if (pSettings.properties.autoOrient)

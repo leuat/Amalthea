@@ -109,6 +109,8 @@ namespace LemonSpawn
                 guiStyle.normal.textColor = guiStyle.normal.textColor * (1 + dp.timer);
 
 
+
+
                 Vector3 pos = mainCamera.GetComponent<Camera>().WorldToScreenPoint(dp.go.transform.position);
                 //int width1 = dp.planet.lsPlanet.pSettings.givenName.Trim().Length;
                 int width2 = dp.planet.lsPlanet.pSettings.name.Trim().Length;
@@ -137,6 +139,15 @@ namespace LemonSpawn
                     guiStyle.fontSize = 12;
 
                     GUI.Label(new Rect(pos.x - (width2 / 2) * 4, Screen.height - pos.y + (int)(fs * 1.0) - ha, 250, 130), dp.planet.lsPlanet.pSettings.name, guiStyle);
+
+                    if (dp.displayMessage!="")
+                    {
+                        guiStyle.fontSize = 40;
+                        guiStyle.normal.textColor = Color.green;
+                        GUI.Label(new Rect(pos.x - (width2 / 2) * 4, Screen.height - pos.y + (int)(fs * 1.0) - 100, 250, 130), dp.displayMessage, guiStyle);
+
+                    }
+
                 }
 
             }
@@ -184,6 +195,9 @@ namespace LemonSpawn
             foreach (DisplayPlanet dp in dPlanets)
             {
                 dp.UpdatePosition();
+                int frame = WorldMC.SzWorld.currentFrame;
+                if (frame< dp.planet.serializedPlanet.Frames.Count)
+                    dp.displayMessage = dp.planet.serializedPlanet.Frames[frame].displayMessage;
             }
         }
         
@@ -229,6 +243,32 @@ namespace LemonSpawn
 
         }
 
+        public void OrganizeDisplayPlanetsFromGameObject()
+        {
+
+            foreach (DisplayPlanet dp in dPlanets)
+            {
+                GameObject g = dp.planet.lsPlanet.pSettings.gameObject;
+                if (g.transform.parent != null)
+                {
+                    DisplayPlanet dparent = FindDisplayPlanetFromGameObject(g.transform.parent.gameObject);
+                    if (dparent != null)
+                    {
+                        dp.planet.lsPlanet.pSettings.properties.parentPlanet = dparent.planet.lsPlanet;
+
+//                        dp.planet.lsPlanet.pSettings.properties.distance = (float)dp.planet.lsPlanet.pSettings.gameObject.transform.position.magnitude;
+                        //dp.planet.lsPlanet.pSettings.properties.pos = dp.planet.lsPlanet.pSettings.properties.pos + dparent.planet.lsPlanet.pSettings.properties.pos;
+                        dp.planet.lsPlanet.pSettings.properties.orgPos = dp.planet.lsPlanet.pSettings.properties.pos;
+                        dp.planet.lsPlanet.pSettings.properties.distance = (float)dp.planet.lsPlanet.pSettings.properties.pos.Length();
+                    }
+                    // Also update properties distance
+
+
+                }
+
+            }
+
+        }
 
     }
 }

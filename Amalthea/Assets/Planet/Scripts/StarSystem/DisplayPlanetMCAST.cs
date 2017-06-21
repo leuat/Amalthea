@@ -8,7 +8,7 @@ namespace LemonSpawn
     public class DisplayPlanetMCAST : DisplayPlanet
     {
 
-        private SerializedPlanet serializedPlanet;
+        private SerializedMCAstObject serializedPlanet;
         public DisplayPlanetMCAST(GameObject g, PlanetInstance p) : base(g,p)
         {
         }

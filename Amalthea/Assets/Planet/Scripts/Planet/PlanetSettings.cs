@@ -34,7 +34,7 @@ namespace LemonSpawn {
         public GameObject terrainObject, parent, environmentObject;
         public Vector3 localCamera;
         public Planet parentPlanet;
-        public SerializedPlanet serializedPlanet;
+        public SerializedMCAstObject serializedPlanet;
         public List<Frame> Frames = new List<Frame>();
         public Plane[] cameraPlanes;
         public GPUSurface gpuSurface;
@@ -43,7 +43,7 @@ namespace LemonSpawn {
     // Public settings
     public class PlanetSettings : MonoBehaviour {
 
-        public enum Categories { Planet, Moon, Star, Spacecraft, BlackHole};
+        public enum Categories { Planet, Moon, Star, Object3D, BlackHole};
 
         [Header("Planet settings")]
         public int seed;
@@ -261,7 +261,7 @@ namespace LemonSpawn {
 	
 
 
-        public void Randomize(int count, string forcedPlanetType) {
+        public void Randomize() {
             System.Random r = new System.Random(seed+1);
 
             givenName = Util.getRandomName(r,"Kvorsk");
@@ -269,8 +269,8 @@ namespace LemonSpawn {
             
             sea = new Sea();
             hasFlatClouds = true;
-            if (forcedPlanetType != null)
-                planetType = PlanetTypes.p.FindPlanetType(forcedPlanetType);
+//            if (forcedPlanetType != null)
+  //              planetType = PlanetTypes.p.FindPlanetType(forcedPlanetType);
             // Or else find a random one
 
 
