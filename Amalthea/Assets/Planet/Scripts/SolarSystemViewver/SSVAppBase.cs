@@ -277,6 +277,8 @@ namespace LemonSpawn
 
         protected void CreatePlanetMenu(bool isInterPlanetary)
         {
+            MenuItem.isLock = true;
+            //System.Threading.Thread.Sleep(1000);
             mainMenu.deleteFromChildren("SolarSystem");
             if (isInterPlanetary)
             {
@@ -286,6 +288,8 @@ namespace LemonSpawn
                 data.dpSun.CreateMenu("SolarSystem", mainMenu, SSVAppSettings.menuSizePlanet, true, 0.75f, mainMenu.layout, SelectPlanetMenu);
             }
             mainMenu.replaceItem("SolarSystem", 0);
+            MenuItem.isLock = false;
+
         }
 
 

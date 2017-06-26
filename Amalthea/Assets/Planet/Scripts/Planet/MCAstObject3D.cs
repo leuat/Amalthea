@@ -51,7 +51,7 @@ namespace LemonSpawn
         public override void Update()
         {
 
-            //cameraAndPosition();
+            cameraAndPosition();
         }
 
 

@@ -41,6 +41,7 @@ namespace LemonSpawn
     {
 
         public string text, name;
+        public static bool isLock = false;
         public Texture2D image;
         public Vector2 size;
         public bool hasHorizontalChildren;
@@ -123,6 +124,8 @@ namespace LemonSpawn
 
         public void Render(Vector2 pos)
         {
+            if (MenuItem.isLock)
+                return;
             Vector2 add = new Vector2(0, size.y);
 
             if (!isRoot)
@@ -214,10 +217,11 @@ namespace LemonSpawn
             }
 
             if (expand)
-            foreach (MenuItem mi in children)
+            //foreach (MenuItem mi in children)
+            for (i=0;i<children.Count;i++)
             {
+                MenuItem mi = children[i];
                 mi.Render(startPos + add * i*timer);
-                i++;
             }
             
         }

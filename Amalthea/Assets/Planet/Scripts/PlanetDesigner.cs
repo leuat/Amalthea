@@ -47,8 +47,8 @@ namespace LemonSpawn
 
         public override void Start() {
 
-    		StartBasics();
             RenderSettings.path = Application.dataPath + "/../";
+            StartBasics();
 //            RenderSettings.planetCubeSphere = false;
             CurrentApp = Verification.MCAstName;
             Update();

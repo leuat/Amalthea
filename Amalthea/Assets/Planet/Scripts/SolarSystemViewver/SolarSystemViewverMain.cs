@@ -449,10 +449,10 @@ namespace LemonSpawn
 
 
 
-        protected void OnGUI()
+        new void OnGUI()
         {
 
-            if (mainMenu != null)
+            if (mainMenu != null && MenuItem.isLock==false)
                 mainMenu.Render(new Vector2(0.02f, 0.1f) * Screen.height);
 
             if (!Initialized)
@@ -470,7 +470,7 @@ namespace LemonSpawn
             string name = (string)o;
             name = RenderSettings.dataDir + name;// + ".xml";
             data.DestroyAllGameObjects();
-            LoadFromXMLFile(name);
+            LoadFromXMLFile(name,false,true);
 
 
             szWorld.useSpaceCamera = false;
@@ -496,7 +496,6 @@ namespace LemonSpawn
 
             CreateAxis();
             Initialized = true;
-            Application.Quit();
             //Debug.Log("")
         }
 

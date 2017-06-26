@@ -244,9 +244,12 @@ void SkyFromSpace(float4 vert, out float3 c0, out float3 c1, out float3 t0) {
 		v3SamplePoint += v3SampleRay;
 	}
 
-	c0 = v3FrontColor * (v3InvWavelength * fKrESun);
+	c0 = v3FrontColor *(v3InvWavelength * fKrESun);
 	c1 = v3FrontColor * fKmESun;
-	t0 = v3CameraPos - v3Pos;
+	//c0 = (v3InvWavelength * fKrESun);
+	//c1 = float3(1,0,0);
+	//c0 = float3(0, 0, 1);
+	t0 = v3CameraPos -v3Pos;
 
 
 }
@@ -325,10 +328,12 @@ float getMiePhase(float fCos, float fCos2, float g, float g2)
 
 void getAtmosphere(float4 vertex, out float3 c0, out float3 c1, out float3 t0) {
 
-	float3 v3CameraPos = _WorldSpaceCameraPos - v3Translate;	// The camera's current position
+	float3 v3CameraPos = _WorldSpaceCameraPos -v3Translate;	// The camera's current position
 	float fCameraHeight = length(v3CameraPos);					// The camera's current height
 	float3 tmp;
-	vertex.xyz = normalize(vertex.xyz)*fInnerRadius;
+	//vertex.xyz = normalize(vertex.xyz)*fOuterRadius;
+
+
 
 	if (fCameraHeight < fOuterRadius)
 		SkyFromAtm(vertex, c0, c1, t0);
@@ -423,7 +428,7 @@ float4 getSkyColor(float3 c0, float3 c1, float3 t) {
 	float3 col = getRayleighPhase(fCos2) * c0 + getMiePhase(fCos, fCos2, g, g2)*c1;
 	//Adjust color from HDR
 	//				col = IN.c0;
-	float d = 0.4;
+//	float d = 0.4;
 
 	float3 v3CameraPos = _WorldSpaceCameraPos - v3Translate;	// The camera's current position
 	float fCameraHeight = length(v3CameraPos);					// The camera's current height
@@ -431,6 +436,7 @@ float4 getSkyColor(float3 c0, float3 c1, float3 t) {
 	float dist = fOuterRadius - fInnerRadius;
 	if (fCameraHeight < fOuterRadius)
 		p = clamp((fCameraHeight - fInnerRadius)/dist, 0.4, 1);//fInnerRadius;
+	
 
 
 
@@ -438,7 +444,9 @@ float4 getSkyColor(float3 c0, float3 c1, float3 t) {
 	col = 1.0 - exp(col * -fHdrExposure*2);
 	float alpha = max(col.r, col.g);
 	alpha = max(alpha, col.b);
-	float a = pow(alpha, p);
+	float a = 0;
+	if (alpha>0)
+		a = pow(alpha, p);
 	return float4(col, a);
 }
 

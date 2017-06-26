@@ -243,7 +243,9 @@ namespace LemonSpawn
             }
             iscale = 1;
             if (m_skyMaterial != null)
-                InitAtmosphereMaterial(m_skyMaterial);
+            {
+                InitAtmosphereMaterial(m_skyMaterial, true);
+            }
 
             UpdateAffectedMaterials();
 
@@ -286,7 +288,7 @@ namespace LemonSpawn
         public Matrix4x4 rotMat = new Matrix4x4();
         Matrix4x4 rotMatInv = new Matrix4x4();
 
-        public virtual void InitAtmosphereMaterial(Material mat)
+        public virtual void InitAtmosphereMaterial(Material mat, bool debug=false)
         {
             localscale = planetSettings.transform.parent.localScale.x;
             // Debug.Log(localscale);
@@ -299,10 +301,12 @@ namespace LemonSpawn
             Vector3 invWaveLength4 = new Vector3(1.0f / Mathf.Pow(planetSettings.m_atmosphereWavelengths.x, 4.0f), 1.0f / Mathf.Pow(planetSettings.m_atmosphereWavelengths.y, 4.0f), 1.0f / Mathf.Pow(planetSettings.m_atmosphereWavelengths.z, 4.0f));
             float scale = 1.0f / (m_outerRadius - m_innerRadius);
 
-            Vector3 lightDir = (m_sun.transform.forward * -1.0f);
 
+            Vector3 lightDir = (m_sun.transform.forward * -1.0f);
             if (RenderSettings.usePointLightSource)
                 lightDir =  (m_sun.transform.position - planetSettings.gameObject.transform.position).normalized;
+
+//          Debug.Log(RenderSettings.usePointLightSource);
 
             mat.SetVector("v3LightPos", lightDir);
             float rscale = planetSettings.gameObject.transform.localScale.x;
@@ -324,6 +328,7 @@ namespace LemonSpawn
             mat.SetFloat("g2", m_g * m_g);
             mat.SetVector("v3Translate", planetSettings.transform.position);
             mat.SetFloat("atmosphereDensity", planetSettings.atmosphereDensity);
+//            Debug.Log(planetSettings.atmosphereDensity);
 
             mat.SetVector("surfaceNoiseSettings", planetSettings.ExpSurfSettings);
             mat.SetVector("surfaceNoiseSettings2", planetSettings.ExpSurfSettings2);

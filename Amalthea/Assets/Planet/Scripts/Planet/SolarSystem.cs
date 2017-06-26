@@ -251,17 +251,20 @@ namespace LemonSpawn
 
         public void findClosestPlanet()
         {
-            if (planets.Count > 0)
-                planet = planets[0];
+            //if (planets.Count > 0)
+            //    planet = planets[0];
 
-            float min = 1E10f;
+            float min = 1E30f;
             foreach (Planet p in planets)
             {
-                float l = (p.pSettings.gameObject.transform.position).magnitude - p.pSettings.radius;
-                if (l < min)
+                if (p.pSettings.category == PlanetSettings.Categories.Planet)
                 {
-                    planet = p;
-                    min = l;
+                    float l = (p.pSettings.gameObject.transform.position).magnitude - p.pSettings.radius;
+                    if (l < min)
+                    {
+                        planet = p;
+                        min = l;
+                    }
                 }
             }
 
@@ -365,12 +368,15 @@ namespace LemonSpawn
 
             findClosestPlanet();
 
-            //            if (planet != null)
-            //                planet.ConstrainCameraExterior();
+            if (planet != null)
+                planet.ConstrainCameraExterior();
 
 
             foreach (Planet p in planets)
+            {
+//                Debug.Log(p.pSettings.gameObject.name);
                 p.Update();
+            }
 
             // Set closest clippping plane
             if (planet != null)
@@ -469,14 +475,12 @@ namespace LemonSpawn
 //            Debug.Log("Initializing : " + sp.category);
             // Set serialized object as well
             p.pSettings.properties.serializedPlanet = sp;
-            //if (ps.category == PlanetSettings.Categories.Star && World.CurrentApp == Verification.MCAstName)
-            //    continue;
 
 
             p.pSettings.properties.parent = go;
 
 
-            if (ps.category == PlanetSettings.Categories.Star)
+            if (ps.category == PlanetSettings.Categories.Star)// && World.CurrentApp != Verification.MCAstName)
                 p.Initialize(sun, groundMaterial, (Material)Resources.Load("Sun"), sphere);
             else
             if (ps.category == PlanetSettings.Categories.Object3D)
@@ -486,6 +490,7 @@ namespace LemonSpawn
             else
                 p.Initialize(sun, groundMaterial, (Material)Resources.Load("SkyMaterial"), sphere);
 
+            
             planets.Add(p);
             GameObject newP = p.pSettings.gameObject;
             if (!hierarchy)

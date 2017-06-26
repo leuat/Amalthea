@@ -49,7 +49,7 @@ namespace LemonSpawn {
 		public static int CloudTextureSize = 1024;
 		public static bool RenderMenu = true;
 		public static bool GPUSurface = true;
-		public static float version = 0.01f;
+		public static float version = 0.16f;
         public static float powScale = 0.75f;
         public static Vector3 stretch = Vector3.one;
 
@@ -321,7 +321,7 @@ namespace LemonSpawn {
 			szWorld = sz;
 		}
 
-		public virtual void LoadFromXMLFile(string filename, bool randomizeSeeds = false) {
+		public virtual void LoadFromXMLFile(string filename, bool randomizeSeeds, bool hierarchy) {
 
             ThreadQueue.AbortAll();
 			string file = RenderSettings.path + filename;
@@ -333,7 +333,7 @@ namespace LemonSpawn {
 			string xml = System.IO.File.ReadAllText(file);
 			PlanetTypes.Initialize();
 
-			solarSystem.LoadWorld(xml, false, false, this, randomizeSeeds);
+			solarSystem.LoadWorld(xml, false, false, this, randomizeSeeds, hierarchy);
 			szWorld.IterateCamera();
 //			solarSystem.space.color = new Color(szWorld.sun_col_r,szWorld.sun_col_g,szWorld.sun_col_b);
             solarSystem.space.hdr = szWorld.sun_intensity;
@@ -423,6 +423,7 @@ namespace LemonSpawn {
 
             if (!szWorld.useSpaceCamera)
                 return;
+
             SpaceCamera = mainCamera.GetComponent<SpaceCamera>();
             closeCamera = new GameObject("CloseCamera");
             CloseCamera = closeCamera.AddComponent<Camera>();
@@ -434,6 +435,8 @@ namespace LemonSpawn {
             MainCamera.farClipPlane = RenderSettings.LOD_ProjectionDistance * 1.1f;
             MainCamera.depthTextureMode = DepthTextureMode.Depth;
             CloseCamera.depthTextureMode = DepthTextureMode.Depth;
+
+            Debug.Log("Setting Closecam");
 
             setFieldOfView(MainCamera.fieldOfView);
 

@@ -16,10 +16,16 @@ namespace LemonSpawn
         public double pos_y;
         public double pos_z;
         public double time;
+        public float scale_x=1, scale_y=1, scale_z=1;
+
         public string displayMessage = "";
         public DVector pos()
         {
             return new DVector(pos_x, pos_y, pos_z);
+        }
+        public Vector3 scale()
+        {
+            return new Vector3(scale_x, scale_y, scale_z);
         }
     }
 
@@ -343,7 +349,7 @@ namespace LemonSpawn
 
             DVector dir = b.getDir() + (c.getDir() - b.getDir()) * dt;
 
-
+//            Debug.Log("INTERPOLATE");
             foreach (Planet p in planets)
             {
                 p.InterpolatePositions(b.frame, dt);
