@@ -49,9 +49,11 @@ namespace LemonSpawn {
 		public static int CloudTextureSize = 1024;
 		public static bool RenderMenu = true;
 		public static bool GPUSurface = true;
-		public static float version = 0.17f;
+		public static float version = 0.18f;
         public static float powScale = 0.75f;
         public static Vector3 stretch = Vector3.one;
+        public static bool UsePerPixelShading = false;
+
 
         public static SerializedWorld currentSZWorld;
         public static bool debug = true;
@@ -75,6 +77,8 @@ namespace LemonSpawn {
         public static float GlobalRadiusScale = 1;
         public static string textureLocation = "Textures/EnvironmentBillboards/";
 
+        public static Texture2D textureRuler = null;
+        public static Color colorRuler = new Color(1.0f, 0.9f, 0.5f, 1.0f);
         public static float fromActualRadius(float radius)
         {
             if (RenderSettings.logScale) radius = Mathf.Pow(radius, RenderSettings.powScale);
@@ -296,6 +300,7 @@ namespace LemonSpawn {
             camera.Render();
             RenderTexture.active = rt;
             CloseCamera.Render();
+            
             //eCamera.Render();
             screenShot.ReadPixels(new Rect(0, 0, resWidth, resHeight), 0, 0);
 
@@ -341,6 +346,46 @@ namespace LemonSpawn {
 //			solarSystem.space.color = new Color(szWorld.sun_col_r,szWorld.sun_col_g,szWorld.sun_col_b);
             solarSystem.space.hdr = szWorld.sun_intensity;
           
+
+        }
+
+        public void RenderRuler()
+        {
+            if (szWorld.rulerTicks == 0)
+                return;
+
+            if (RenderSettings.textureRuler == null)
+                RenderSettings.textureRuler = Util.createSolidTexture(RenderSettings.colorRuler);
+
+            float W = Screen.width;
+            float H = Screen.height;
+
+            float w = 0.2f;
+            float y = 0.1f;
+            float h = 0.008f;
+
+            float tickW = 0.002f;
+            float tickH = 0.03f;
+
+            float textY = y + tickH;
+            float dx = (1 - 2*w) / szWorld.rulerTicks;
+
+            GUI.DrawTexture(new Rect(w*W, y*H, Screen.width - 2*w*W, h*H), RenderSettings.textureRuler);
+
+            //Draw ticks
+            float start = w;
+            float dval = (szWorld.rulerEnd - szWorld.rulerStart) / szWorld.rulerTicks;
+            float val = szWorld.rulerStart;
+            for (int i=0;i<szWorld.rulerTicks+1;i++)
+            {
+                GUI.DrawTexture(new Rect(start * W, y * H,tickW*W, tickH*H), RenderSettings.textureRuler);
+                string text = val + " " + szWorld.rulerUnit;
+                GUI.Label(new Rect(start * W, textY * H, 200, 30), text);
+                start = start + dx;
+                val += dval;
+            }
+
+
 
         }
 

@@ -2,7 +2,7 @@
 
 // Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
 
-Shader "LemonSpawn/GroundDisplacement"
+Shader "LemonSpawn/GroundDisplacementVertexOnly"
 {
 	Properties
 	{
@@ -109,9 +109,9 @@ Shader "LemonSpawn/GroundDisplacement"
 		float3 n1 : TEXCOORD10;
 		//	float4 vpos  : TEXCOORD11;
 		// next ones would not fit into SM2.0 limits, but they are always for SM3.0+
-//#if UNITY_SPECCUBE_BOX_PROJECTION
+		//#if UNITY_SPECCUBE_BOX_PROJECTION
 		float3 posWorld					: TEXCOORD11;
-//#endif
+		//#endif
 		float3 posWorld2 				: TEXCOORD12;
 		float3 tangent : TEXCOORD13;
 		float3 binormal: TEXCOORD14;
@@ -140,26 +140,29 @@ Shader "LemonSpawn/GroundDisplacement"
 		float3 b = normalize(cross(normalWorld, t));
 		o.tangent = t;
 		o.binormal = b;
+		normalWorld = getPlanetSurfaceNormal(posWorld - v3Translate, t, b, 0.2 / 50000.0*fInnerRadius, 3);
+
 		o.posWorld2 = normalWorld;
 		normalWorld = normalWorld;//getPlanetSurfaceNormal(posWorld - v3Translate, t, b, 0.1);
 #endif
-//		posWorld.x = 0;
+								  //		posWorld.x = 0;
 		o.posWorld = posWorld.xyz;
-//#if UNITY_SPECCUBE_BOX_PROJECTION
-//#endif
+		//#if UNITY_SPECCUBE_BOX_PROJECTION
+		//#endif
 
 
+		//s.normalWorld = realN;
 
 		float wh = (length(o.posWorld.xyz - v3Translate) - fInnerRadius);
 
-//		capV.xyz -= v3Translate;
+		//		capV.xyz -= v3Translate;
 
 		capV.xyz += v3Translate;
 		capV.x *= lengthContraction.x;
 		capV.y *= lengthContraction.y;
 		capV.z *= lengthContraction.z;
 		//capV.xyz += _WorldSpaceCameraPos;
-			capV.xyz -= v3Translate;
+		capV.xyz -= v3Translate;
 
 		o.pos = UnityObjectToClipPos(capV);
 		//o.pos.xyz -= v3Translate;
@@ -167,7 +170,7 @@ Shader "LemonSpawn/GroundDisplacement"
 		//o.pos.y *= lengthContraction.y;
 		//o.pos.z *= lengthContraction.z;
 		//o.pos.xyz += v3Translate;
-		
+
 		//			o.vpos = capV;
 
 		o.tex = TexCoords(v);
@@ -258,9 +261,7 @@ Shader "LemonSpawn/GroundDisplacement"
 	{
 		FRAGMENT_SETUP(s)
 
-   	    float h = (length(i.posWorld.xyz - v3Translate) - fInnerRadius) / fInnerRadius;// - liquidThreshold;
-			float3 realN = getPlanetSurfaceNormal(i.posWorld - v3Translate, i.tangent, i.binormal, 0.2/50000.0*fInnerRadius,3);
-			s.normalWorld = realN;
+		float h = (length(i.posWorld.xyz - v3Translate) - fInnerRadius) / fInnerRadius;// - liquidThreshold;
 
 	//UnityLight mainLight = MainLight(s.normalWorld);
 	UnityLight mainLight = MainLight();
@@ -275,7 +276,7 @@ Shader "LemonSpawn/GroundDisplacement"
 		s.posWorld, occlusion, i.ambientOrLightmapUV, atten, rness, s.normalWorld, s.eyeVec, mainLight);
 
 
-//	float dd = dot(normalize(mul(rotMatrixInv, i.posWorld2.xyz)), normalize(s.normalWorld * 1 + i.n1 * 0));
+	//	float dd = dot(normalize(mul(rotMatrixInv, i.posWorld2.xyz)), normalize(s.normalWorld * 1 + i.n1 * 0));
 	float dd = dot(normalize(i.posWorld2.xyz), normalize(s.normalWorld * 1 + i.n1 * 0));
 
 	float tt = pow(clamp(noise(normalize(i.posWorld2.xyz)*3.1032) + 0.3,0,1),2);
@@ -283,9 +284,9 @@ Shader "LemonSpawn/GroundDisplacement"
 	//	float3 bColor = ((1-tt)*basinColor + basinColor2*tt*r_noise(normalize(i.vpos.xyz),2.1032,3));
 
 	float3 hColor = mColor;// *getTex(_Surface, i.tex.xy);//float3(1,1,1);//s.diffColor;
-													  //	float3 hillColor = s.diffColor;
-													  //if (dd < 0.98 )
-													  //	hColor = float3(0.2, 0.2 ,0.2);
+						   //	float3 hillColor = s.diffColor;
+						   //if (dd < 0.98 )
+						   //	hColor = float3(0.2, 0.2 ,0.2);
 	float3 v3CameraPos = _WorldSpaceCameraPos - v3Translate;	// The camera's current position
 
 
@@ -306,13 +307,13 @@ Shader "LemonSpawn/GroundDisplacement"
 	hColor = mixHeight(hColor, basinColor2*getTex(_Basin, i.tex.xy), 3000, liquidThreshold, h);
 	hColor = mixHeight(topColor*getTex(_Top, i.tex.xy), hColor, 1000, modulatedTopThreshold, h);
 	hColor = mixHeight(hColor, hillColor*getTex(_Mountain, i.tex.xy), 250, modulatedHillyThreshold, dd);
-	
 
 
-	
+
+
 	float3 diff = hColor;
 
-	
+
 	float4 spc = _Color*0.65;// float4(1, 1, 1, 1);// *metallicity;// *specularity * 1;
 	half4 c = UNITY_BRDF_PBS(diff, s.specColor, s.oneMinusReflectivity, rness, s.normalWorld, -s.eyeVec, gi.light, gi.indirect);
 	c.rgb += UNITY_BRDF_GI(diff, s.specColor, s.oneMinusReflectivity, rness, s.normalWorld, -s.eyeVec, occlusion, gi);
@@ -322,11 +323,11 @@ Shader "LemonSpawn/GroundDisplacement"
 
 	c.rgb = groundColor(i.c0, i.c1, c.rgb, s.posWorld, 1.0);// *groundClouds;
 
-	//											c.rgb = modulatedHillyThreshold;
-	//												c.rgb = float3(1,0,0)*modd;
-	//return float4(ppos.xyz,1);
-	//s.alpha = 1;
-	return OutputForward(c, s.alpha); 
+															//											c.rgb = modulatedHillyThreshold;
+															//												c.rgb = float3(1,0,0)*modd;
+															//return float4(ppos.xyz,1);
+															//s.alpha = 1;
+	return OutputForward(c, s.alpha);
 	}
 		ENDCG
 	}

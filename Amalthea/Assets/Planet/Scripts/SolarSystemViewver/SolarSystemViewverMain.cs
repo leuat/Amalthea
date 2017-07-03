@@ -528,7 +528,7 @@ namespace LemonSpawn
             }
 
         }
-
+        /*
         public void playNormal()
         {
             setPlaySpeed(0.000025f);
@@ -538,21 +538,24 @@ namespace LemonSpawn
         public void playFast()
         {
             setPlaySpeed(0.0002f);
+        }*/
+
+        public void UpdatePlaySpeed()
+        {
+            float speed = GameObject.Find("SliderPlaySpeed").GetComponent<Slider>().value;
+            setPlaySpeed((speed-0.5f)*0.01f);
         }
+
 
 
         protected void UpdatePlay()
         {
             //          Debug.Log(Time.time + " " + m_playSpeed);
-            if (m_playSpeed > 0 && solarSystem.planets.Count != 0)
+            if (/*m_playSpeed > 0 && */solarSystem.planets.Count != 0)
             {
                 float v = slider.GetComponent<Slider>().value;
                 v += (float)m_playSpeed;
-                if (v >= 1)
-                {
-                    m_playSpeed = 0;
-                    v = 1;
-                }
+                v = Mathf.Clamp(v, 0, 1);
                 //                Debug.Log("Playspeed after: " + m_playSpeed + " " + Time.time);
                 slider.GetComponent<Slider>().value = v;
 

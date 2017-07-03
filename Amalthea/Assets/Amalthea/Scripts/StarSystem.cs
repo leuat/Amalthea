@@ -182,7 +182,7 @@ namespace Amalthea
         public string getName()
         {
             if (name == "")
-                name = LemonSpawn.Util.getRandomName(new System.Random(seed), "Kvorsk");
+                name = LemonSpawn.Util.getRandomName(new System.Random(seed), "Lespanol");
             return name;
         }
 

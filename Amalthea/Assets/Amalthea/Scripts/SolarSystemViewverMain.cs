@@ -174,7 +174,7 @@ namespace Amalthea {
                 return;
             }
             else
-            if (dp.planet.lsPlanet.pSettings.category == LemonSpawn.PlanetSettings.Categories.Spacecraft)
+            if (dp.planet.lsPlanet.pSettings.category == LemonSpawn.PlanetSettings.Categories.Object3D)
             {
                 setText("txtPlanetName", "Spacecraft");
                 setText("txtPlanetName2", "Spacecraft");
@@ -273,7 +273,7 @@ namespace Amalthea {
                     c.a = Mathf.Clamp(1 - 0.00005f * (dp.go.transform.position - mainCamera.transform.position).magnitude, 0, 1);
                     guiStyle.normal.textColor = c;
                 }
-                if (dp.planet.lsPlanet.pSettings.category == LemonSpawn.PlanetSettings.Categories.Spacecraft)
+                if (dp.planet.lsPlanet.pSettings.category == LemonSpawn.PlanetSettings.Categories.Object3D)
                     guiStyle.normal.textColor = SSVSettings.spaceCraftColor;
 
                 guiStyle.normal.textColor = guiStyle.normal.textColor * (1 + dp.timer);

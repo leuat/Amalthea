@@ -16,6 +16,7 @@ namespace LemonSpawn
         public double pos_y;
         public double pos_z;
         public double time;
+        public float visible = 1;
         public float scale_x=1, scale_y=1, scale_z=1;
 
         public string displayMessage = "";
@@ -52,9 +53,16 @@ namespace LemonSpawn
         public string objectString = "";
         public string objectMaterial = "";
         public float objectScale = 1;
-        public float color_r;
-        public float color_g;
-        public float color_b;
+        public float color_r = 0;
+        public float color_g = 0;
+        public float color_b = 0;
+
+        public Color getColor()
+        {
+            if (color_r == 0 && color_g == 0 && color_b == 0)
+                return Color.white;
+            return new Color(color_r, color_g, color_b, 1.0f);
+        }
 
 
 
@@ -190,6 +198,14 @@ namespace LemonSpawn
         public int screenshot_width = 1024;
         public int screenshot_height = 1024;
         public int maxFrames = 0;
+
+        public float rulerStart = 0;
+        public float rulerEnd = 0;
+        public float rulerTicks;
+        public string rulerUnit = "";
+
+        public string clockUnit = "s";
+
         public bool isVideo()
         {
             if (Cameras.Count > 1)
@@ -436,6 +452,7 @@ namespace LemonSpawn
         public bool advancedClouds = false;
         public bool cameraEffects = true;
         public string previousFile = "";
+        public bool PerPixelShading = false;
 
 
         public static MCAstSettings DeSerialize(string filename)

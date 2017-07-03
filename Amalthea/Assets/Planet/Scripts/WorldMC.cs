@@ -92,6 +92,7 @@ namespace LemonSpawn
             {
                 settings = MCAstSettings.DeSerialize(fname);
                 AddMessage("Settings file loaded : " + RenderSettings.MCAstSettingsFile);
+                RenderSettings.UsePerPixelShading = settings.PerPixelShading;
 
             }
             else
@@ -122,12 +123,14 @@ namespace LemonSpawn
 
         public void Slide()
         {
+            if (RenderSettings.MoveCam)
+                return;
             double v = slider.GetComponent<Slider>().value;
             currentCamera = szWorld.getInterpolatedCamera(v/sliderScale, solarSystem.planets);
-
             if (currentCamera!=null) {
+                szWorld.currentFrame = currentCamera.frame;
 
-                isInCrash = (currentCamera.status==1);
+                    isInCrash = (currentCamera.status==1);
                 if (isInCrash) 
                     noiseImage.SetActive(true);
                 else
@@ -143,7 +146,7 @@ namespace LemonSpawn
         {
             if (m_playSpeed == v)
             {
-                m_playSpeed = 0;
+                //m_playSpeed = 0;
             }
             else
             {
@@ -157,8 +160,10 @@ namespace LemonSpawn
 
         public void playNormal()
         {
-            setPlaySpeed(0.000025);
-
+            float speed = GameObject.Find("SliderPlaySpeed").GetComponent<Slider>().value;
+            if (m_playSpeed == 0)
+                setPlaySpeed((speed - 0.5f) * 0.01f);
+            else m_playSpeed = 0;
         }
 
         public void playFast()
@@ -166,6 +171,12 @@ namespace LemonSpawn
             setPlaySpeed(0.0001);
         }
 
+
+        public void UpdatePlaySpeed()
+        {
+            float speed = GameObject.Find("SliderPlaySpeed").GetComponent<Slider>().value;
+            setPlaySpeed((speed-0.5f)*0.01f);
+        }
 
 
 
@@ -363,6 +374,9 @@ namespace LemonSpawn
         {
 
             GenerateTextures();
+            solarSystem.RenderInformation();
+
+            RenderRuler();
 
             if (RenderSettings.isVideo)
             {
@@ -395,6 +409,7 @@ namespace LemonSpawn
 
                 return;
             }
+
             // Generate Textures
             if (!hasScene)
                 return;
@@ -701,17 +716,23 @@ namespace LemonSpawn
 
         protected void UpdatePlay()
         {
-  //          Debug.Log(Time.time + " " + m_playSpeed);
-            if (m_playSpeed > 0 && solarSystem.planets.Count!=0)
+            if (RenderSettings.MoveCam)
+                return;
+
+            if (slider == null)
+                return;
+
+            //          Debug.Log(Time.time + " " + m_playSpeed);
+            if (solarSystem.planets.Count!=0)
             {
-                canvas.SetActive(true);
                 float v = slider.GetComponent<Slider>().value;
                 v += (float)(m_playSpeed*sliderScale);
-                if (v >= sliderScale)
-                {
-                    m_playSpeed = 0;
-                    v = 0;
-                }
+                /*                if (v >= sliderScale)
+                                {
+                                    m_playSpeed = 0;
+                                    v = 0;
+                                }*/
+                v = Mathf.Clamp(v, 0, (float)sliderScale);
 //                Debug.Log("Playspeed after: " + m_playSpeed + " " + Time.time);
                 slider.GetComponent<Slider>().value = v;
                 canvas.SetActive(RenderSettings.RenderMenu);

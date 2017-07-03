@@ -59,7 +59,12 @@ namespace LemonSpawn
             if (!RenderSettings.GPUSurface)
                 groundMaterial = (Material)Resources.Load("GroundMaterial");
             else
-                groundMaterial = (Material)Resources.Load("GroundMaterialGPU");
+            {
+                if (RenderSettings.UsePerPixelShading)
+                    groundMaterial = (Material)Resources.Load("GroundMaterialGPU");
+                else
+                    groundMaterial = (Material)Resources.Load("GroundMaterialGPUVertexOnly");
+            }
 
         }
 
@@ -198,6 +203,43 @@ namespace LemonSpawn
 
 
             SetSkybox(skybox);
+
+        }
+
+
+        public void RenderInformation()
+        {
+
+            foreach (Planet p  in planets)
+            {
+                GUIStyle guiStyle = SSVAppSettings.guiStyle;
+
+                guiStyle.normal.textColor = Color.red; //guiStyle.normal.textColor;
+
+
+
+
+                Vector3 pos = World.MainCamera.GetComponent<Camera>().WorldToScreenPoint(p.pSettings.gameObject.transform.position);
+                //int width1 = dp.planet.lsPlanet.pSettings.givenName.Trim().Length;
+                if (pos.z > 0 && guiStyle.normal.textColor.a > 0)
+                {
+                
+                    {
+                        guiStyle.fontSize = 30;
+                        if (p.pSettings.properties.serializedPlanet != null)
+                        {
+                            guiStyle.normal.textColor = p.pSettings.properties.serializedPlanet.getColor();//  new Color(0.5f, 0.7f, 1.0f);
+                            Frame frame = p.pSettings.properties.serializedPlanet.Frames[World.SzWorld.currentFrame];
+                            string info = frame.displayMessage;
+                            if (info != null && info != "")
+                                GUI.Label(new Rect(pos.x, Screen.height - pos.y, 250, 130), info, guiStyle);
+
+                        }
+                    }
+
+                }
+
+            }
 
         }
 

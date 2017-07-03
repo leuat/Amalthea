@@ -83,13 +83,20 @@ namespace LemonSpawn
             // IF auto :
             if (pSettings.properties.autoOrient)
             {
-                Vector3 dir = (f0.pos() - f1.pos()).toVectorf().normalized;
+                //                Vector3 dir = (f0.pos() - f1.pos()).toVectorf().normalized;
+                Vector3 dir = (f0.pos() - f1.pos()).Normalize().toVectorf();
                 pSettings.rotation = 0;
                 pSettings.gameObject.transform.forward = dir;
                 //                pSettings.gameObject.transform.LookAt(f1.pos().toVectorf() - pSettings.gameObject.transform.position, Vector3.up);
                 //                Debug.Log("WTF");
             }
-            
+
+            if (f0.visible == 1)
+                pSettings.gameObject.SetActive(true);
+            else
+            {
+                pSettings.gameObject.SetActive(false);
+            }
 
         }
 
