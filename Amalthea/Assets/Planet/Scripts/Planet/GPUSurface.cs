@@ -18,6 +18,7 @@ public class GPUSurface {
         Vector3 surfaceNoiseSettings3;
         Vector3 surfaceNoiseSettings4;
         Vector3 surfaceNoiseSettings5;
+        Vector3 surfaceNoiseSettings6;
         Vector3 v3Translate;
         Vector3 surfaceVortex1;
         Vector3 surfaceVortex2;
@@ -34,6 +35,7 @@ public class GPUSurface {
 			surfaceNoiseSettings3 = planetSettings.ExpSurfSettings3;
             surfaceNoiseSettings4 = planetSettings.ExpSurfSettings4;
             surfaceNoiseSettings5 = planetSettings.ExpSurfSettings5;
+            surfaceNoiseSettings6 = planetSettings.ExpSurfSettings6;
             surfaceVortex1 = planetSettings.SurfaceVortex1;
             surfaceVortex2 = planetSettings.SurfaceVortex2;
 			fInnerRadius = planetSettings.radius;
@@ -185,8 +187,9 @@ public static float noiseStatic(Vector3 x)
 
             float value = 0.0f;
             float weight = 1.0f;
-
+            float w = surfaceNoiseSettings6.x;//-0.5;
             Vector3 vt = p * frequency;
+            float f = 1;
             for (float octave = 0; octave < octaves; octave++)
             {
                  float signal = initialO + noise(vt);//perlinNoise2dSeamlessRaw(frequency, vt.x, vt.z,0,0,0,0);//   Mathf.PerlinNoise(vt.x, vt.z);
@@ -202,9 +205,10 @@ public static float noiseStatic(Vector3 x)
                 weight = signal * gain;
                 weight = clamp(weight, 0, 1);
 
-                value += (signal * 1);
+                value += (signal * Mathf.Pow(f, w));
                 vt = vt * lacunarity;
-                frequency *= lacunarity;
+                //frequency *= lacunarity;
+                f *= lacunarity;
             }
             return value;
         }
@@ -216,7 +220,7 @@ public static float noiseStatic(Vector3 x)
            // return noise(pos * 10) * 5;
             scale = scale*(1 + surfaceVortex1.y*noise(pos*surfaceVortex1.x));
             scale = scale*(1 + surfaceVortex2.y*noise(pos*surfaceVortex2.x));
-            float val = getMultiFractal(pos, scale, (int)octaves, surfaceNoiseSettings.x, surfaceNoiseSettings.y, surfaceNoiseSettings.z, surfaceNoiseSettings2.x);
+            float val = getMultiFractal(pos*1.523f, scale, (int)octaves, surfaceNoiseSettings.x, surfaceNoiseSettings.y, surfaceNoiseSettings.z, surfaceNoiseSettings2.x);
             val = pow(val, surfaceNoiseSettings3.z);
             return clamp(val-surfaceNoiseSettings3.x, 0, 10);
             //return getStandardPerlin(pos, scale, 1, 0.5, 8);

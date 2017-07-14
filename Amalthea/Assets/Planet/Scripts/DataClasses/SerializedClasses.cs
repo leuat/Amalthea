@@ -18,12 +18,20 @@ namespace LemonSpawn
         public double time;
         public float visible = 1;
         public float scale_x=1, scale_y=1, scale_z=1;
+        public float color_r = 1, color_g = 1, color_b = 1;
 
         public string displayMessage = "";
+        public string sound = "";
         public DVector pos()
         {
             return new DVector(pos_x, pos_y, pos_z);
         }
+
+        public Vector3 color()
+        {
+            return new Vector3(color_r, color_g, color_b);
+        }
+
         public Vector3 scale()
         {
             return new Vector3(scale_x, scale_y, scale_z);
@@ -105,6 +113,8 @@ namespace LemonSpawn
                 ps.category = PlanetSettings.Categories.Planet;
             if (category == "black hole")
                 ps.category = PlanetSettings.Categories.BlackHole;
+            if (category == "explosion")
+                ps.category = PlanetSettings.Categories.Explosion;
 
             /*            if (planetType.ToLower() == "star" || planetType.ToLower() == "spacecraft")
                         {
@@ -162,6 +172,7 @@ namespace LemonSpawn
         public double fov;
         public double time;
         public int frame;
+        public string displayMessage = "";
         public int status = 0;
         public DVector getPos()
         {
@@ -198,7 +209,7 @@ namespace LemonSpawn
         public int screenshot_width = 1024;
         public int screenshot_height = 1024;
         public int maxFrames = 0;
-
+        public float currentTime = 0;
         public float rulerStart = 0;
         public float rulerEnd = 0;
         public float rulerTicks;
@@ -260,7 +271,7 @@ namespace LemonSpawn
             return 0;
                 }
 
-        public SerializedCamera getInterpolatedCameraSpline(double t, List<Planet> planets)
+/*        public SerializedCamera getInterpolatedCameraSpline(double t, List<Planet> planets)
         {
             // t in [0,1]
             if (Cameras.Count <= 1)
@@ -294,10 +305,6 @@ namespace LemonSpawn
             up = Util.CatmullRom(dt, p0.getUp(), p1.getUp(), p2.getUp(), p3.getUp());
             DVector dir = Util.CatmullRom(dt, p0.getDir(), p1.getDir(), p2.getDir(), p3.getDir());
 
-          /*  pos = p1.getPos() + (p2.getPos() - p1.getPos()) * dt;
-            up = p1.getUp() + (p2.getUp() - p1.getUp()) * dt;
-            dir = p1.getDir() + (p2.getDir() - p1.getDir()) * dt;
-            */
 
             foreach (Planet p in planets)
             {
@@ -307,8 +314,9 @@ namespace LemonSpawn
             World.MainCamera.GetComponent<SpaceCamera>().SetLookCamera(pos, dir.toVectorf(), up.toVectorf());
             return p1;
         }
-
+*/
         public int currentFrame;
+        public bool isNewFrame = false;
 
         public void InterpolatePlanetFrames(double t, List<Planet> pl)
         {
@@ -326,12 +334,17 @@ namespace LemonSpawn
                 return;
             }
             int frame = (int)(totalFrames*t);
+            if (currentFrame == frame)
+                isNewFrame = false;
+            else
+                isNewFrame = true;
+
             currentFrame = frame;
             double dt = (totalFrames*t - frame);
 
             foreach (Planet p in pl)
             {
-                p.InterpolatePositions(frame, dt);
+                p.InterpolatePositions(frame, dt, isNewFrame);
 //                Debug.Log(p.pSettings.properties.pos.toVectorf());
             }
 
@@ -361,20 +374,29 @@ namespace LemonSpawn
 
             pos = b.getPos() + (c.getPos() - b.getPos()) * dt;
             up = b.getUp() + (c.getUp() - b.getUp()) * dt;
+            currentTime = (float)(b.time + (c.time - b.time) * dt);
+
 
 
             DVector dir = b.getDir() + (c.getDir() - b.getDir()) * dt;
 
-//            Debug.Log("INTERPOLATE");
+            //            Debug.Log("INTERPOLATE");
+            if (b.frame == currentFrame)
+                isNewFrame = false;
+            else
+                isNewFrame = true;
             foreach (Planet p in planets)
             {
-                p.InterpolatePositions(b.frame, dt);
+                p.InterpolatePositions(b.frame, dt, isNewFrame);
             }
+
+
+
 
             World.MainCamera.GetComponent<SpaceCamera>().SetLookCamera(pos, dir.toVectorf(), up.toVectorf());
             return b;
         }
-
+        
         public void IterateCamera()
         {
 
@@ -452,8 +474,8 @@ namespace LemonSpawn
         public bool advancedClouds = false;
         public bool cameraEffects = true;
         public string previousFile = "";
-        public bool PerPixelShading = false;
-
+        public bool PerPixelShading = true;
+        public bool UseGPURenderer = true;
 
         public static MCAstSettings DeSerialize(string filename)
         {

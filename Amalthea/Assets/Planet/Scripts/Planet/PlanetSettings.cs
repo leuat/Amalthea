@@ -38,12 +38,13 @@ namespace LemonSpawn {
         public List<Frame> Frames = new List<Frame>();
         public Plane[] cameraPlanes;
         public GPUSurface gpuSurface;
+        public Vector3 scale = Vector3.one;
         public Color extraColor = new Color(1,1,1,1);
     }
     // Public settings
     public class PlanetSettings : MonoBehaviour {
 
-        public enum Categories { Planet, Moon, Star, Object3D, BlackHole};
+        public enum Categories { Planet, Moon, Star, Object3D, BlackHole, Explosion};
 
         [Header("Planet settings")]
         public int seed;

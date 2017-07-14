@@ -40,7 +40,7 @@ namespace LemonSpawn {
         public static float LOD_ProjectionDistance = 10000000;
         public static bool MoveCam = false;
 		public static bool RenderText = false;
-        public static bool logScale = false;
+        public static bool logScale = false; 
         public static Vector3 lengthContraction = Vector3.one;
         public static bool planetCubeSphere = true;
 		public static int waterMaxQuadNodeLever = 3;
@@ -49,10 +49,10 @@ namespace LemonSpawn {
 		public static int CloudTextureSize = 1024;
 		public static bool RenderMenu = true;
 		public static bool GPUSurface = true;
-		public static float version = 0.18f;
+		public static float version = 0.19f;
         public static float powScale = 0.75f;
         public static Vector3 stretch = Vector3.one;
-        public static bool UsePerPixelShading = false;
+        public static bool UsePerPixelShading = true;
 
 
         public static SerializedWorld currentSZWorld;
@@ -200,6 +200,9 @@ namespace LemonSpawn {
 		public int m_maxQuadNodeLevel = 11;
 		public int m_minQuadNodeLevel = 2;
 
+        private AudioSource audioSource = null;
+        public static AudioSource audioSourceStatic = null;
+
 		public static string CurrentApp;
 
         public bool GPUSurface = false;
@@ -229,6 +232,9 @@ namespace LemonSpawn {
         protected SolarSystem solarSystem;
 		protected bool modifier = false;
 		protected bool ctrlModifier = false;
+
+        protected List<Message> messages = new List<Message>();
+
 
         public static void MoveCamera(Vector3 dp) {
             if (World.SzWorld.useSpaceCamera)
@@ -318,14 +324,30 @@ namespace LemonSpawn {
             return pureFile;
         }
 
-      
-		
-		//	#if UNITY_STANDALONE
-		
 
 
+        //	#if UNITY_STANDALONE
 
-		public void setWorld(SerializedWorld sz) {
+        protected void UpdateMessages()
+        {
+            foreach (Message m in messages)
+                if (m.time-- < 0)
+                {
+                    messages.Remove(m);
+                    return;
+                }
+
+
+        }
+
+
+        protected void AddMessage(string s, float t = 1)
+        {
+            messages.Add(new Message(s, t * 100));
+        }
+
+
+        public void setWorld(SerializedWorld sz) {
 			szWorld = sz;
 		}
 
@@ -334,7 +356,8 @@ namespace LemonSpawn {
             ThreadQueue.AbortAll();
 			string file = RenderSettings.path + filename;
 			if (!System.IO.File.Exists(file)) {
-				FatalError("Could not open file: " + file);
+                //FatalError("Could not open file: " + file);
+                AddMessage("Could not open file: " + file);
 				return;
 			}
 
@@ -346,46 +369,6 @@ namespace LemonSpawn {
 //			solarSystem.space.color = new Color(szWorld.sun_col_r,szWorld.sun_col_g,szWorld.sun_col_b);
             solarSystem.space.hdr = szWorld.sun_intensity;
           
-
-        }
-
-        public void RenderRuler()
-        {
-            if (szWorld.rulerTicks == 0)
-                return;
-
-            if (RenderSettings.textureRuler == null)
-                RenderSettings.textureRuler = Util.createSolidTexture(RenderSettings.colorRuler);
-
-            float W = Screen.width;
-            float H = Screen.height;
-
-            float w = 0.2f;
-            float y = 0.1f;
-            float h = 0.008f;
-
-            float tickW = 0.002f;
-            float tickH = 0.03f;
-
-            float textY = y + tickH;
-            float dx = (1 - 2*w) / szWorld.rulerTicks;
-
-            GUI.DrawTexture(new Rect(w*W, y*H, Screen.width - 2*w*W, h*H), RenderSettings.textureRuler);
-
-            //Draw ticks
-            float start = w;
-            float dval = (szWorld.rulerEnd - szWorld.rulerStart) / szWorld.rulerTicks;
-            float val = szWorld.rulerStart;
-            for (int i=0;i<szWorld.rulerTicks+1;i++)
-            {
-                GUI.DrawTexture(new Rect(start * W, y * H,tickW*W, tickH*H), RenderSettings.textureRuler);
-                string text = val + " " + szWorld.rulerUnit;
-                GUI.Label(new Rect(start * W, textY * H, 200, 30), text);
-                start = start + dx;
-                val += dval;
-            }
-
-
 
         }
 
@@ -504,6 +487,11 @@ namespace LemonSpawn {
             RenderSettings.path = Application.dataPath + "/../";
             CurrentApp = Verification.MCAstName;
 
+            GameObject go = new GameObject("AudioSource");
+            audioSource = go.AddComponent<AudioSource>();
+
+            audioSourceStatic = audioSource;
+
             RenderSettings.GPUSurface = GPUSurface;
 
         if (solarSystem == null)
@@ -538,9 +526,16 @@ namespace LemonSpawn {
 
         public virtual void Start () {
             StartBasics();
+            
    		}
-		
 
+
+        public static void PlaySound(string sound, float amp)
+        {
+            if (audioSourceStatic!=null)
+            audioSourceStatic.PlayOneShot(SSVAppSettings.loadAudio(sound), amp);
+
+        }
 
         public void UpdateWorldCamera() {
 			

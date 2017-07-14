@@ -46,7 +46,6 @@ namespace LemonSpawn
 
         protected MenuItem mainMenu;
         public GameObject starCamera;
-        protected static AudioSource audioSource;
         protected GameObject pnlInfo = null;
         protected CameraRotator cameraRotator, starCameraRotator;
         protected bool Initialized = false;
@@ -63,8 +62,6 @@ namespace LemonSpawn
             pnlInfo = GameObject.Find("pnlInfo");
             pnlInfo.SetActive(false);
             Globals.definitions.InitTemp();
-            GameObject go = new GameObject("AudioSource");
-            audioSource = go.AddComponent<AudioSource>();
 
             RenderSettings.path = Application.dataPath + "/../";
 
@@ -162,11 +159,6 @@ namespace LemonSpawn
                 }
                 */
 
-        public static void PlaySound(string sound, float amp)
-        {
-            SolarSystemViewverMain.audioSource.PlayOneShot(SSVAppSettings.loadAudio(sound), amp);
-
-        }
 
 
 

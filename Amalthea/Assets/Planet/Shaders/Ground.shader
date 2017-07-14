@@ -6,6 +6,7 @@
 
 Shader "LemonSpawn/Ground"
 {
+
 	Properties
 	{
 		_Color("Color", Color) = (1,1,1,1)
@@ -101,7 +102,7 @@ struct VertexOutputForwardBase2
 	float4 pos							: SV_POSITION;
 	float4 tex							: TEXCOORD0;
 	half3 eyeVec 						: TEXCOORD1;
-	half4 tangentToWorldAndParallax[3]	: TEXCOORD2;	// [3x3:tangentToWorld | 1x3:viewDirForParallax]
+	half4 tangentToWorldAndPackedData[3]	: TEXCOORD2;	// [3x3:tangentToWorld | 1x3:viewDirForParallax]
 	half4 ambientOrLightmapUV			: TEXCOORD5;	// SH or Lightmap UV
 	SHADOW_COORDS(6)
 	UNITY_FOG_COORDS(7)
@@ -223,13 +224,13 @@ struct VertexOutputForwardBase2
 					float4 tangentWorld = float4(UnityObjectToWorldDir(v.tangent.xyz), v.tangent.w);
 
 					float3x3 tangentToWorld = CreateTangentToWorldPerVertex(normalWorld, tangentWorld.xyz, tangentWorld.w);
-					o.tangentToWorldAndParallax[0].xyz = tangentToWorld[0];
-					o.tangentToWorldAndParallax[1].xyz = tangentToWorld[1];
-					o.tangentToWorldAndParallax[2].xyz = tangentToWorld[2];
+					o.tangentToWorldAndPackedData[0].xyz = tangentToWorld[0];
+					o.tangentToWorldAndPackedData[1].xyz = tangentToWorld[1];
+					o.tangentToWorldAndPackedData[2].xyz = tangentToWorld[2];
 				#else
-					o.tangentToWorldAndParallax[0].xyz = 0;
-					o.tangentToWorldAndParallax[1].xyz = 0;
-					o.tangentToWorldAndParallax[2].xyz = normalWorld;
+					o.tangentToWorldAndPackedData[0].xyz = 0;
+					o.tangentToWorldAndPackedData[1].xyz = 0;
+					o.tangentToWorldAndPackedData[2].xyz = normalWorld;
 				#endif
 					//We need this for shadow receving
 					TRANSFER_SHADOW(o);
@@ -264,9 +265,9 @@ struct VertexOutputForwardBase2
 							#ifdef _PARALLAXMAP
 								TANGENT_SPACE_ROTATION;
 								half3 viewDirForParallax = mul(rotation, ObjSpaceViewDir(v.vertex));
-								o.tangentToWorldAndParallax[0].w = viewDirForParallax.x;
-								o.tangentToWorldAndParallax[1].w = viewDirForParallax.y;
-								o.tangentToWorldAndParallax[2].w = viewDirForParallax.z;
+								o.tangentToWorldAndPackedData[0].w = viewDirForParallax.x;
+								o.tangentToWorldAndPackedData[1].w = viewDirForParallax.y;
+								o.tangentToWorldAndPackedData[2].w = viewDirForParallax.z;
 							#endif
 
 							UNITY_TRANSFER_FOG(o,o.pos);

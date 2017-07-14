@@ -19,7 +19,6 @@ namespace LemonSpawn
     public class WorldMC : World
     {
 
-        protected List<Message> messages = new List<Message>();
 
 
         protected double m_playSpeed = 0;
@@ -32,6 +31,7 @@ namespace LemonSpawn
         public GameObject slider;
         public static GameObject Slider;
         public static GameObject canvas;
+        public static AudioSource audioSource = null;
 
 
         protected void PopulateGUISettings()
@@ -40,6 +40,8 @@ namespace LemonSpawn
             GameObject.Find("MovieResolutionCmb").GetComponent<Dropdown>().value = settings.movieResolution;
             GameObject.Find("GridSizeCmb").GetComponent<Dropdown>().value = settings.gridSize;
             GameObject.Find("ToggleCameraEffects").GetComponent<Toggle>().isOn = settings.cameraEffects;
+            GameObject.Find("ToggleGPURendering").GetComponent<Toggle>().isOn = settings.UseGPURenderer;
+            RenderSettings.GPUSurface = settings.UseGPURenderer;
 
         }
 
@@ -50,10 +52,6 @@ namespace LemonSpawn
         }
 
 
-        protected void AddMessage(string s, float t = 1)
-        {
-            messages.Add(new Message(s, t * 100));
-        }
 
         protected void PopulateSettingsFromGUI()
         {
@@ -61,6 +59,8 @@ namespace LemonSpawn
             settings.movieResolution = GameObject.Find("MovieResolutionCmb").GetComponent<Dropdown>().value;
             settings.gridSize = GameObject.Find("GridSizeCmb").GetComponent<Dropdown>().value;
             settings.cameraEffects = GameObject.Find("ToggleCameraEffects").GetComponent<Toggle>().isOn;
+            settings.UseGPURenderer = GameObject.Find("ToggleGPURendering").GetComponent<Toggle>().isOn;
+            RenderSettings.GPUSurface = settings.UseGPURenderer;
             int actualGridSize = MCAstSettings.GridSizes[ settings.gridSize ];
             if (actualGridSize != RenderSettings.sizeVBO)
             {
@@ -70,18 +70,6 @@ namespace LemonSpawn
 
             }
             effectCamera.GetComponent<Camera>().enabled = settings.cameraEffects;
-        }
-
-        protected void UpdateMessages()
-        {
-            foreach (Message m in messages)
-                if (m.time--<0)
-                {
-                    messages.Remove(m);
-                    return;
-                }
-
-
         }
 
 
@@ -370,13 +358,81 @@ namespace LemonSpawn
 
         public Vector2 blinkCrash = new Vector3(10, 0,0);
 
+        protected void RenderClock() {
+            if (szWorld.currentTime == 0)
+                return;
+
+            float W = Screen.width;
+            float H = Screen.height;
+
+            float w = 0.85f;
+            float y = 0.02f;
+
+            GUIStyle guiStyle = SSVAppSettings.guiStyle;
+            guiStyle.normal.textColor = Color.white;
+            guiStyle.fontSize = 15;
+
+
+            GUI.Label(new Rect(w * W, y * H, 300, 30), "" + szWorld.currentTime.ToString("F3") + " " + szWorld.clockUnit, guiStyle);
+            if (currentCamera!=null)
+            GUI.Label(new Rect(w * W, y * H + 20, 300, 30), currentCamera.displayMessage , guiStyle);
+
+
+        }
+
+
+        protected void RenderRuler()
+        {
+            if (szWorld.rulerTicks == 0)
+                return;
+
+            if (RenderSettings.textureRuler == null)
+                RenderSettings.textureRuler = Util.createSolidTexture(RenderSettings.colorRuler);
+
+            float W = Screen.width;
+            float H = Screen.height;
+
+            float w = 0.0f;
+            float y = 0.1f;
+            float h = 0.008f;
+
+            float tickW = 0.002f;
+            float tickH = 0.03f;
+
+            float textY = y + tickH;
+            float dx = (1 - 2 * w) / szWorld.rulerTicks;
+
+            GUI.DrawTexture(new Rect(w * W, y * H, Screen.width - 2 * w * W, h * H), RenderSettings.textureRuler);
+
+            //Draw ticks
+            float start = w;
+            float dval = (szWorld.rulerEnd - szWorld.rulerStart) / szWorld.rulerTicks;
+            float val = szWorld.rulerStart;
+            for (int i = 0; i < szWorld.rulerTicks + 1; i++)
+            {
+                GUI.DrawTexture(new Rect(start * W, y * H, tickW * W, tickH * H), RenderSettings.textureRuler);
+                string text = val.ToString("F3") + " " + szWorld.rulerUnit;
+                GUI.Label(new Rect(start * W, textY * H, 200, 30), text);
+                start = start + dx;
+                val += dval;
+            }
+
+
+
+        }
+
+
+
         protected void OnGUI()
         {
 
             GenerateTextures();
             solarSystem.RenderInformation();
 
+
+
             RenderRuler();
+            RenderClock();
 
             if (RenderSettings.isVideo)
             {
@@ -549,7 +605,7 @@ namespace LemonSpawn
                     if (lst[1].Trim().ToLower() == fileType.Trim().ToLower()) {
 
 
-                        string text = lst[0].Trim().ToLower();
+                        string text = lst[0].Trim();
                         if (!Verification.VerifyXML(RenderSettings.path + RenderSettings.dataDir + text + ".xml", Verification.MCAstName))
                             continue;
 

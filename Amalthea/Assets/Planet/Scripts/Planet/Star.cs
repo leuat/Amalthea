@@ -44,7 +44,7 @@ namespace LemonSpawn {
             pSettings.properties.extraColor = Constants.colorTemperatureToRGB(pSettings.temperature);
             starMaterial.SetColor("_Color", pSettings.properties.extraColor);
             CreateCorona();
-            CreateCorona3D();
+//            CreateCorona3D();
 
         }
 

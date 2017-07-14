@@ -42,7 +42,7 @@ namespace LemonSpawn
         }
 
 
-        public void InterpolatePositions(int frame, double dt)
+        public void InterpolatePositions(int frame, double dt, bool isNewFrame)
         {
             //		return;
         //    Debug.Log("Frame:" + frame + " / " + pSettings.properties.Frames.Count);
@@ -67,6 +67,13 @@ namespace LemonSpawn
 //                pos = pos - pSettings.properties.parentPlanet.pSettings.properties.pos;
             pSettings.properties.pos = pos;
             pSettings.rotation = rot;
+            pSettings.properties.scale = f0.scale() + (f1.scale() - f0.scale()) * (float)dt;
+
+            if (isNewFrame && f0.sound!="")
+            {
+                World.PlaySound(f0.sound, 1);
+            } 
+
 
             if (pSettings.category == PlanetSettings.Categories.Object3D)
             {
@@ -76,6 +83,12 @@ namespace LemonSpawn
                 pSettings.transform.rotation = Quaternion.Euler((float)rotx*scale, (float)rot*scale, (float)rotz*scale);
                 Vector3 localscale = f0.scale() + (f1.scale() - f0.scale()) * (float)dt;
                 pSettings.gameObject.transform.localScale = localscale;
+
+            }
+            if (pSettings.category== PlanetSettings.Categories.Explosion)
+            {
+                Vector3 col = f0.color() + (f1.color() - f0.color()) * (float)dt;
+                pSettings.properties.extraColor = new Color(col.x, col.y, col.z, 1);
 
             }
 

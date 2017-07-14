@@ -213,7 +213,6 @@ namespace LemonSpawn
             foreach (Planet p  in planets)
             {
                 GUIStyle guiStyle = SSVAppSettings.guiStyle;
-
                 guiStyle.normal.textColor = Color.red; //guiStyle.normal.textColor;
 
 
@@ -322,6 +321,9 @@ namespace LemonSpawn
                 return new BlackHole(ps);
             if (ps.category == PlanetSettings.Categories.Object3D)
                 return new MCAstObject3D(ps);
+            if (ps.category == PlanetSettings.Categories.Explosion)
+                return new Explosion(ps);
+
 
             return new Planet(ps);
         }
@@ -514,8 +516,7 @@ namespace LemonSpawn
                 ps.Randomize();
             }
             Planet p = InitializeObject(ps);
-//            Debug.Log("Initializing : " + sp.category);
-            // Set serialized object as well
+
             p.pSettings.properties.serializedPlanet = sp;
 
 

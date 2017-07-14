@@ -97,7 +97,6 @@
             float w = surfaceNoiseSettings6.x;//-0.5;
             float3 vt = p * frequency;
             float f = 1;
-
             for (float octave = 0; octave < octaves; octave++)
             {
                  float signal = initialO + noisePerturbed(vt);//perlinNoise2dSeamlessRaw(frequency, vt.x, vt.z,0,0,0,0);//   Mathf.PerlinNoise(vt.x, vt.z);
@@ -130,6 +129,19 @@
 
 		float getSurfaceHeight(float3 pos, float scale, float octaves) {
 
+			// return noise(pos * 10) * 5;
+			scale = scale*(1 + surfaceVortex1.y*noise(pos*surfaceVortex1.x));
+			scale = scale*(1 + surfaceVortex2.y*noise(pos*surfaceVortex2.x));
+			float val = getMultiFractal(pos, scale*1.523, (int)octaves + 2, surfaceNoiseSettings.x, surfaceNoiseSettings.y, surfaceNoiseSettings.z, surfaceNoiseSettings2.x);
+			val = pow(val, surfaceNoiseSettings3.z);
+			return clamp(val - surfaceNoiseSettings3.x, 0, 10);
+			//return getStandardPerlin(pos, scale, 1, 0.5, 8);
+
+		}
+
+
+		float getSurfaceHeightCraters(float3 pos, float scale, float octaves) {
+
 			//return noise(pos * 10)*5;
 
 
@@ -151,7 +163,7 @@
 //				if (surfaceNoiseSettings4.y>0)
 //	    		val+= surfaceNoiseSettings4.y*getMultiFractal(pos*surfaceNoiseSettings4.z, scale, octaves, surfaceNoiseSettings.x, surfaceNoiseSettings.y, surfaceNoiseSettings.z, surfaceNoiseSettings2.x);
 			val =  pow(val, surfaceNoiseSettings3.z);
-			float craterScale = surfaceNoiseSettings5.x*10;
+			/*float craterScale = surfaceNoiseSettings5.x*10;
 
 			float crater = 0.5*(abs(noise(craterScale*pos)) + abs(noise(craterScale*pos * 0.5)));// +abs(noise(craterScale*pos * 4));
 
@@ -159,6 +171,8 @@
 			crater = clamp(5*crater - 10.5*exp(-pow(crater - 0.05, 2)*500), -100, 100);
 
 			return clamp(val-surfaceNoiseSettings3.x - crater*surfaceNoiseSettings6.z*0.001, -0.1, 10);
+			*/
+			return clamp(val - surfaceNoiseSettings3.x, -0.1, 10);
 			//return getStandardPerlin(pos, scale, 1, 0.5, 8);
 
 		}

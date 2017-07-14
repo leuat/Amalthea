@@ -279,7 +279,7 @@ namespace LemonSpawn
 
             CreateAxis();
 
-            data.player.galaxy.Generate(50000, 1, 3000);
+            data.player.galaxy.Generate(5000, 1, 3000);
             data.currentSystem = data.player.galaxy.stars[0];
             data.player.AddToKnown(data.currentSystem);
             //solarSystem.GenerateSolarSystem(currentSystem);
