@@ -224,7 +224,7 @@ namespace LemonSpawn
                 {
                 
                     {
-                        guiStyle.fontSize = 30;
+                        guiStyle.fontSize = Screen.height/50;
                         if (p.pSettings.properties.serializedPlanet != null)
                         {
                             guiStyle.normal.textColor = p.pSettings.properties.serializedPlanet.getColor();//  new Color(0.5f, 0.7f, 1.0f);
@@ -282,6 +282,7 @@ namespace LemonSpawn
             foreach (Planet p in planets)
             {
                // Debug.Log("WTF");
+               if (groundMaterial != null)
                 p.pSettings.atmosphere.ReinitializeGroundMaterial(groundMaterial);
 //                ReplaceMaterial(p.pSettings.properties.terrainObject, groundMaterial, p.pSettings);
                 GameObject.DestroyImmediate(p.pSettings.properties.terrainObject);

@@ -18,7 +18,6 @@ namespace LemonSpawn {
         public double currentDistance;
         public float albedo = 0.3f;
         public float t0 = 0;
-        public bool autoOrient = false; // Auto orient to face direction
         public Quaternion rotationMatrix = Quaternion.identity;
         public float rotationSpeed = 0;
         public float distortionIntensity = 0; // Used for black holes

@@ -31,9 +31,13 @@ namespace LemonSpawn
             bhMaterial.CopyPropertiesFromMaterial(sky);
 
             pSettings.properties.distortionIntensity = 1f;
+            RenderSettings.distortionIntensity = 1f;
+
             GameObject go = obj;
             go.name = "black hole";
             go.transform.localScale = Vector3.one * pSettings.radius;
+
+            RenderSettings.useAtmosphericStarSphere = false;
 
             //pSettings.radius = 1000;
 

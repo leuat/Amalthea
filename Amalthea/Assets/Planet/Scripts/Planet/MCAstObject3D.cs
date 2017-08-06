@@ -47,8 +47,6 @@ namespace LemonSpawn
 
             GameObject main = new GameObject(pSettings.properties.serializedPlanet.name);
 
-            pSettings.properties.autoOrient = true;
-
             GameObject obj;
             string objName = pSettings.properties.serializedPlanet.objectString;
             if (objName.ToLower() == "laser")

@@ -20,7 +20,7 @@ namespace LemonSpawn
     {
 
 
-
+        protected GameObject StarBackgroundSphere = null;
         protected double m_playSpeed = 0;
         protected Texture2D tx_background, tx_load, tx_record;
         protected int load_percent;
@@ -81,6 +81,7 @@ namespace LemonSpawn
                 settings = MCAstSettings.DeSerialize(fname);
                 AddMessage("Settings file loaded : " + RenderSettings.MCAstSettingsFile);
                 RenderSettings.UsePerPixelShading = settings.PerPixelShading;
+                RenderSettings.GPUSurface = settings.UseGPURenderer;
 
             }
             else
@@ -365,17 +366,18 @@ namespace LemonSpawn
             float W = Screen.width;
             float H = Screen.height;
 
-            float w = 0.85f;
+            float w = 0.02f;
             float y = 0.02f;
 
             GUIStyle guiStyle = SSVAppSettings.guiStyle;
             guiStyle.normal.textColor = Color.white;
-            guiStyle.fontSize = 15;
+            float fs = Screen.height / 50;
+            guiStyle.fontSize = (int)fs;
 
 
             GUI.Label(new Rect(w * W, y * H, 300, 30), "" + szWorld.currentTime.ToString("F3") + " " + szWorld.clockUnit, guiStyle);
             if (currentCamera!=null)
-            GUI.Label(new Rect(w * W, y * H + 20, 300, 30), currentCamera.displayMessage , guiStyle);
+            GUI.Label(new Rect(w * W, y * H + fs*1.5f, 300, 30), currentCamera.displayMessage , guiStyle);
 
 
         }
@@ -665,6 +667,7 @@ namespace LemonSpawn
             settings.previousFile = name;
             PopulateOverviewList("Overview");
             slider.GetComponent<Slider>().value = 0;
+            GameObject.Find("SliderPlaySpeed").GetComponent<Slider>().value = SzWorld.defaultPlaySpeed;
 
         }
         
@@ -694,17 +697,23 @@ namespace LemonSpawn
             CurrentApp = Verification.MCAstName;
             RenderSettings.GlobalRadiusScale = 0.995f;
 
+
+
             if (solarSystem == null)
     			solarSystem = new SolarSystem(sun, sphere, transform, (int)szWorld.skybox);
+
             canvas = GameObject.Find ("Canvas");
             noiseImage = GameObject.Find("NoiseImage");
             if (noiseImage != null)
                noiseImage.SetActive(false);
-            SetupGUI();
 			base.Start();
+            SetupGUI();
 
- 
+
             SetupErrorPanel();
+
+            StarBackgroundSphere = GameObject.Find("SunBackgroundSphere");
+
 
 
 //            solarSystem.InitializeFromScene();
@@ -723,7 +732,9 @@ namespace LemonSpawn
             {
                 LoadFromXMLFileMCAST(settings.previousFile);
                 szWorld.IterateCamera();
-                
+                GameObject.Find("SliderPlaySpeed").GetComponent<Slider>().value = SzWorld.defaultPlaySpeed;
+
+
                 //                szWorld.getInterpolatedCamera(0, solarSystem.planets);
 
             }
@@ -835,9 +846,34 @@ namespace LemonSpawn
 
         }
 
+
         public override void Update()
         {
             base.Update();
+
+            if (StarBackgroundSphere!=null)
+                StarBackgroundSphere.SetActive(RenderSettings.useAtmosphericStarSphere);
+    
+            //UpdateBlackHoleEffect(SpaceCamera.getPos().Normalize().toVectorf()*-1, mainCamera);
+            
+
+            if (Input.GetKey(KeyCode.Escape))
+            {
+
+                if (settingsPanel!=null && settingsPanel.activeSelf == true)
+                {
+                    settingsPanel.SetActive(false);
+                }
+                else
+                if (helpPanel!=null && helpPanel.activeSelf == true)
+                {
+                    settingsPanel.SetActive(false);
+                }
+                else
+                    FatalQuit();
+            }
+
+
             UpdateMessages();
             UpdatePlay();
             //            return;

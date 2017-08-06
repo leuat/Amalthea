@@ -40,7 +40,8 @@ namespace LemonSpawn {
         public static float LOD_ProjectionDistance = 10000000;
         public static bool MoveCam = false;
 		public static bool RenderText = false;
-        public static bool logScale = false; 
+        public static bool logScale = false;
+        public static float distortionIntensity = 0; 
         public static Vector3 lengthContraction = Vector3.one;
         public static bool planetCubeSphere = true;
 		public static int waterMaxQuadNodeLever = 3;
@@ -49,11 +50,11 @@ namespace LemonSpawn {
 		public static int CloudTextureSize = 1024;
 		public static bool RenderMenu = true;
 		public static bool GPUSurface = true;
-		public static float version = 0.19f;
+		public static float version = 0.2f;
         public static float powScale = 0.75f;
         public static Vector3 stretch = Vector3.one;
         public static bool UsePerPixelShading = true;
-
+        public static bool useAtmosphericStarSphere = true;
 
         public static SerializedWorld currentSZWorld;
         public static bool debug = true;
@@ -289,7 +290,43 @@ namespace LemonSpawn {
 
 		}
 
-		
+        protected void UpdateBlackHoleEffect(Vector3 bhPos, GameObject cam)
+        {
+            Vector3 pos = MainCamera.WorldToScreenPoint(bhPos);
+            if (pos.z > 0 && RenderSettings.distortionIntensity != 0)
+            {
+                cam.GetComponent<BlackHoleEffect>().enabled = true;
+                BlackHoleEffect.centerPoint = new Vector3(pos.x, pos.y);
+                BlackHoleEffect.centerPoint.x /= Screen.width;
+                BlackHoleEffect.centerPoint.y /= Screen.height;
+                BlackHoleEffect.intensity = RenderSettings.distortionIntensity;
+                BlackHoleEffect.size = 0.0006f;// / bhPos.magnitude;
+                // Set cameras
+            }
+            else
+            {
+                BlackHoleEffect.intensity = 0;
+                cam.GetComponent<BlackHoleEffect>().enabled = false;
+            }
+
+            float add = 0;
+            //if (data.dpSun != null)
+            //    add = data.dpSun.planet.lsPlanet.pSettings.radius * 1;
+
+            /*MainCamera.nearClipPlane = MainCamera.transform.position.magnitude + add;
+            Camera NearCam = GameObject.Find("FrontBlackHoleCamera").GetComponent<Camera>();
+            NearCam.farClipPlane = MainCamera.nearClipPlane;
+
+            NearCam.enabled = true;
+            if (NearCam.farClipPlane < 0)
+            {
+                NearCam.enabled = false;
+                MainCamera.nearClipPlane = 0.1f;
+            }
+            */
+        }
+
+
         protected string WriteScreenshot(string directory, int resWidth, int resHeight)
         {
         	// Something wrong with EFFECTcamera - fix!
@@ -573,9 +610,6 @@ namespace LemonSpawn {
             solarSystem.Update();
             Collect();
 
-            if (Input.GetKey(KeyCode.Escape)) {
-				FatalQuit();
-			}
 
             if (Input.GetKeyDown (KeyCode.LeftShift)) 
 				modifier = true;

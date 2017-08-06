@@ -94,14 +94,11 @@ namespace LemonSpawn
 
 
             // IF auto :
-            if (pSettings.properties.autoOrient)
+            if (pSettings.properties.serializedPlanet.autoOrient==1 && pSettings.category == PlanetSettings.Categories.Object3D)
             {
-                //                Vector3 dir = (f0.pos() - f1.pos()).toVectorf().normalized;
                 Vector3 dir = (f0.pos() - f1.pos()).Normalize().toVectorf();
                 pSettings.rotation = 0;
                 pSettings.gameObject.transform.forward = dir;
-                //                pSettings.gameObject.transform.LookAt(f1.pos().toVectorf() - pSettings.gameObject.transform.position, Vector3.up);
-                //                Debug.Log("WTF");
             }
 
             if (f0.visible == 1)
@@ -128,9 +125,8 @@ namespace LemonSpawn
             if (pSettings.sea != null)
                 pSettings.sea.Initialize(sun, sphere, pSettings);
 
-           
 
-            if (pSettings.hasFlatClouds)
+            if (pSettings.hasFlatClouds && RenderSettings.GPUSurface)
                    clouds = new Clouds(sun, sphere, pSettings, pSettings.cloudSettings);
 
             // Ignore old environment type
@@ -265,8 +261,8 @@ namespace LemonSpawn
 
             Vector3 pos = d.toVectorf();
             double ds = dist / RenderSettings.LOD_Distance;
-//                      Debug.Log(pSettings.gameObject.name + " : " + ds + " "+ SolarSystem.planet.pSettings.gameObject.name);
-            if ((ds < 1 && SolarSystem.planet == this) || pSettings.category == PlanetSettings.Categories.Object3D)
+//            if ((ds < 1 && SolarSystem.planet == this)) || pSettings.category == PlanetSettings.Categories.Object3D || pSettings.category == PlanetSettings.Categories.Explosion)
+            if ((ds < 1 )) 
             {
                 Util.tagAll(pSettings.properties.parent, "Normal", 10);
                 pSettings.setLayer(10, "Normal");
@@ -332,13 +328,14 @@ namespace LemonSpawn
             pSettings.rotation += Time.deltaTime * pSettings.properties.rotationSpeed;
             float rot = (float)(pSettings.rotation / (2 * Mathf.PI) * 360f);
 
-//            Debug.Log(pSettings.radius);
+            //            Debug.Log(pSettings.radius);
 
             //     Debug.Log(pSettings.getHeight());
 
             //             rot = 0;
-            if (!pSettings.properties.autoOrient)
-                pSettings.gameObject.transform.rotation = Quaternion.Euler(new Vector3(0, rot, 0));
+            pSettings.gameObject.transform.rotation = Quaternion.Euler(new Vector3(0, rot, 0));
+            //if (pSettings.properties.serializedPlanet.autoOrient == 0)
+            //    pSettings.gameObject.transform.rotation = Quaternion.Euler(new Vector3(0, rot, 0));
 
             if (pSettings.atmosphere != null)
                 pSettings.atmosphere.Update();

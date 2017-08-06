@@ -18,11 +18,11 @@ namespace LemonSpawn
         public static float MiniCamFOV = 60;
         public static float MiniCamSize = 0.1f;
         public static int MaxOrbitalLines = 60;
-        public static int FontSize = 12 * Screen.height / 512;
+        public static int FontSize = 10 * Screen.height / 512;
         public static bool useAbsolutePositions = false;
-        public static Vector2 menuSizeText = new Vector2(0.2f, 0.1f) * Screen.height;
-        public static Vector2 menuSizeImage = new Vector2(0.2f, 0.1f) * Screen.height;
-        public static Vector2 menuSizePlanet = new Vector2(0.1f, 0.1f) * Screen.height;
+        public static Vector2 menuSizeText = new Vector2(0.2f, 0.1f) * Screen.height/1.5f;
+        public static Vector2 menuSizeImage = new Vector2(0.2f, 0.1f) * Screen.height/1.5f;
+        public static Vector2 menuSizePlanet = new Vector2(0.1f, 0.1f) * Screen.height/1.5f;
 
         public static string audioClickPlanet = "GUI40Click";
         public static string audioHoverMenu = "GUIPop";
@@ -87,12 +87,12 @@ namespace LemonSpawn
 
         // Update is called once per frame
 
-        protected void UpdateBlackHoleEffect()
+        protected void UpdateBlackHoleEffect(GameObject cam)
         {
             Vector3 pos = MainCamera.WorldToScreenPoint(Vector3.zero);
             if (pos.z > 0 && data.dpSun != null && data.dpSun.planet.lsPlanet.pSettings.properties.distortionIntensity != 0)
             {
-                mainCamera.GetComponent<BlackHoleEffect>().enabled = true;
+                cam.GetComponent<BlackHoleEffect>().enabled = true;
                 BlackHoleEffect.centerPoint = new Vector3(pos.x, pos.y);
                 BlackHoleEffect.centerPoint.x /= Screen.width;
                 BlackHoleEffect.centerPoint.y /= Screen.height;
@@ -149,7 +149,7 @@ namespace LemonSpawn
             if (RenderSettings.UseThreading)
                 ThreadQueue.MaintainThreadQueue();
 
-            UpdateBlackHoleEffect();
+            UpdateBlackHoleEffect(mainCamera);
         }
         /*
                 public void OnPostRender()

@@ -54,6 +54,8 @@ namespace LemonSpawn
         public double rot_x, rot_y, rot_z;
         public float temperature = 200;
         public float atmosphereDensity = 1;
+        public float autoOrient = 1;
+
 
         public List<Frame> Frames = new List<Frame>();
 
@@ -209,6 +211,8 @@ namespace LemonSpawn
         public int screenshot_width = 1024;
         public int screenshot_height = 1024;
         public int maxFrames = 0;
+        public float defaultPlaySpeed = 0.1f;
+
         public float currentTime = 0;
         public float rulerStart = 0;
         public float rulerEnd = 0;

@@ -354,13 +354,14 @@ namespace Amalthea
         public void Update(Vector3 currentPos, Vector3 up)
         {
             localSystems = galaxy.FindLocalSystems(currentPos, 500f);
-            galaxy.galaxyMaterial.SetVector("upVector", up);
+/*            galaxy.galaxyMaterial.SetVector("upVector", up);
             if (galaxy.nebulaeMaterial)
             galaxy.nebulaeMaterial.SetVector("upVector", up);
             if (markingMaterial != null)
                markingMaterial.SetVector("upVector", up);
             if (sunGlareMaterial)
                 sunGlareMaterial.SetVector("upVector", up);
+                */
 
         }
 
@@ -400,7 +401,7 @@ namespace Amalthea
         {
             currentSystem = newSystem;
             LemonSpawn.Util.DestroyGameObject("knownMarker");
-            CreateSunGlare();
+           // CreateSunGlare();
         }
 
         
