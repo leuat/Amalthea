@@ -52,6 +52,7 @@ namespace LemonSpawn {
 		public static bool GPUSurface = true;
 		public static float version = 0.2f;
         public static float powScale = 0.75f;
+        public static float fov = 70;
         public static Vector3 stretch = Vector3.one;
         public static bool UsePerPixelShading = true;
         public static bool useAtmosphericStarSphere = true;
@@ -609,6 +610,8 @@ namespace LemonSpawn {
 			UpdateWorldCamera();		
             solarSystem.Update();
             Collect();
+
+            setFieldOfView(RenderSettings.fov);
 
 
             if (Input.GetKeyDown (KeyCode.LeftShift)) 

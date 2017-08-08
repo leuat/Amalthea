@@ -9,8 +9,9 @@ namespace LemonSpawn
     {
 
         private Material material;
-
+        private GameObject object3d;
         private Billboards explosionBB = new Billboards();
+        private float rad = 0;
         public Explosion()
         {
 
@@ -40,14 +41,22 @@ namespace LemonSpawn
         {
             float r = pSettings.properties.serializedPlanet.objectScale;
             Vector3 color = new Vector3(pSettings.properties.extraColor.r, pSettings.properties.extraColor.g, pSettings.properties.extraColor.b);
-
+            rad = r;
             //            color = Vector3.one;
             // Skal være 2
             explosionBB.billboards.Add(new LemonSpawn.Billboard(Vector3.zero, new Vector2( r, r), color));
-            material = (Material)Resources.Load("ExplosionMaterial");
-            int rndName = (int)(Random.value * 100000);
-            explosionBB.Realize("Explosion"+rndName, material, 0).transform.parent = obj.transform.parent;
+            Material org = (Material)Resources.Load("ExplosionMaterial");
 
+
+            material = new Material(org.shader);
+            material.CopyPropertiesFromMaterial(org);
+            int rndName = (int)(Random.value * 100000);
+            //explosionBB.Realize("Explosion"+rndName, material, 0).transform.parent = obj.transform.parent;
+
+            object3d = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            object3d.transform.parent = obj.transform.parent;
+            object3d.GetComponent<MeshRenderer>().material = material;
+            
         }
 
         public override void Update()
@@ -55,10 +64,17 @@ namespace LemonSpawn
             cameraAndPosition();
             //material.SetColor("_Color", pSettings.properties.extraColor);
 
-            Vector3[] c = explosionBB.lsMesh.mesh.normals;
+            /*Vector3[] c = explosionBB.lsMesh.mesh.normals;
             c[0] = new Vector3( pSettings.properties.extraColor.r, pSettings.properties.extraColor.g, pSettings.properties.extraColor.b);
-            explosionBB.lsMesh.mesh.normals = c;
-            material.SetFloat("_Size", pSettings.properties.scale.x);
+            explosionBB.lsMesh.mesh.normals = c;*/
+            material.SetColor("_Color", pSettings.properties.extraColor);
+            material.SetFloat("_Size", pSettings.properties.scale.x*rad);
+/*            if (object3d != null)
+            {
+                object3d.transform.localScale = Vector3.one * pSettings.properties.scale.x*rad;
+                Debug.Log(object3d.transform.localScale);
+            }*/
+
         }
 
 

@@ -217,7 +217,7 @@ namespace LemonSpawn
         public int screenshot_width = 1024;
         public int screenshot_height = 1024;
         public int maxFrames = 0;
-        public float defaultPlaySpeed = 0.1f;
+        public float defaultPlaySpeed = 0.6f;
 
         public float currentTime = 0;
         public float rulerStart = 0;
@@ -386,7 +386,7 @@ namespace LemonSpawn
             up = b.getUp() + (c.getUp() - b.getUp()) * dt;
             currentTime = (float)(b.time + (c.time - b.time) * dt);
 
-
+            RenderSettings.fov = (float)(b.fov + (c.fov - b.fov) * dt);
 
             DVector dir = b.getDir() + (c.getDir() - b.getDir()) * dt;
 
@@ -426,6 +426,7 @@ namespace LemonSpawn
 
 
             //c.fieldOfView = sc.fov;
+
 
 
             //Atmosphere.sunScale = Mathf.Clamp(1.0f / (float)pos.Length(), 0.0001f, 1);

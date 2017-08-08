@@ -81,26 +81,33 @@ namespace LemonSpawn
                 double rotx = Util.LerpDegrees(f0.rot_x, f1.rot_x, dt);
                 double rotz = Util.LerpDegrees(f0.rot_z, f1.rot_z, dt);
                 //pSettings.transform.rotation = Quaternion.Euler((float)rotx*scale, (float)rot*scale, (float)rotz*scale);
-                pSettings.gameObject.transform.forward = f0.rot() + (f1.rot() - f0.rot()) * (float)dt;
                 Vector3 localscale = f0.scale() + (f1.scale() - f0.scale()) * (float)dt;
                 pSettings.gameObject.transform.localScale = localscale;
+
+                if (pSettings.properties.serializedPlanet.autoOrient == 1)
+                {
+                    Vector3 dir = (f0.pos() - f1.pos()).Normalize().toVectorf();
+                    pSettings.rotation = 0;
+                    pSettings.gameObject.transform.forward = dir;
+                }
+                else
+                {
+                    Vector3 dir = f0.rot() + (f1.rot() - f0.rot()) * (float)dt;
+                    if (dir.magnitude>0)
+                        pSettings.gameObject.transform.forward = dir;
+                }
+                    
+
 
             }
             if (pSettings.category== PlanetSettings.Categories.Explosion)
             {
                 Vector3 col = f0.color() + (f1.color() - f0.color()) * (float)dt;
                 pSettings.properties.extraColor = new Color(col.x, col.y, col.z, 1);
-
             }
 
 
             // IF auto :
-            if (pSettings.properties.serializedPlanet.autoOrient==1 && pSettings.category == PlanetSettings.Categories.Object3D)
-            {
-                Vector3 dir = (f0.pos() - f1.pos()).Normalize().toVectorf();
-                pSettings.rotation = 0;
-                pSettings.gameObject.transform.forward = dir;
-            }
 
             if (f0.visible == 1)
                 pSettings.gameObject.SetActive(true);

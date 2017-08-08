@@ -21,7 +21,7 @@ namespace LemonSpawn
 
 
         protected GameObject StarBackgroundSphere = null;
-        protected double m_playSpeed = 0;
+        protected double m_playSpeed = 0.6;
         protected Texture2D tx_background, tx_load, tx_record;
         protected int load_percent;
         protected GameObject helpPanel = null;
