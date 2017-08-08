@@ -45,7 +45,8 @@ namespace LemonSpawn
             // Skal være 2
             explosionBB.billboards.Add(new LemonSpawn.Billboard(Vector3.zero, new Vector2( r, r), color));
             material = (Material)Resources.Load("ExplosionMaterial");
-            explosionBB.Realize("Explosion", material, 0).transform.parent = obj.transform.parent;
+            int rndName = (int)(Random.value * 100000);
+            explosionBB.Realize("Explosion"+rndName, material, 0).transform.parent = obj.transform.parent;
 
         }
 

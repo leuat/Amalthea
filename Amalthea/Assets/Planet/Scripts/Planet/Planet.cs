@@ -80,7 +80,8 @@ namespace LemonSpawn
                 float scale = 360.0f / 2 * Mathf.PI;
                 double rotx = Util.LerpDegrees(f0.rot_x, f1.rot_x, dt);
                 double rotz = Util.LerpDegrees(f0.rot_z, f1.rot_z, dt);
-                pSettings.transform.rotation = Quaternion.Euler((float)rotx*scale, (float)rot*scale, (float)rotz*scale);
+                //pSettings.transform.rotation = Quaternion.Euler((float)rotx*scale, (float)rot*scale, (float)rotz*scale);
+                pSettings.gameObject.transform.forward = f0.rot() + (f1.rot() - f0.rot()) * (float)dt;
                 Vector3 localscale = f0.scale() + (f1.scale() - f0.scale()) * (float)dt;
                 pSettings.gameObject.transform.localScale = localscale;
 

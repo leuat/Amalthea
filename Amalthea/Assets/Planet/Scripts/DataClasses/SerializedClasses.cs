@@ -36,6 +36,12 @@ namespace LemonSpawn
         {
             return new Vector3(scale_x, scale_y, scale_z);
         }
+
+        public Vector3 rot()
+        {
+            return new Vector3((float)rot_x, (float)rot_y, (float)rot_z);
+        }
+
     }
 
     [System.Serializable]
