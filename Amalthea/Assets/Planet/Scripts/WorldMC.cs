@@ -21,7 +21,7 @@ namespace LemonSpawn
 
 
         protected GameObject StarBackgroundSphere = null;
-        protected double m_playSpeed = 0.6;
+        protected double m_playSpeed = 0.0;
         protected Texture2D tx_background, tx_load, tx_record;
         protected int load_percent;
         protected GameObject helpPanel = null;
@@ -404,7 +404,20 @@ namespace LemonSpawn
             float textY = y + tickH;
             float dx = (1 - 2 * w) / szWorld.rulerTicks;
 
-            GUI.DrawTexture(new Rect(w * W, y * H, Screen.width - 2 * w * W, h * H), RenderSettings.textureRuler);
+            Rect r = new Rect(w * W, y * H, Screen.width - 2 * w * W, h * H);
+            Rect full = new Rect(w * W, 0, Screen.width - 2 * w * W,Screen.height);
+
+            GUI.DrawTexture(r, RenderSettings.textureRuler);
+
+            if (full.Contains(Event.current.mousePosition))
+            {
+
+                float x = Event.current.mousePosition.x / Screen.width;
+                float ddx = (szWorld.rulerEnd - szWorld.rulerStart);
+                x = szWorld.rulerStart + ddx * x;
+
+                GUI.Label(new Rect(Event.current.mousePosition.x+10, Event.current.mousePosition.y+10, 200, 30), "" + x.ToString("F2"));
+            }
 
             //Draw ticks
             float start = w;
@@ -413,7 +426,7 @@ namespace LemonSpawn
             for (int i = 0; i < szWorld.rulerTicks + 1; i++)
             {
                 GUI.DrawTexture(new Rect(start * W, y * H, tickW * W, tickH * H), RenderSettings.textureRuler);
-                string text = val.ToString("F3") + " " + szWorld.rulerUnit;
+                string text = val.ToString("F2") + " " + szWorld.rulerUnit;
                 GUI.Label(new Rect(start * W, textY * H, 200, 30), text);
                 start = start + dx;
                 val += dval;
