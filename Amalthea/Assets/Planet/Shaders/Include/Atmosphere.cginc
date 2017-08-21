@@ -26,6 +26,7 @@ uniform float metallicity;
 uniform float cloudRadius;
 uniform float3 lightDir;
 uniform float3 lengthContraction;
+uniform float3 scaleFactor;
 
 #ifndef PI
 #define PI 3.14159265358979323846264338327
@@ -89,10 +90,16 @@ inline void swap(inout float a, inout float b) {
 
 void AtmFromGround(float4 vert, out float3 c0, out float3 c1, float3 camPos) {
 	float3 v3CameraPos = camPos - v3Translate;	// The camera's current position
-																					//float fCameraHeight2 = fCameraHeight*fCameraHeight;		// fCameraHeight^2
+	v3CameraPos.x /= scaleFactor.x;
+	v3CameraPos.y /= scaleFactor.y;
+	v3CameraPos.z /= scaleFactor.z;
+	//float fCameraHeight2 = fCameraHeight*fCameraHeight;		// fCameraHeight^2
 																					// Get the ray from the camera to the vertex and its length (which is the far point of the ray passing through the atmosphere)
 	float3 v3Pos = mul(unity_ObjectToWorld, vert).xyz - v3Translate;
-//	float fCameraHeight = clamp(length(v3CameraPos), length(v3Pos) , 1000000);					// The camera's current height
+	v3Pos.x /= scaleFactor.x;
+	v3Pos.y /= scaleFactor.y;
+	v3Pos.z /= scaleFactor.z;
+	//	float fCameraHeight = clamp(length(v3CameraPos), length(v3Pos) , 1000000);					// The camera's current height
 	float fCameraHeight = clamp(length(v3CameraPos), length(v3Pos)*0, 1000000);					// The camera's current height
 
 	float3 v3Ray = v3Pos - v3CameraPos;
@@ -146,11 +153,18 @@ void AtmFromGround(float4 vert, out float3 c0, out float3 c1, float3 camPos) {
 
 void AtmFromSpace(float4 vert, out float3 c0, out float3 c1) {
 	float3 v3CameraPos = _WorldSpaceCameraPos - v3Translate;	// The camera's current position
+	v3CameraPos.x /= scaleFactor.x;
+	v3CameraPos.y /= scaleFactor.y;
+	v3CameraPos.z /= scaleFactor.z;
+
 	float fCameraHeight = length(v3CameraPos);					// The camera's current height
 	float fCameraHeight2 = fCameraHeight*fCameraHeight;			// fCameraHeight^2
 
 																// Get the ray from the camera to the vertex and its length (which is the far point of the ray passing through the atmosphere)
 	float3 v3Pos = mul(unity_ObjectToWorld, vert).xyz - v3Translate;
+	v3Pos.x /= scaleFactor.x;
+	v3Pos.y /= scaleFactor.y;
+	v3Pos.z /= scaleFactor.z;
 	float3 v3Ray = v3Pos - v3CameraPos;
 	float fFar = length(v3Ray);
 	v3Ray /= fFar;
@@ -201,12 +215,19 @@ void AtmFromSpace(float4 vert, out float3 c0, out float3 c1) {
 
 void SkyFromSpace(float4 vert, out float3 c0, out float3 c1, out float3 t0) {
 	float3 v3CameraPos = _WorldSpaceCameraPos - v3Translate;	// The camera's current position
+	v3CameraPos.x /= scaleFactor.x;
+	v3CameraPos.y /= scaleFactor.y;
+	v3CameraPos.z /= scaleFactor.z;
+
 	float fCameraHeight = length(v3CameraPos);					// The camera's current height
 	float fCameraHeight2 = fCameraHeight*fCameraHeight;			// fCameraHeight^2
 	float fSamples = 3.0;
 
 	// Get the ray from the camera to the vertex and its length (which is the far point of the ray passing through the atmosphere)
 	float3 v3Pos = mul(unity_ObjectToWorld, vert).xyz - v3Translate;
+	v3Pos.x /= scaleFactor.x;
+	v3Pos.y /= scaleFactor.y;
+	v3Pos.z /= scaleFactor.z;
 	float3 v3Ray = v3Pos - v3CameraPos;
 	float fFar = length(v3Ray);
 	v3Ray /= fFar;
@@ -257,12 +278,20 @@ void SkyFromSpace(float4 vert, out float3 c0, out float3 c1, out float3 t0) {
 
 void SkyFromAtm(float4 vert, out float3 c0, out float3 c1, out float3 t0) {
 	float3 v3CameraPos = _WorldSpaceCameraPos - v3Translate; 	// The camera's current position
+	v3CameraPos.x /= scaleFactor.x;
+	v3CameraPos.y /= scaleFactor.y;
+	v3CameraPos.z /= scaleFactor.z;
+
 	float fCameraHeight = length(v3CameraPos);					// The camera's current height
 																//float fCameraHeight2 = fCameraHeight*fCameraHeight;		// fCameraHeight^2
 
 	float fSamples = 3.0;
 	// Get the ray from the camera to the vertex and its length (which is the far point of the ray passing through the atmosphere)
 	float3 v3Pos = mul(unity_ObjectToWorld, vert).xyz - v3Translate;
+	v3Pos.x /= scaleFactor.x;
+	v3Pos.y /= scaleFactor.y;
+	v3Pos.z /= scaleFactor.z;
+
 	float3 v3Ray = v3Pos - v3CameraPos;
 	float fFar = length(v3Ray);
 	v3Ray /= fFar;
@@ -329,6 +358,9 @@ float getMiePhase(float fCos, float fCos2, float g, float g2)
 void getAtmosphere(float4 vertex, out float3 c0, out float3 c1, out float3 t0) {
 
 	float3 v3CameraPos = _WorldSpaceCameraPos -v3Translate;	// The camera's current position
+	v3CameraPos.x /= scaleFactor.x;
+	v3CameraPos.y /= scaleFactor.y;
+	v3CameraPos.z /= scaleFactor.z;
 	float fCameraHeight = length(v3CameraPos);					// The camera's current height
 	float3 tmp;
 	//vertex.xyz = normalize(vertex.xyz)*fOuterRadius;

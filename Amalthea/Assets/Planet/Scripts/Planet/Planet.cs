@@ -72,7 +72,16 @@ namespace LemonSpawn
             if (isNewFrame && f0.sound!="")
             {
                 World.PlaySound(f0.sound, 1);
-            } 
+            }
+
+            if (pSettings.category == PlanetSettings.Categories.Planet)
+            {
+                Vector3 localscale = f0.scale() + (f1.scale() - f0.scale()) * (float)dt;
+                //pSettings.gameObject.transform.localScale = localscale;
+                //Debug.Log(localscale);
+                pSettings.properties.localScale = localscale;
+            }
+
 
 
             if (pSettings.category == PlanetSettings.Categories.Object3D)
@@ -88,6 +97,7 @@ namespace LemonSpawn
                 {
                     Vector3 dir = (f0.pos() - f1.pos()).Normalize().toVectorf();
                     pSettings.rotation = 0;
+                    if (dir.magnitude>0)
                     pSettings.gameObject.transform.forward = dir;
                 }
                 else
@@ -288,12 +298,12 @@ namespace LemonSpawn
             if (pSettings.category==PlanetSettings.Categories.Planet)
             if (projectionDistance < 1)
             {
-                pSettings.gameObject.transform.localScale = Vector3.one;
+                pSettings.gameObject.transform.localScale = pSettings.properties.localScale;
 
             }
             else
             {
-                pSettings.gameObject.transform.localScale = Vector3.one * (float)(1.0 / projectionDistance);
+                pSettings.gameObject.transform.localScale = pSettings.properties.localScale * (float)(1.0 / projectionDistance);
 
             }
 
@@ -367,10 +377,12 @@ namespace LemonSpawn
             if (billboardClouds != null)
                 billboardClouds.Update();
 
-            if (World.SzWorld.hasLengthContraction)
+            /*if (World.SzWorld.hasLengthContraction)
             {
                 LengthContract();
-            }
+            }*/
+
+
 
 
             // Fun

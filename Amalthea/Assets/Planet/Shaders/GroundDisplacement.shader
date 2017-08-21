@@ -155,9 +155,12 @@ Shader "LemonSpawn/GroundDisplacement"
 //		capV.xyz -= v3Translate;
 
 		capV.xyz += v3Translate;
-		capV.x *= lengthContraction.x;
+/*		capV.x *= lengthContraction.x;
 		capV.y *= lengthContraction.y;
-		capV.z *= lengthContraction.z;
+		capV.z *= lengthContraction.z;*/
+		capV.x *= scaleFactor.x;
+		capV.y *= scaleFactor.y;
+		capV.z *= scaleFactor.z;
 		//capV.xyz += _WorldSpaceCameraPos;
 			capV.xyz -= v3Translate;
 

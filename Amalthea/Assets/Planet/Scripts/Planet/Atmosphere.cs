@@ -341,6 +341,10 @@ namespace LemonSpawn
             mat.SetMatrix("rotMatrix", rotMat);
 
 
+//            Debug.Log(planetSettings.name + " : " + planetSettings.properties.scale);
+            mat.SetVector("scaleFactor", planetSettings.properties.scale);
+
+
            /*            Debug.Log("exposure:" + planetSettings.m_hdrExposure);
                         Debug.Log("sun:" + planetSettings.m_ESun);
                         Debug.Log("l:" + planetSettings.m_atmosphereWavelengths);

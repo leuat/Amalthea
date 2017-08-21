@@ -32,6 +32,7 @@ namespace LemonSpawn {
         public DVector posInKm;
         public GameObject terrainObject, parent, environmentObject;
         public Vector3 localCamera;
+        public Vector3 localScale = Vector3.one;
         public Planet parentPlanet;
         public SerializedMCAstObject serializedPlanet;
         public List<Frame> Frames = new List<Frame>();
