@@ -1204,19 +1204,40 @@ new Vector3(14, 14, 14),
             Serialize(p, fname);
         }
 
-        public SettingsTypes getRandomPlanetType(System.Random r, float radius, float temperature)
+        public SettingsTypes getRandomPlanetType(System.Random r, float radius, float temperature, string forcePlanetSurface)
         {
             List<SettingsTypes> candidates = new List<SettingsTypes>();
             foreach (SettingsTypes pt in planetTypes)
             {
                 if ((radius >= pt.RadiusRange.x && radius < pt.RadiusRange.y) && (temperature >= pt.TemperatureRange.x && temperature < pt.TemperatureRange.y))
                 {
-                    candidates.Add(pt);
+                    bool OK = false;
+                    if (forcePlanetSurface == "") OK = true;
+                    if (forcePlanetSurface == "gas")
+                    {
+                        if (pt.findParameter("Is Gas Planet").realizedValue == 1)
+                        {
+                            OK = true;
+                            
+                        }
+                    }
+                    if (forcePlanetSurface == "rocky")
+                    {
+                        if (pt.findParameter("Is Gas Planet").realizedValue == 0)
+                            OK = true;
+                    }
+
+
+                    if (OK)
+                        candidates.Add(pt);
                 }
             }
 
             if (candidates.Count == 0)
+            {
+                Debug.Log("COULD NOT FIND PLANET TYPE");
                 return planetTypes[0];
+            }
 
             return candidates[r.Next() % candidates.Count];
         }

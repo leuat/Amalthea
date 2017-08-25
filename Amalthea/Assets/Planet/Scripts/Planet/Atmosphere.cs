@@ -140,6 +140,8 @@ namespace LemonSpawn
             if (planetSettings.m_surfaceTexture != null)
                 mat.SetTexture("_Surface", planetSettings.m_surfaceTexture);
 
+            mat.SetTexture("_Craters", RenderSettings.craters);
+
         }
 
         private static Texture2D mountain, basin, top, surface;
@@ -309,7 +311,7 @@ namespace LemonSpawn
 //          Debug.Log(RenderSettings.usePointLightSource);
 
             mat.SetVector("v3LightPos", lightDir);
-            float rscale = planetSettings.gameObject.transform.localScale.x;
+            float rscale = 1;// planetSettings.gameObject.transform.localScale.x;
             mat.SetVector("lightDir", rot * lightDir);
             mat.SetVector("v3InvWavelength", invWaveLength4);
             mat.SetFloat("fOuterRadius", m_outerRadius * ds*rscale);
@@ -341,16 +343,9 @@ namespace LemonSpawn
             mat.SetMatrix("rotMatrix", rotMat);
 
 
-//            Debug.Log(planetSettings.name + " : " + planetSettings.properties.scale);
-            mat.SetVector("scaleFactor", planetSettings.properties.scale);
+            mat.SetVector("scaleFactor", planetSettings.properties.localScale);
 
-
-           /*            Debug.Log("exposure:" + planetSettings.m_hdrExposure);
-                        Debug.Log("sun:" + planetSettings.m_ESun);
-                        Debug.Log("l:" + planetSettings.m_atmosphereWavelengths);
-                        */
         }
     }
 
 }
-

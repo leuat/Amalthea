@@ -90,13 +90,24 @@ namespace LemonSpawn
         protected void UpdateBlackHoleEffect(GameObject cam)
         {
             Vector3 pos = MainCamera.WorldToScreenPoint(Vector3.zero);
-            if (pos.z > 0 && data.dpSun != null && data.dpSun.planet.lsPlanet.pSettings.properties.distortionIntensity != 0)
+
+            if (data.dpSun.Count == 0)
+                return;
+
+            DisplayPlanet sun = null;
+
+            foreach (DisplayPlanet s in data.dPlanets)
+                if (s.planet.lsPlanet.pSettings.properties.distortionIntensity != 0)
+                    sun = s;
+ 
+
+            if (pos.z > 0 && sun != null && RenderSettings.distortionIntensity != 0)
             {
                 cam.GetComponent<BlackHoleEffect>().enabled = true;
                 BlackHoleEffect.centerPoint = new Vector3(pos.x, pos.y);
                 BlackHoleEffect.centerPoint.x /= Screen.width;
                 BlackHoleEffect.centerPoint.y /= Screen.height;
-                BlackHoleEffect.intensity = data.dpSun.planet.lsPlanet.pSettings.properties.distortionIntensity;
+                BlackHoleEffect.intensity = RenderSettings.distortionIntensity;
                 BlackHoleEffect.size = 1.0f / mainCamera.transform.position.magnitude;
 
                 // Set cameras
@@ -108,8 +119,8 @@ namespace LemonSpawn
             }
 
             float add = 0;
-            if (data.dpSun != null)
-                add = data.dpSun.planet.lsPlanet.pSettings.radius * 1;
+            if (sun != null)
+                add = sun.planet.lsPlanet.pSettings.radius * 1;
 
             MainCamera.nearClipPlane = MainCamera.transform.position.magnitude + add;
             Camera NearCam = GameObject.Find("FrontBlackHoleCamera").GetComponent<Camera>();
@@ -181,10 +192,10 @@ namespace LemonSpawn
             {
                 RaycastHit hit;
                 Ray ray = MainCamera.ScreenPointToRay(Input.mousePosition);
-                Debug.Log("blah " + ray.origin + "  " + ray.direction);
+//                Debug.Log("blah " + ray.origin + "  " + ray.direction);
                 if (Physics.Raycast(ray, out hit))
                 {
-                    Debug.Log("HIT" + hit.transform.gameObject.name);
+  //                  Debug.Log("HIT" + hit.transform.gameObject.name);
                     foreach (DisplayPlanet dp in data.dPlanets)
                     {
                         if (dp.go == hit.transform.gameObject)
@@ -277,7 +288,10 @@ namespace LemonSpawn
                 foreach (DisplayPlanet dp in data.dPlanets)
                     dp.CreatePlanetCamera();
 
-                data.dpSun.CreateMenu("SolarSystem", mainMenu, SSVAppSettings.menuSizePlanet, true, 0.75f, mainMenu.layout, SelectPlanetMenu);
+                foreach (DisplayPlanet star in data.dpSun)
+                {
+                    star.CreateMenu("SolarSystem:" + star.planet.lsPlanet.pSettings.name, mainMenu, SSVAppSettings.menuSizePlanet, true, 0.75f, mainMenu.layout, SelectPlanetMenu);
+                }
             }
             mainMenu.replaceItem("SolarSystem", 0);
             MenuItem.isLock = false;

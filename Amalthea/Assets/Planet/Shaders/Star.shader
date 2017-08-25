@@ -9,7 +9,7 @@ Shader "LemonSpawn/Star" {
 	}
 	SubShader {
 //	    Tags {"Queue"="Transparent-1" "IgnoreProjector"="True" "RenderType"="Transparent"}
-	    Tags {"Queue"="Opaque" "IgnoreProjector"="True" "RenderType"="Opaque"}
+	    Tags {"Queue"="Geometry" "IgnoreProjector"="True" "RenderType"="Opaque"}
         LOD 400
 
 
@@ -92,7 +92,7 @@ Shader "LemonSpawn/Star" {
  				 //o.worldPosition = mul (_Object2World, v.vertex).xyz;
 
  				 float3 vv = mul(unity_ObjectToWorld, v.vertex).xyz;
- 				 vv = normalize(vv-v3Translate)*fInnerRadius*1.01;
+// 				 vv = normalize(vv-v3Translate)*fInnerRadius*1.01;
 
 //  			   	  getGroundAtmosphere(v.vertex, o.c0, o.c1);
   				
@@ -127,11 +127,12 @@ Shader "LemonSpawn/Star" {
 
 			}
 
+
                             
 		fixed4 frag(v2f i) : COLOR {
 
-			float3 worldSpacePosition = i.worldPosition - v3Translate*0;
-			float3 viewDirection = normalize(_WorldSpaceCameraPos - worldSpacePosition);
+			float3 worldSpacePosition = i.worldPosition;// -v3Translate;
+			float3 viewDirection = normalize(_WorldSpaceCameraPos - worldSpacePosition - v3Translate);
 			float3 centerDirection = normalize(_WorldSpaceCameraPos);
 
 			float globalLight = clamp(dot(i.normal, normalize(lightDir))+0.25,0,1);
@@ -158,7 +159,7 @@ Shader "LemonSpawn/Star" {
 	//		t2 = max(t2, 0.0);
 		//	val = val + t2*5;
 
-			float theta = 1.0 - pow(dot(normalize(viewDirection), pos),0.4);
+			float theta = 1- pow(dot(normalize(viewDirection), pos),0.4);
 //			pColor = vec4(unColor + total - theta, 1.0);
 			val += theta*0.7;
 			//val *= 2.9;

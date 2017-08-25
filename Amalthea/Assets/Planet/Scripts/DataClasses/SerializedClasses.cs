@@ -73,6 +73,9 @@ namespace LemonSpawn
         public float color_g = 0;
         public float color_b = 0;
 
+
+        public string forcePlanetSurface = "";
+
         public Color getColor()
         {
             if (color_r == 0 && color_g == 0 && color_b == 0)
@@ -95,6 +98,7 @@ namespace LemonSpawn
             ps.properties.pos.x = pos_x;
             ps.properties.pos.y = pos_y;
             ps.properties.pos.z = pos_z;
+            ps.properties.serializedPlanet = this;
             ps.rotation = rot_y % (2.0 * Mathf.PI);
             ps.temperature = temperature;
             ps.seed = seed;
@@ -210,6 +214,7 @@ namespace LemonSpawn
         private int frame = 0;
         public float skybox = 0;
         public string uuid;
+        public float displayTime = 1;
         public int EnvQuadLevel = 5;
         public int resolution = 64;
         public bool useSpaceCamera = true;

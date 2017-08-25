@@ -77,7 +77,8 @@ namespace LemonSpawn {
         }
 
         public override void Update() {
-            //cameraAndPosition();
+            cameraAndPosition();
+            starMaterial.SetVector("v3Translate", pSettings.transform.position);
         }
 
 

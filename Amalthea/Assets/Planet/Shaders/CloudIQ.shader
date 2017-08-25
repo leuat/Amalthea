@@ -130,13 +130,15 @@ Shader "LemonSpawn/CloudID" {
 
 			float val = getIQClouds(pos,N);
 
+
 			c.rgb = ls_cloudcolor*ls_cloudintensity;
 			c.a = val;
 
 			c.a*=ls_cloudthickness;
+			
 			if (c.a<0.02)
 				discard;
-
+			
 
 			float shadow = getIQCloudShadow(pos, normalize(v3LightPos), ls_shadowscale, 4);
 
@@ -146,7 +148,13 @@ Shader "LemonSpawn/CloudID" {
 
 //			c.rgb = groundColor(i.c0, i.c1, c.rgb*0);
 			c.rgb = atmColor(i.c0, i.c1)+c.rgb;
+			
+//			c.a += 1-length(c.rgb);
 
+
+	//		c.rgb = float3(0.5, 0.5, 0.5);
+//			c.a += 0.9;
+//			c.a = 1;
 
 			return c;
              }

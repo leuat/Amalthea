@@ -8,7 +8,7 @@ namespace LemonSpawn
     {
         public List<DisplayPlanet> dPlanets = new List<DisplayPlanet>();
         public DisplayPlanet selected = null;
-        public DisplayPlanet dpSun = null;
+        public List<DisplayPlanet> dpSun = new List<DisplayPlanet>();
         public Vector3 focusPointCurStar = Vector3.zero;
         public StarSystem currentSystem = null, selectedSystem = null;
         public APlayer player = new APlayer();
@@ -46,13 +46,16 @@ namespace LemonSpawn
 
             return null;
         }
-        public DisplayPlanet findDisplayPlanetWithparent(LemonSpawn.Planet p)
+        public List<DisplayPlanet> findDisplayPlanetsWithparent(LemonSpawn.Planet p)
         {
+
+            List<DisplayPlanet> lst = new List<DisplayPlanet>();
+
             foreach (DisplayPlanet dp in dPlanets)
                 if (dp.planet.lsPlanet.pSettings.properties.parentPlanet == p)
-                    return dp;
+                    lst.Add(dp);
 
-            return null;
+            return lst ;
         }
 
 
@@ -62,23 +65,29 @@ namespace LemonSpawn
             // First, find the sun
             //            DisplayPlanet sun = dPlanets[0];
             
-            dpSun = findDisplayPlanetWithparent(null);
-            dpSun.children.Clear();
+            dpSun = findDisplayPlanetsWithparent(null);
+//            Debug.Log("Suns: " + dpSun.Count);
+            foreach (DisplayPlanet dp in dpSun)
+                dp.children.Clear();
+
             foreach (DisplayPlanet dp in dPlanets)
             {
-                if (dp.planet.lsPlanet.pSettings.properties.parentPlanet == dpSun.planet.lsPlanet)
+                foreach (DisplayPlanet star in dpSun)
                 {
-                    dpSun.children.Add(dp);
-                }
-                if (dp.planet.lsPlanet.pSettings.category == LemonSpawn.PlanetSettings.Categories.Planet)
-                    foreach (DisplayPlanet sp in dPlanets)
+                    if (dp.planet.lsPlanet.pSettings.properties.parentPlanet == star.planet.lsPlanet)
                     {
-                        if (sp.planet.lsPlanet.pSettings.properties.parentPlanet == dp.planet.lsPlanet)
-                        {
-                            dp.children.Add(sp);
-                        }
+                        star.children.Add(dp);
                     }
+                    if (dp.planet.lsPlanet.pSettings.category == LemonSpawn.PlanetSettings.Categories.Planet)
+                        foreach (DisplayPlanet sp in dPlanets)
+                        {
+                            if (sp.planet.lsPlanet.pSettings.properties.parentPlanet == dp.planet.lsPlanet)
+                            {
+                                dp.children.Add(sp);
+                            }
+                        }
 
+                }
             }
         }
 
@@ -165,7 +174,8 @@ namespace LemonSpawn
 //                dp.DestroyOrbits();
                 GameObject.DestroyImmediate(dp.go);
             }
-            dpSun = null;
+            dpSun.Clear();
+//            dpSun = null;
             dPlanets.Clear();
             selected = null;
             
@@ -211,7 +221,7 @@ namespace LemonSpawn
                 string n = g.name;
                 if (n.ToLower().Contains("planet") && !n.ToLower().Contains("moon"))
                 {
-                    g.transform.parent = findDisplayPlanetWithparent(null).planet.lsPlanet.pSettings.transform;//   GameObject.Find("The star").transform;
+                    g.transform.parent = findDisplayPlanetsWithparent(null)[0].planet.lsPlanet.pSettings.transform;//   GameObject.Find("The star").transform;
                 }
                 if (n.ToLower().Contains("moon"))
                 {

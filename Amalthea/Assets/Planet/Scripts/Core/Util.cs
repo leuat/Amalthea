@@ -1040,6 +1040,19 @@ namespace LemonSpawn
             }
         }
 
+        public static float RandomGauss(float mean, float stdDev, System.Random rnd)
+        {
+
+            double u1 = 1.0 - rnd.NextDouble(); //uniform(0,1] random doubles
+            double u2 = 1.0 - rnd.NextDouble();
+            double randStdNormal = Math.Sqrt(-2.0 * Math.Log(u1)) *
+                         Math.Sin(2.0 * Math.PI * u2); //random normal(0,1)
+            double randNormal =
+                         mean + stdDev * randStdNormal; //random normal(mean,stdDev^2)
+
+            return (float)randNormal;
+        }
+
         public static List<string> FindFilesInDirectory(string dir, string fileType)
         {
             DirectoryInfo info = new DirectoryInfo(dir + ".");

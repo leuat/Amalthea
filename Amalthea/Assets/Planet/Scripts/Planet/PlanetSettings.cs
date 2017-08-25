@@ -38,7 +38,6 @@ namespace LemonSpawn {
         public List<Frame> Frames = new List<Frame>();
         public Plane[] cameraPlanes;
         public GPUSurface gpuSurface;
-        public Vector3 scale = Vector3.one;
         public Color extraColor = new Color(1,1,1,1);
     }
     // Public settings
@@ -276,7 +275,9 @@ namespace LemonSpawn {
 
 
             if (planetType == null)
-                planetType = PlanetTypes.p.getRandomPlanetType(r, getActualRadius(), temperature);
+                planetType = PlanetTypes.p.getRandomPlanetType(r, getActualRadius(), temperature, properties.serializedPlanet.forcePlanetSurface);
+
+
             planetTypeName = planetType.name;
             planetType.Realize(r);
             planetType.setParameters(this, r);

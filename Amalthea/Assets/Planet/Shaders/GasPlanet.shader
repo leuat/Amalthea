@@ -128,7 +128,9 @@
 		float yy = pos.y;
 		float scale = ls_cloudthickness*3.5;
 
-		float3 p = 20*float3(0, yy + 10.1234, 0)*scale;
+		float ns = 0.02;
+
+		float3 p = 13*float3(ns*normal.x, yy + 10.1234, ns*normal.z)*scale;
 
 //		return ls_cloudcolor*clamp(getNoiseOctaves(1*p, 2, 0.5, 8, 0) - 0.3, 0,1) ;
 
@@ -136,7 +138,7 @@
 		float n = clamp(1 - abs(normal.y), 0, 1);
 //		float n = 1;
 
-		float amp = 0.5*n;// noise(4.23*pos);
+		float amp = 0.1*n;// noise(4.23*pos);
 		float stormThreshold = getStormThreshold(pos, add);
 			
 		float stormy = 100 * noise(10*normal)*stormThreshold;// *noise(float3(0.35, 23.234, 0.52));
@@ -155,15 +157,23 @@
 		pp.z += add * 0.05;
 		p.y+=amp*0.5*noise(scale * 56 * pp);
 		pp.x += add * 0.01;
-		p.y += 0.1*noise(scale*1856.34*pp);
+		p.y += amp*0.2*noise(scale*1856.34*pp);
 
+/*		pp.x += add * 0.001;
+		p.y += amp*0.05*noise(scale*12856.34*pp);
+		*/
 		p.y += stormy;
 		p.x += 0.1*stormy*noise(pos*25);
 		
 		//p.y += 0.1*stormy*add//
 
 
-		float val = pow(1.2*abs(getNoiseOctaves(p, 8, 0.5, 4, 0)),1)*0.5;
+		//float val = pow(1.2*abs(getNoiseOctaves(p, 8, 0.5, 4, 0)),1)*0.5;
+
+		float val = pow(1.2* abs(getMultiFractal2(p, 0.1, 12, 2.5, 0.57, 4, -0.5)),1);        
+
+
+		// Add dark bankds
 
 
 		//val += 3*stormThreshold;
@@ -176,9 +186,11 @@
 
 		val = clamp(val-ls_cloudSubScale, 0, 1);
 
+		float dval = 0.1*pow(2 * abs(getMultiFractal2(p*2.6554, 0.1, 12, 2.5, 0.57, 4, -0.5)), 1);
 
+		dval = clamp(dval - ls_cloudSubScale*0.5, 0, 1);
 
-		return c*val;
+		return c*val -c.bgr*dval;
 
 
 	}

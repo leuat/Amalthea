@@ -68,7 +68,7 @@ namespace LemonSpawn
             c[0] = new Vector3( pSettings.properties.extraColor.r, pSettings.properties.extraColor.g, pSettings.properties.extraColor.b);
             explosionBB.lsMesh.mesh.normals = c;*/
             material.SetColor("_Color", pSettings.properties.extraColor);
-            material.SetFloat("_Size", pSettings.properties.scale.x*rad);
+            material.SetFloat("_Size", pSettings.properties.localScale.x*rad);
 /*            if (object3d != null)
             {
                 object3d.transform.localScale = Vector3.one * pSettings.properties.scale.x*rad;

@@ -50,15 +50,18 @@ namespace LemonSpawn {
 		public static int CloudTextureSize = 1024;
 		public static bool RenderMenu = true;
 		public static bool GPUSurface = true;
-		public static float version = 0.21f;
+		public static float version = 0.22f;
         public static float powScale = 0.75f;
         public static float fov = 70;
         public static Vector3 stretch = Vector3.one;
         public static bool UsePerPixelShading = true;
         public static bool useAtmosphericStarSphere = true;
 
+        public static Texture2D craters = null;
+
+
         public static SerializedWorld currentSZWorld;
-        public static bool debug = true;
+        public static bool debug = false;
 		public static float MinCameraHeight = 1.5f;
 		public static RenderType renderType = RenderType.Normal;
 		public static string extraText = "";
@@ -521,6 +524,20 @@ namespace LemonSpawn {
         }
 
 
+
+        void GenerateCraters()
+        {
+            C2DMap.sizeX = 512;
+            C2DMap.sizeY = 512;
+
+            C2DMap m = new C2DMap();
+/*            m.Craters(75, 4, new System.Random());
+            RenderSettings.craters = m.ToTexture(Color.white);
+            RenderSettings.craters.wrapMode = TextureWrapMode.Repeat;
+            RenderSettings.craters.Apply();*/
+            RenderSettings.craters = (Texture2D)Resources.Load("Textures/LROLow");
+        }
+
         protected void StartBasics() {
             RenderSettings.path = Application.dataPath + "/../";
             CurrentApp = Verification.MCAstName;
@@ -542,7 +559,7 @@ namespace LemonSpawn {
 
             //CloseCamera = closeCamera.GetComponent<Camera>();
             SetupCloseCamera();
-
+            GenerateCraters();
 
             RenderSettings.maxQuadNodeLevel = m_maxQuadNodeLevel;
             RenderSettings.sizeVBO = szWorld.resolution;

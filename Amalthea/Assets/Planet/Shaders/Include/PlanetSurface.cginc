@@ -14,6 +14,8 @@
 		uniform float3 surfaceVortex2;
 		float4x4 rotMatrix;
 	
+		uniform sampler2D _Craters;
+
 
 		float getStandardPerlin(float3 pos, float scale, float power, float sub, int N) {
 			float n = 0;
@@ -127,7 +129,7 @@
 
 
 
-		float getSurfaceHeight(float3 pos, float scale, float octaves) {
+		float getSurfaceHeightOrg(float3 pos, float scale, float octaves) {
 
 			// return noise(pos * 10) * 5;
 			scale = scale*(1 + surfaceVortex1.y*noise(pos*surfaceVortex1.x));
@@ -140,45 +142,31 @@
 		}
 
 
-		float getSurfaceHeightCraters(float3 pos, float scale, float octaves) {
+
+		float getSurfaceHeight(float3 pos, float scale, float octaves, float craterScale = 1) {
 
 			//return noise(pos * 10)*5;
 
 
-			scale = scale*(1 + surfaceVortex1.y*noisePerturbed(pos*surfaceVortex1.x));
-			scale = scale*(1 + surfaceVortex2.y*noisePerturbed(pos*surfaceVortex2.x));
-			//float val = getMultiFractal(pos, scale, octaves*0.6, surfaceNoiseSettings.x, surfaceNoiseSettings.y, surfaceNoiseSettings.z, surfaceNoiseSettings2.x);
-			float val = 1;
-			float continent = getMultiFractal(pos, scale*1.523, octaves*1, surfaceNoiseSettings.x, surfaceNoiseSettings.y, surfaceNoiseSettings.z, surfaceNoiseSettings2.x);
-//			float continent = clamp(getMultiFractal(pos, scale*1.523, 6, 2.5, 1, 1.5, 0),0,0.5);
-//			float h = getMultiFractal(pos, scale*2.523, 6, surfaceNoiseSettings.x, surfaceNoiseSettings.y, surfaceNoiseSettings.z, surfaceNoiseSettings2.x);
-//			float h = 0.5*continent*getMultiFractal(pos, scale*12, octaves, surfaceNoiseSettings.x, surfaceNoiseSettings.y, surfaceNoiseSettings.z, surfaceNoiseSettings2.x);
-	//		 h+= 0.05*getMultiFractal(pos, scale*137.23, octaves, surfaceNoiseSettings.x, surfaceNoiseSettings.y, surfaceNoiseSettings.z, surfaceNoiseSettings2.x);
-			//float h  = 0.2*clamp(getSwissFractal(pos, scale*surfaceNoiseSettings6.z, 10, 2.2, surfaceNoiseSettings6.x, surfaceNoiseSettings6.y, surfaceNoiseSettings5.x, surfaceNoiseSettings5.y)- surfaceNoiseSettings5.z,0,100);
-			val = continent;// + h;
-			//val = clamp(val, 0.3, 2);
-			//val+= continent*clamp(getSwissFractal(pos, scale*surfaceNoiseSettings6.z, 8, 2.2, surfaceNoiseSettings6.x, surfaceNoiseSettings6.y, surfaceNoiseSettings5.x, surfaceNoiseSettings5.y)- surfaceNoiseSettings5.z,0,100);
-			//val += val*0.6*clamp(getSwissFractal(pos, 0.2*scale*surfaceNoiseSettings6.z, 4, 2.2, surfaceNoiseSettings6.x, surfaceNoiseSettings6.y, surfaceNoiseSettings5.x, surfaceNoiseSettings5.y) - surfaceNoiseSettings5.z, 0, 100);
-			//val += 0.2*getMultiFractal(pos, scale*11.234, octaves-2, surfaceNoiseSettings.x, surfaceNoiseSettings.y, surfaceNoiseSettings.z, surfaceNoiseSettings2.x);
-//				if (surfaceNoiseSettings4.y>0)
-//	    		val+= surfaceNoiseSettings4.y*getMultiFractal(pos*surfaceNoiseSettings4.z, scale, octaves, surfaceNoiseSettings.x, surfaceNoiseSettings.y, surfaceNoiseSettings.z, surfaceNoiseSettings2.x);
-			val =  pow(val, surfaceNoiseSettings3.z);
-			/*float craterScale = surfaceNoiseSettings5.x*10;
+			scale = scale*(1 + surfaceVortex1.y*noise(pos*surfaceVortex1.x));
+			scale = scale*(1 + surfaceVortex2.y*noise(pos*surfaceVortex2.x));
+			float val = getMultiFractal(pos, scale*1.523, (int)octaves + 2, surfaceNoiseSettings.x, surfaceNoiseSettings.y, surfaceNoiseSettings.z, surfaceNoiseSettings2.x);
+			val = pow(val, surfaceNoiseSettings3.z);
 
-			float crater = 0.5*(abs(noise(craterScale*pos)) + abs(noise(craterScale*pos * 0.5)));// +abs(noise(craterScale*pos * 4));
 
-			crater = abs(pow(clamp(crater - surfaceNoiseSettings6.y,0,1), 2));
-			crater = clamp(5*crater - 10.5*exp(-pow(crater - 0.05, 2)*500), -100, 100);
-
-			return clamp(val-surfaceNoiseSettings3.x - crater*surfaceNoiseSettings6.z*0.001, -0.1, 10);
+/*			float pi = 3.14159265;
+			float2 uv = float2(saturate(((atan2(pos.z, pos.x) / (1*pi)) + 1.0) / 2.0), (0.5 - (asin(pos.y) / pi)));			
+			float craters = tex2Dlod(_Craters, float4(uv*1,0,0)).x*0.2;
 			*/
-			return clamp(val - surfaceNoiseSettings3.x, -0.1, 10);
-			//return getStandardPerlin(pos, scale, 1, 0.5, 8);
+			float craters = 0;
+//			return craters;
+
+			return clamp(val + craters*craterScale - surfaceNoiseSettings3.x, -0.1, 10);
 
 		}
 
-		float3 getHeightPosition(in float3 pos, in float scale, float heightScale, float octaves) {
-			return pos*fInnerRadius *(1 + getSurfaceHeight(mul(rotMatrix, pos), scale, octaves)*heightScale);
+		float3 getHeightPosition(in float3 pos, in float scale, float heightScale, float octaves, float cs=1) {
+			return pos*fInnerRadius *(1 + getSurfaceHeight(mul(rotMatrix, pos), scale, octaves,cs)*heightScale);
 //			return pos*fInnerRadius*(1+getSurfaceHeight(mul(rotMatrix, pos) , scale, octaves)*heightScale);
 			
 		}

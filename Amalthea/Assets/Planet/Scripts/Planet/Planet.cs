@@ -67,7 +67,7 @@ namespace LemonSpawn
 //                pos = pos - pSettings.properties.parentPlanet.pSettings.properties.pos;
             pSettings.properties.pos = pos;
             pSettings.rotation = rot;
-            pSettings.properties.scale = f0.scale() + (f1.scale() - f0.scale()) * (float)dt;
+            //pSettings.properties.scale = f0.scale() + (f1.scale() - f0.scale()) * (float)dt;
 
             if (isNewFrame && f0.sound!="")
             {
@@ -76,9 +76,8 @@ namespace LemonSpawn
 
             if (pSettings.category == PlanetSettings.Categories.Planet)
             {
-                Vector3 localscale = f0.scale() + (f1.scale() - f0.scale()) * (float)dt;
+                Vector3 localscale = (f0.scale() + (f1.scale() - f0.scale()) * (float)dt);
                 //pSettings.gameObject.transform.localScale = localscale;
-                //Debug.Log(localscale);
                 pSettings.properties.localScale = localscale;
             }
 

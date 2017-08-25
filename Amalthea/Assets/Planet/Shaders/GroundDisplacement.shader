@@ -154,7 +154,7 @@ Shader "LemonSpawn/GroundDisplacement"
 
 //		capV.xyz -= v3Translate;
 
-		capV.xyz += v3Translate;
+//		capV.xyz += v3Translate;
 /*		capV.x *= lengthContraction.x;
 		capV.y *= lengthContraction.y;
 		capV.z *= lengthContraction.z;*/
@@ -162,7 +162,7 @@ Shader "LemonSpawn/GroundDisplacement"
 		capV.y *= scaleFactor.y;
 		capV.z *= scaleFactor.z;
 		//capV.xyz += _WorldSpaceCameraPos;
-			capV.xyz -= v3Translate;
+//			capV.xyz -= v3Translate;
 
 		o.pos = UnityObjectToClipPos(capV);
 		//o.pos.xyz -= v3Translate;
@@ -244,25 +244,37 @@ Shader "LemonSpawn/GroundDisplacement"
 
 
 
+
 	inline float3 getTex(sampler2D t, in float2 uv) {
+		return 1;
 		//								return float3(1,1,1);
+//		uv *= ;
 		float3 c = tex2D(t, uv)*0.25;
 		//								c += tex2D(t, 0.5323*uv);
 		c += tex2D(t, 0.2213*uv)*0.33;
 
 		c += tex2D(t, 0.0513*uv)*0.33;
 
-		c /= 1;
+		c /= 0.5;
 		return c;
 	}
 
 
-	half4 LfragForwardBase(VertexOutputForwardBase2 i) : SV_Target
+	inline float widthDistance(float3 pos) {
+		return clamp(10*length(pos - _WorldSpaceCameraPos)/fInnerRadius, 0.1, 10);
+	}
+
+
+
+
+
+
+half4 LfragForwardBase(VertexOutputForwardBase2 i) : SV_Target
 	{
 		FRAGMENT_SETUP(s)
 
    	    float h = (length(i.posWorld.xyz - v3Translate) - fInnerRadius) / fInnerRadius;// - liquidThreshold;
-			float3 realN = getPlanetSurfaceNormal(i.posWorld - v3Translate, i.tangent, i.binormal, 0.2/50000.0*fInnerRadius,3);
+		float3 realN = getPlanetSurfaceNormal(i.posWorld - v3Translate, i.tangent, i.binormal, widthDistance(i.posWorld.xyz),3);
 			s.normalWorld = realN;
 
 	//UnityLight mainLight = MainLight(s.normalWorld);
@@ -285,11 +297,19 @@ Shader "LemonSpawn/GroundDisplacement"
 	float3 mColor = ((1 - tt)*middleColor + middleColor2*tt);
 	//	float3 bColor = ((1-tt)*basinColor + basinColor2*tt*r_noise(normalize(i.vpos.xyz),2.1032,3));
 
-	float3 hColor = mColor;// *getTex(_Surface, i.tex.xy);//float3(1,1,1);//s.diffColor;
+
+
+
+
+
+
+	float3 hColor = mColor;//getTex(_Surface, i.tex.xy);//float3(1,1,1);//s.diffColor;
 													  //	float3 hillColor = s.diffColor;
 													  //if (dd < 0.98 )
 													  //	hColor = float3(0.2, 0.2 ,0.2);
 	float3 v3CameraPos = _WorldSpaceCameraPos - v3Translate;	// The camera's current position
+
+
 
 
 	float fCameraHeight = length(v3CameraPos);

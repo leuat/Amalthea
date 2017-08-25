@@ -66,6 +66,15 @@ namespace LemonSpawn
             HideSettingsPanels();
 
 
+            
+
+
+        }
+
+        void OnGUI()
+        {
+
+           // GUI.DrawTexture(new Rect(0, 0, Screen.height, Screen.height), RenderSettings.craters);
         }
 
 

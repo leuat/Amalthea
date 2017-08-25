@@ -363,6 +363,9 @@ namespace LemonSpawn
             if (szWorld.currentTime == 0)
                 return;
 
+            if (szWorld.displayTime == 0)
+                return;
+
             float W = Screen.width;
             float H = Screen.height;
 

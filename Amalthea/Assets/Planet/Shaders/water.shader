@@ -99,7 +99,12 @@ Shader "LemonSpawn/Water" {
 
 									float4 newVertex = mul(unity_ObjectToWorld, v.vertex);
 									newVertex.xyz -= v3Translate;
-									newVertex.xyz = normalize(newVertex.xyz)*fInnerRadius*(1 + liquidThreshold) + v3Translate;
+									newVertex.xyz = normalize(newVertex.xyz)*fInnerRadius*(1 + liquidThreshold);
+									
+									newVertex.x *= scaleFactor.x;
+									newVertex.y *= scaleFactor.y;
+									newVertex.z *= scaleFactor.z;
+									newVertex.xyz+=v3Translate;
 									v.vertex = mul(unity_WorldToObject, newVertex);
 
 									o.worldPosition = newVertex.xyz;
