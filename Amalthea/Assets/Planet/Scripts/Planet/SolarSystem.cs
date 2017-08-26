@@ -228,10 +228,15 @@ namespace LemonSpawn
                         if (p.pSettings.properties.serializedPlanet != null)
                         {
                             guiStyle.normal.textColor = p.pSettings.properties.serializedPlanet.getColor();//  new Color(0.5f, 0.7f, 1.0f);
-                            Frame frame = p.pSettings.properties.serializedPlanet.Frames[World.SzWorld.currentFrame];
-                            string info = frame.displayMessage;
-                            if (info != null && info != "")
-                                GUI.Label(new Rect(pos.x, Screen.height - pos.y, 250, 130), info, guiStyle);
+                            if (World.SzWorld.currentFrame < p.pSettings.properties.serializedPlanet.Frames.Count)
+                            {
+                                Frame frame = p.pSettings.properties.serializedPlanet.Frames[World.SzWorld.currentFrame];
+                                string info = frame.displayMessage;
+                                if (info != null && info != "")
+                                    GUI.Label(new Rect(pos.x, Screen.height - pos.y, 250, 130), info, guiStyle);
+
+
+                            }
 
                         }
                     }

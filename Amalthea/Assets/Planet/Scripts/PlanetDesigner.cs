@@ -74,7 +74,10 @@ namespace LemonSpawn
         void OnGUI()
         {
 
-           // GUI.DrawTexture(new Rect(0, 0, Screen.height, Screen.height), RenderSettings.craters);
+            // GUI.DrawTexture(new Rect(0, 0, Screen.height, Screen.height), RenderSettings.craters);
+            base.OnGUI();
+            GUI.Label(new Rect(0, 50, 100, 100), "Left:" + ThreadQueue.threadQueue.Count);
+
         }
 
 
