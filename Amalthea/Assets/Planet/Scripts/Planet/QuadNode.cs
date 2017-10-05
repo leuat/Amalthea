@@ -551,7 +551,7 @@ namespace LemonSpawn
 
 
 
-            float l = Mathf.Pow(findMinDistance(planetSettings.properties.localCamera, true), 1);
+            float l = Mathf.Pow(findMinDistance(planetSettings.properties.localCamera, true), 1)+0.0005f;
 /*            float height = RenderSettings.ResolutionScale * 0.035f;
             l = l / (height);*/
             //			l = Mathf.Min (l, 10.0f);

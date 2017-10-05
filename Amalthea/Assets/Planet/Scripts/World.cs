@@ -28,7 +28,7 @@ namespace LemonSpawn {
 	public class RenderSettings {
         public static bool UseThreading = true;
         public static bool ignoreXMLResolution = true;
-		public static int sizeVBO = 96;
+		public static int sizeVBO = 48;
 		public static bool assProjection = true;
 		public static bool flatShading = false;
 		public static int maxQuadNodeLevel = 14;
@@ -50,7 +50,8 @@ namespace LemonSpawn {
 		public static int CloudTextureSize = 1024;
 		public static bool RenderMenu = true;
 		public static bool GPUSurface = true;
-		public static float version = 0.22f;
+        public static bool RenderCorona = true;
+		public static float version = 0.23f;
         public static float powScale = 0.75f;
         public static float fov = 70;
         public static Vector3 stretch = Vector3.one;

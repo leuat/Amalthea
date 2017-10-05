@@ -1,634 +1,700 @@
-// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
-
-// Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
-
-// Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
-
-Shader "LemonSpawn/Ground"
+﻿Shader "LemonSpawn/Ground"
 {
-
 	Properties
 	{
+
 		_Color("Color", Color) = (1,1,1,1)
 		_MainTex("Albedo map", 2D) = "white" {}
-		_Cutoff("Alpha Cutoff", Range(0.0, 1.0)) = 0.5
+	_Cutoff("Alpha Cutoff", Range(0.0, 1.0)) = 0.5
 
 		_Glossiness("Smoothness", Range(0.0, 1.0)) = 0.5
 		[Gamma] _Metallic("Metallic", Range(0.0, 1.0)) = 0.0
 		_MetallicGlossMap("Metallic", 2D) = "white" {}
 
-		_BumpScale("Scale", Float) = 1.0
+	_BumpScale("Scale", Float) = 1.0
 		_BumpMap("Normal Map", 2D) = "bump" {}
 
-		_Parallax("Height Scale", Range(0.005, 0.08)) = 0.02
+	_Parallax("Height Scale", Range(0.005, 0.08)) = 0.02
 		_ParallaxMap("Height Map", 2D) = "black" {}
 
-		_OcclusionStrength("Strength", Range(0.0, 1.0)) = 1.0
+	_OcclusionStrength("Strength", Range(0.0, 1.0)) = 1.0
 		_OcclusionMap("Occlusion", 2D) = "white" {}
 
-		_EmissionColor("Color", Color) = (0,0,0)
+	_EmissionColor("Color", Color) = (0,0,0)
 		_EmissionMap("Emission", 2D) = "white" {}
 
-		_DetailMask("Detail Mask", 2D) = "white" {}
+	_DetailMask("Detail Mask", 2D) = "white" {}
 
-		_DetailAlbedoMap("Detail Albedo x2", 2D) = "grey" {}
-		_DetailNormalMapScale("Scale", Float) = 1.0
+	_DetailAlbedoMap("Detail Albedo x2", 2D) = "grey" {}
+	_DetailNormalMapScale("Scale", Float) = 1.0
 		_DetailNormalMap("Normal Map", 2D) = "bump" {}
 
-		[Enum(UV0,0,UV1,1)] _UVSec("UV Set for secondary textures", Float) = 0
+	[Enum(UV0,0,UV1,1)] _UVSec("UV Set for secondary textures", Float) = 0
 
-			// UI-only data
-			[HideInInspector] _EmissionScaleUI("Scale", Float) = 0.0
-			[HideInInspector] _EmissionColorUI("Color", Color) = (1,1,1)
+		// UI-only data
+		[HideInInspector] _EmissionScaleUI("Scale", Float) = 0.0
+		[HideInInspector] _EmissionColorUI("Color", Color) = (1,1,1)
 
-			// Blending state
-			[HideInInspector] _Mode("__mode", Float) = 0.0
-			[HideInInspector] _SrcBlend("__src", Float) = 1.0
-			[HideInInspector] _DstBlend("__dst", Float) = 0.0
-			[HideInInspector] _ZWrite("__zw", Float) = 1.0
+		// Blending state
+		[HideInInspector] _Mode("__mode", Float) = 0.0
+		[HideInInspector] _SrcBlend("__src", Float) = 1.0
+		[HideInInspector] _DstBlend("__dst", Float) = 0.0
+		[HideInInspector] _ZWrite("__zw", Float) = 1.0
 	}
+
+
+
 
 		CGINCLUDE
 #define UNITY_SETUP_BRDF_INPUT MetallicSetup
-			ENDCG
-
-
-
-			SubShader
-		{
-			Tags { "RenderType" = "Opaque" "PerformanceChecks" = "False" }
-			LOD 150
-
-
-			// ------------------------------------------------------------------
-			//  Base forward pass (directional light, emission, lightmaps, ...)
-			Pass
-			{
-				Name "FORWARD"
-				Tags { "LightMode" = "ForwardBase" }
-				Blend[_SrcBlend][_DstBlend]
-				ZWrite[_ZWrite]
-
+		ENDCG
 
 
-				CGPROGRAM
-				#pragma target 3.0
-			// TEMPORARY: GLES2.0 temporarily disabled to prevent errors spam on devices without textureCubeLodEXT
-			#pragma exclude_renderers gles
 
-			// -------------------------------------
+		SubShader
+	{
+		Tags{ "RenderType" = "Opaque" "PerformanceChecks" = "False" }
+		LOD 150
 
-			#pragma shader_feature _NORMALMAP
-			#pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
-			#pragma shader_feature _EMISSION
-			#pragma shader_feature _METALLICGLOSSMAP 
-			#pragma shader_feature ___ _DETAIL_MULX2
-			#pragma shader_feature _PARALLAXMAP
-			//#pragma skip_variants SHADOWS_SOFT DIRLIGHTMAP_COMBINED DIRLIGHTMAP_SEPARATE
 
-			#pragma multi_compile_fwdbase
-			#pragma multi_compile_fog
+		// ------------------------------------------------------------------
+		//  Base forward pass (directional light, emission, lightmaps, ...)
+		Pass
+	{
+		Name "FORWARD"
+		Tags{ "LightMode" = "ForwardBase" }
+		Blend[_SrcBlend][_DstBlend]
+		ZWrite[_ZWrite]
 
-			#pragma vertex LvertForwardBase
-			#pragma fragment LfragForwardBase
 
-			#include "UnityStandardCore.cginc"
-			#include "Include/IQnoise.cginc"
-			#include "Include/Atmosphere.cginc"
+		CGPROGRAM
+#pragma target 4.0
+		// TEMPORARY: GLES2.0 temporarily disabled to prevent errors spam on devices without textureCubeLodEXT
+#pragma exclude_renderers gles
 
+		// -------------------------------------
 
-struct VertexOutputForwardBase2
-{
-	float4 pos							: SV_POSITION;
-	float4 tex							: TEXCOORD0;
-	half3 eyeVec 						: TEXCOORD1;
-	half4 tangentToWorldAndPackedData[3]	: TEXCOORD2;	// [3x3:tangentToWorld | 1x3:viewDirForParallax]
-	half4 ambientOrLightmapUV			: TEXCOORD5;	// SH or Lightmap UV
-	SHADOW_COORDS(6)
-	UNITY_FOG_COORDS(7)
-	float3 c0 : TEXCOORD8;
-	float3 c1 : TEXCOORD9;
-	float3 n1 : TEXCOORD10;
-//	float4 vpos  : TEXCOORD11;
-	// next ones would not fit into SM2.0 limits, but they are always for SM3.0+
-#if UNITY_SPECCUBE_BOX_PROJECTION
-	float3 posWorld					: TEXCOORD11;
-	#endif
-	float3 posWorld2 				: TEXCOORD12;
-	UNITY_VERTEX_OUTPUT_STEREO
-};
+#pragma shader_feature _NORMALMAP
+#pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
+#pragma shader_feature _EMISSION
+#pragma shader_feature _METALLICGLOSSMAP 
+#pragma shader_feature ___ _DETAIL_MULX2
+#pragma shader_feature _PARALLAXMAP
+		//#pragma skip_variants SHADOWS_SOFT DIRLIGHTMAP_COMBINED DIRLIGHTMAP_SEPARATE
+
+#pragma multi_compile_fwdbase
+#pragma multi_compile_fog
+
+#pragma multi_compile LS_GPU_SURFACE LS_CPU_SURFACE
+
+//#pragma LS_GPU_SURFACE
+//#pragma LS_CPU_SURFACE
+
+#pragma vertex LvertForwardBase
+#pragma fragment LfragForwardBase
+
+#include "UnityStandardCore.cginc"
+#include "Include/IQnoise.cginc"
+#include "Include/Atmosphere.cginc"
+#include "Include/PlanetSurface.cginc"
+
+
+
+		struct VertexOutputForwardBaseGround
+	{
+		float4 pos							: SV_POSITION;
+		float4 tex							: TEXCOORD0;
+		half3 eyeVec 						: TEXCOORD1;
+		half4 tangentToWorldAndPackedData[3]    : TEXCOORD2;	// [3x3:tangentToWorld | 1x3:viewDirForParallax]
+		half4 ambientOrLightmapUV			: TEXCOORD5;	// SH or Lightmap UV
+		SHADOW_COORDS(6)
+		UNITY_FOG_COORDS(7)
+		float3 c0 : TEXCOORD8;
+		float3 c1 : TEXCOORD9;
+		float3 posWorld					: TEXCOORD10;
+		float3 tangent : TEXCOORD11;
+
+	};
+
+
+	sampler2D _Mountain, _Basin, _Top, _Surface;
+
+
+
+
+VertexOutputForwardBaseGround LvertForwardBase(VertexInput v)
+	{
+		VertexOutputForwardBaseGround o;
+
+
+		float3 normalWorld = normalize(mul(unity_ObjectToWorld, v.vertex).xyz - v3Translate);
+#ifdef LS_GPU_SURFACE
+		float4 groundVertex = getPlanetSurfaceOnly(v.vertex);
+		v.vertex = groundVertex;
+#else
+		float4 groundVertex = v.vertex;
+		normalWorld = normalize(UnityObjectToWorldNormal(v.normal));
+
+#endif
+		UNITY_INITIALIZE_OUTPUT(VertexOutputForwardBaseGround, o);
+		float4 capV = groundVertex;
+		float4 posWorld = mul(unity_ObjectToWorld, capV);
+		
+#ifdef _TANGENT_TO_WORLD
+		o.tangent = v.tangent.xyz;
+#endif
+								  //		posWorld.x = 0;
+		o.posWorld = posWorld.xyz;
+
+		float wh = (length(o.posWorld.xyz - v3Translate) - fInnerRadius);
 
+#ifdef LS_GPU_SURFACE
+		capV.x *= scaleFactor.x;
+		capV.y *= scaleFactor.y;
+		capV.z *= scaleFactor.z;
+#else
+/*		o.posWorld.x/= scaleFactor.x;
+		o.posWorld.y /= scaleFactor.y;
+		o.posWorld.z /= scaleFactor.z;
+		o.posWorld.xyz = capV.xyz;*/
+#endif
+		o.pos = UnityObjectToClipPos(capV);
 
+		o.tex = TexCoords(v);
+		o.eyeVec = NormalizePerVertexNormal(posWorld.xyz - _WorldSpaceCameraPos);
 
-	float calculateWave(float2 pos, float t) {
-		//	return cos(time + pos.x);
-			int N = 8;
-			float v = 0;
-			float w = 0.5;
-			float theta_i = 1;
-			for (int i = 1; i < N; i++) {
-				float A = 1.0 / i;
-				float k_i = i;
-				float kernel = pos.x*cos(theta_i) + pos.y*sin(theta_i) - w*t;
-				v += A*cos(k_i*kernel);
-			}
-			return v;
+//		o.n1 = normalWorld;
+#ifdef _TANGENT_TO_WORLD
+		float4 tangentWorld = float4(UnityObjectToWorldDir(v.tangent.xyz), v.tangent.w);
 
-		}
+		float3x3 tangentToWorld = CreateTangentToWorldPerVertex(normalWorld, tangentWorld.xyz, tangentWorld.w);
+		o.tangentToWorldAndPackedData[0].xyz = tangentToWorld[0];
+		o.tangentToWorldAndPackedData[1].xyz = tangentToWorld[1];
+		o.tangentToWorldAndPackedData[2].xyz = tangentToWorld[2];
+#else
+		o.tangentToWorldAndPackedData[0].xyz = 0;
+		o.tangentToWorldAndPackedData[1].xyz = 0;
+		o.tangentToWorldAndPackedData[2].xyz = normalWorld;
+#endif
+		//We need this for shadow receving
+		TRANSFER_SHADOW(o);
 
-		float Gerstner(float2 Position, float time, out float3 N) {
-			float h = 0;
-			h += 4 * (sin(-0.05*Position.x + 0.5*time)*0.5 + 0.5);
-		   float first = -0.100*cos(-0.05*Position.x + 0.5*time);
+		// Static lightmaps
+#ifndef LIGHTMAP_OFF
+		o.ambientOrLightmapUV.xy = v.uv1.xy * unity_LightmapST.xy + unity_LightmapST.zw;
+		o.ambientOrLightmapUV.zw = 0;
+		// Sample light probe for Dynamic objects only (no static or dynamic lightmaps)
+#elif UNITY_SHOULD_SAMPLE_SH
+#if UNITY_SAMPLE_FULL_SH_PER_PIXEL
+		o.ambientOrLightmapUV.rgb = 0;
+#elif (SHADER_TARGET < 30)
+		o.ambientOrLightmapUV.rgb = ShadeSH9(half4(normalWorld, 1.0));
+#else
+		// Optimization: L2 per-vertex, L0..L1 per-pixel
+		o.ambientOrLightmapUV.rgb = ShadeSH3Order(half4(normalWorld, 1.0));
+#endif
+		// Add approximated illumination from non-important point lights
+#ifdef VERTEXLIGHT_ON
+		o.ambientOrLightmapUV.rgb += Shade4PointLights(
+			unity_4LightPosX0, unity_4LightPosY0, unity_4LightPosZ0,
+			unity_LightColor[0].rgb, unity_LightColor[1].rgb, unity_LightColor[2].rgb, unity_LightColor[3].rgb,
+			unity_4LightAtten0, posWorld, normalWorld);
+#endif
+#endif
 
-		   h += 2 * (sin((-0.07*Position.x + 0.07*Position.y) + time*1.3)*0.5 + 0.5);
-		   float second1 = -0.070*cos(-0.07*Position.x + 0.07*Position.y + 1.3*time);
-		   float second2 = 0.070*cos(-0.07*Position.x + 0.07*Position.y + 1.3*time);
-
-			float3 prem = float3(-first,1,-first);
-		   float3 sec = normalize(float3(-second1,1,-second2));
-		   N = normalize((sec + prem)* float3(1,0.5,1));
-
-			return h;
-		}
-
-
-		/*float3 Gerstner2(float3 P, float DeltaT, out float3 N) {
-
-			float A = 20.0;	// amplitude
-			float L = 50;	// wavelength
-			float w = 2*3.1416/L;
-			float Q = 0.5;
-
-			float3 P0 = P;
-			float2 D = normalize(float2(0.5, 5));
-			float dotD = dot(P0.xz, D);
-			float C = cos(w*dotD + DeltaT/1.0);
-			float S = sin(w*dotD + DeltaT/1.0);
-
-			float3 val = float3( Q*A*C*D.x, A * S,  Q*A*C*D.y);
-
-
-			return val;
-
-		//	output.position = mul(WorldViewProj, float4(P,1));
-
-		}
-		*/
-
-		sampler2D _Mountain, _Basin, _Top, _Surface;
-
+#ifdef DYNAMICLIGHTMAP_ON
+		o.ambientOrLightmapUV.zw = v.uv2.xy * unity_DynamicLightmapST.xy + unity_DynamicLightmapST.zw;
+#endif
 
-		VertexOutputForwardBase2 LvertForwardBase(VertexInput v)
-		{
-			VertexOutputForwardBase2 o;
-			UNITY_INITIALIZE_OUTPUT(VertexOutputForwardBase2, o);
+#ifdef _PARALLAXMAP
+		TANGENT_SPACE_ROTATION;
+		half3 viewDirForParallax = mul(rotation, ObjSpaceViewDir(groundVertex));
+		o.tangentToWorldAndPackedData[0].w = viewDirForParallax.x;
+		o.tangentToWorldAndPackedData[1].w = viewDirForParallax.y;
+		o.tangentToWorldAndPackedData[2].w = viewDirForParallax.z;
+#endif
 
-			float4 capV = v.vertex;
-			float4 posWorld = mul(unity_ObjectToWorld, capV);
-			#if UNITY_SPECCUBE_BOX_PROJECTION
-				o.posWorld = posWorld.xyz;
-			#endif
-			o.posWorld2 = v.vertex;
+		UNITY_TRANSFER_FOG(o,o.pos);
 
-			float wh = (length(o.posWorld.xyz - v3Translate) - fInnerRadius);
+		getGroundAtmosphere(groundVertex, o.c0, o.c1);
 
+		return o;
+	}
 
-			o.pos = UnityObjectToClipPos(capV);
 
-//			o.vpos = capV;
+	uniform float hillyThreshold;
 
-			o.tex = TexCoords(v);
-			o.eyeVec = NormalizePerVertexNormal(posWorld.xyz - _WorldSpaceCameraPos);
-			float3 normalWorld = UnityObjectToWorldNormal(v.normal);
-			/*	if (wh<liquidThreshold) {
 
 
-			//		float h = Gerstner(o.tex.xy*100.0, time*1.0, normalWorld)*0.4;
-					//Gerstner2(normalize(capV.xyz)*100000.0, time*1.0, normalWorld);
-					float3 P = 0.2*Gerstner2(normalize(capV.xyz)*1000000.0, time*1.0, normalWorld);
-			//		capV.xyz = normalize(capV.xyz)*(fInnerRadius + liquidThreshold + h);
-					capV.xyz = normalize(capV.xyz)*(fInnerRadius + liquidThreshold) +P;
-					normalWorld = normalize(normalize(capV)+normalWorld);
 
-					posWorld = mul(_Object2World, capV);
-					o.pos = mul(UNITY_MATRIX_MVP, capV);
 
-					normalWorld = normalize(capV.xyz);
-				}
-				*/
-//			normalWorld = normalize(capV.xyz);
+	inline float3 getTex(sampler2D t, in float2 uv) {
+//		return 1;
+		//								return float3(1,1,1);
+		//		uv *= ;
+		float3 c = tex2D(t, uv)*0.25;
+		//								c += tex2D(t, 0.5323*uv);
+		c += tex2D(t, 0.2213*uv)*0.33;
 
-				o.n1 = normalWorld;
-				#ifdef _TANGENT_TO_WORLD
-					float4 tangentWorld = float4(UnityObjectToWorldDir(v.tangent.xyz), v.tangent.w);
+		c += tex2D(t, 0.0513*uv)*0.33;
 
-					float3x3 tangentToWorld = CreateTangentToWorldPerVertex(normalWorld, tangentWorld.xyz, tangentWorld.w);
-					o.tangentToWorldAndPackedData[0].xyz = tangentToWorld[0];
-					o.tangentToWorldAndPackedData[1].xyz = tangentToWorld[1];
-					o.tangentToWorldAndPackedData[2].xyz = tangentToWorld[2];
-				#else
-					o.tangentToWorldAndPackedData[0].xyz = 0;
-					o.tangentToWorldAndPackedData[1].xyz = 0;
-					o.tangentToWorldAndPackedData[2].xyz = normalWorld;
-				#endif
-					//We need this for shadow receving
-					TRANSFER_SHADOW(o);
+		c /= 0.5;
+		return c;
+	}
 
-					// Static lightmaps
-					#ifndef LIGHTMAP_OFF
-						o.ambientOrLightmapUV.xy = v.uv1.xy * unity_LightmapST.xy + unity_LightmapST.zw;
-						o.ambientOrLightmapUV.zw = 0;
-						// Sample light probe for Dynamic objects only (no static or dynamic lightmaps)
-						#elif UNITY_SHOULD_SAMPLE_SH
-							#if UNITY_SAMPLE_FULL_SH_PER_PIXEL
-								o.ambientOrLightmapUV.rgb = 0;
-							#elif (SHADER_TARGET < 30)
-								o.ambientOrLightmapUV.rgb = ShadeSH9(half4(normalWorld, 1.0));
-							#else
-								// Optimization: L2 per-vertex, L0..L1 per-pixel
-								o.ambientOrLightmapUV.rgb = ShadeSH3Order(half4(normalWorld, 1.0));
-							#endif
-								// Add approximated illumination from non-important point lights
-								#ifdef VERTEXLIGHT_ON
-									o.ambientOrLightmapUV.rgb += Shade4PointLights(
-										unity_4LightPosX0, unity_4LightPosY0, unity_4LightPosZ0,
-										unity_LightColor[0].rgb, unity_LightColor[1].rgb, unity_LightColor[2].rgb, unity_LightColor[3].rgb,
-										unity_4LightAtten0, posWorld, normalWorld);
-								#endif
-							#endif
-
-							#ifdef DYNAMICLIGHTMAP_ON
-								o.ambientOrLightmapUV.zw = v.uv2.xy * unity_DynamicLightmapST.xy + unity_DynamicLightmapST.zw;
-							#endif
 
-							#ifdef _PARALLAXMAP
-								TANGENT_SPACE_ROTATION;
-								half3 viewDirForParallax = mul(rotation, ObjSpaceViewDir(v.vertex));
-								o.tangentToWorldAndPackedData[0].w = viewDirForParallax.x;
-								o.tangentToWorldAndPackedData[1].w = viewDirForParallax.y;
-								o.tangentToWorldAndPackedData[2].w = viewDirForParallax.z;
-							#endif
+	inline float widthDistance(float3 pos) {
+		return clamp(10 * length(pos - _WorldSpaceCameraPos) / fInnerRadius, 0.1, 10);
+	}
 
-							UNITY_TRANSFER_FOG(o,o.pos);
 
-							getGroundAtmosphere(v.vertex, o.c0, o.c1);
 
-							return o;
-						}
 
 
-						uniform float hillyThreshold;
 
+	float3 getSurfaceColor(float h, float hill, float perlinGround, float posY, float2 uv) {
+		
+		float3 mColor = ((1 - perlinGround)*middleColor + middleColor2*perlinGround);
+		//	float3 bColor = ((1-tt)*basinColor + basinColor2*tt*r_noise(normalize(i.vpos.xyz),2.1032,3));
 
 
+		float3 hColor = mColor;//getTex(_Surface, i.tex.xy);//float3(1,1,1);//s.diffColor;
+							   //	float3 hillColor = s.diffColor;
+							   //if (dd < 0.98 )
+							   //	hColor = float3(0.2, 0.2 ,0.2);
+		float3 v3CameraPos = _WorldSpaceCameraPos - v3Translate;	// The camera's current position
 
-						half4 fragForwardBaseORG(VertexOutputForwardBase i) : SV_Target
-						{
-							FRAGMENT_SETUP(s)
-						#if UNITY_OPTIMIZE_TEXCUBELOD
-							s.reflUVW = i.reflUVW;
-						#endif
 
-							UnityLight mainLight = MainLight();
-							half atten = SHADOW_ATTENUATION(i);
 
 
-							half occlusion = Occlusion(i.tex.xy);
-							UnityGI gi = FragmentGI(s, occlusion, i.ambientOrLightmapUV, atten, mainLight);
-							float rness = 1;
-							half4 c = UNITY_BRDF_PBS(s.diffColor, s.specColor, s.oneMinusReflectivity, rness, s.normalWorld, -s.eyeVec, gi.light, gi.indirect);
-							c.rgb += UNITY_BRDF_GI(s.diffColor, s.specColor, s.oneMinusReflectivity, rness, s.normalWorld, -s.eyeVec, occlusion, gi);
-							c.rgb += Emission(i.tex.xy);
+		float fCameraHeight = length(v3CameraPos);
+		float camH = clamp(fCameraHeight - fInnerRadius, 0, 1);
+		//	float wh = (length(i.posWorld.xyz - v3Translate) - fInnerRadius);
+		//	wh = 0.0;
+		//									float modulatedHillyThreshold = hillyThreshold* atan2(i.posWorld.z , i.posWorld.y);
+		float modulatedTopThreshold = topThreshold*(1 - posY*1.1);
+		float modulatedHillyThreshold = hillyThreshold;// clamp(hillyThreshold - 1 * posY, 0, 1);
 
-							UNITY_APPLY_FOG(i.fogCoord, c.rgb);
-							return OutputForward(c, s.alpha);
-						}
 
-							inline float3 getTex(sampler2D t, in float2 uv) {
-//								return float3(1,1,1);
-								float3 c = tex2D(t, uv)*0.25;
-//								c += tex2D(t, 0.5323*uv);
-								c += tex2D(t, 0.2213*uv)*0.75;
+		hColor = mixHeight(hColor, basinColor*getTex(_Basin, uv), 500, basinThreshold, h);
 
-								c /= 1;
-							return c;
-							}
+		hColor = mixHeight(hColor, basinColor2*getTex(_Basin, uv), 3000, liquidThreshold, h);
+		hColor = mixHeight(topColor*getTex(_Top, uv), hColor, 1000, modulatedTopThreshold, h);
 
-						half4 LfragForwardBase(VertexOutputForwardBase2 i) : SV_Target
-						{
-							FRAGMENT_SETUP(s)
-							UnityLight mainLight = MainLight();
-							half atten = SHADOW_ATTENUATION(i);
-							float rness = 1.0;
-							half occlusion = Occlusion(i.tex.xy);
-							UnityGI gi = FragmentGI(
-								s.posWorld, occlusion, i.ambientOrLightmapUV, atten, rness, s.normalWorld, s.eyeVec, mainLight);
 
-							float dd = dot(normalize(i.posWorld2.xyz), normalize(s.normalWorld * 1 + i.n1 * 0));
+		//float dd = dot(normalize(i.posWorld2.xyz), normalize(s.normalWorld * 1));
 
-							float tt = clamp(noise(normalize(i.posWorld2.xyz)*3.1032)+0.2,0,1);
-							float3 mColor = ((1 - tt)*middleColor + middleColor2*tt);
-							//	float3 bColor = ((1-tt)*basinColor + basinColor2*tt*r_noise(normalize(i.vpos.xyz),2.1032,3));
+		hColor = mixHeight(hColor, hillColor*getTex(_Mountain, uv), 10, modulatedHillyThreshold, hill);
 
-								float3 hColor = mColor*getTex(_Surface, i.tex.xy);//float3(1,1,1);//s.diffColor;
-								//	float3 hillColor = s.diffColor;
-									//if (dd < 0.98 )
-									//	hColor = float3(0.2, 0.2 ,0.2);
-									float3 v3CameraPos = _WorldSpaceCameraPos - v3Translate;	// The camera's current position
+		return hColor;
+	}
 
+	half4 LfragForwardBase(VertexOutputForwardBaseGround i) : SV_Target
+	{
+		FRAGMENT_SETUP(s)
 
-									float fCameraHeight = length(v3CameraPos);
-									float camH = clamp(fCameraHeight - fInnerRadius, 0, 1);
-									float h = (length(i.posWorld.xyz - v3Translate) - fInnerRadius) / fInnerRadius;// - liquidThreshold;
-									float wh = (length(i.posWorld.xyz - v3Translate) - fInnerRadius);
+#ifdef LS_GPU_SURFACE
+	float3 pfix = i.posWorld.xyz;
+#else
+		float3 pfix = i.posWorld - v3Translate;
+		pfix = float3(pfix.x  / scaleFactor.x, pfix.y / scaleFactor.y,pfix.z / scaleFactor.z);
+		pfix += v3Translate;
+#endif
 
-//									float modulatedHillyThreshold = hillyThreshold* atan2(i.posWorld.z , i.posWorld.y);
-									float3 ppos = normalize(i.posWorld2.xyz);
-//									float modulatedHillyThreshold = atan2(ppos.z, ppos.y);
-									float posY = (clamp(2 * abs(asin(ppos.y) / 3.14159), 0, 1));
-									float modulatedTopThreshold = topThreshold*(1-posY*1.1);
-									float modulatedHillyThreshold = hillyThreshold;// clamp(hillyThreshold - 1 * posY, 0, 1);
+		float h = (length(pfix - v3Translate) - fInnerRadius) / fInnerRadius;// - liquidThreshold;
+#ifdef LS_GPU_SURFACE
+	float3 binormal = normalize(cross(i.posWorld - v3Translate, i.tangent));
 
+	float3 realN = getPlanetSurfaceNormal(i.posWorld - v3Translate, i.tangent, binormal, widthDistance(i.posWorld.xyz),3);
+	s.normalWorld = realN;
+#endif
+	//UnityLight mainLight = MainLight(s.normalWorld);
+	UnityLight mainLight = MainLight();
+	mainLight.dir = v3LightPos;
+	half atten = SHADOW_ATTENUATION(i);
 
-									hColor = mixHeight(hColor, basinColor*getTex(_Basin, i.tex.xy), 500, basinThreshold	, h);
-								
-									hColor = mixHeight(hColor, basinColor2*getTex(_Basin, i.tex.xy), 3000, liquidThreshold, h);
-									hColor = mixHeight(topColor*getTex(_Top, i.tex.xy), hColor, 1000, modulatedTopThreshold, h);
-									hColor = mixHeight(hColor, hillColor*getTex(_Mountain, i.tex.xy), 250, modulatedHillyThreshold, dd);
-									//									hColor = mixHeight(topColor, hColor, 4000, topThreshold, h);
+	half occlusion = Occlusion(i.tex.xy);
 
+	float rness = s.smoothness;
 
+	UnityGI gi = FragmentGI(
+		s.posWorld, occlusion, i.ambientOrLightmapUV, atten, rness, s.normalWorld, s.eyeVec, mainLight);
 
-									//	float3 diff = hColor*(i.c0*3 + i.c1)*1;//0.35*(hColor*1 + 1.25*cc + hColor*cc);
-										float3 diff = hColor;
-										//float3 diff = 0.35*(hColor*0 + 1.00*i.c0 + i.c1);
-										float d = 0.05;
-										//	diff -=float3(d,d,d);
 
+	//	float dd = dot(normalize(mul(rotMatrixInv, i.posWorld2.xyz)), normalize(s.normalWorld * 1 + i.n1 * 0));
 
+	
+	float3 ppos = normalize(pfix- v3Translate);
 
 
+	float perlinGround = pow(clamp(noise(normalize(ppos)*3.1032) + 0.3, 0, 1), 2);
 
-										//float4 spc =_Color;// float4(1, 1, 1, 1);// *specularity * 1;
-										float4 spc = _Color*0.25;// float4(1, 1, 1, 1);// *metallicity;// *specularity * 1;
-										float omr = s.oneMinusReflectivity;
-											float omr2 = 1.0;
-											//	diff = groundColor(i.c0, i.c1, diff);
-												half4 c = UNITY_BRDF_PBS(diff, spc, omr, omr2, s.normalWorld, -s.eyeVec, gi.light, gi.indirect);
+	float hill = dot(normalize(ppos), normalize(s.normalWorld * 1));
 
-												c.rgb += UNITY_BRDF_GI(diff, spc, omr, omr2, s.normalWorld, -s.eyeVec, occlusion, gi);
-												c.rgb += Emission(i.tex.xy);
+	float posY = (clamp(2 * abs(asin(ppos.y) / 3.14159), 0, 1));
 
-												float groundClouds = getGroundShadowFromClouds(ppos);
 
-												
-												c.rgb = groundColor(i.c0, i.c1, c.rgb, s.posWorld, 1.0)*groundClouds;
+	float3 diff = getSurfaceColor(h, hill, perlinGround, posY, i.tex.xy);
 
-	//											c.rgb = modulatedHillyThreshold;
-//												c.rgb = float3(1,0,0)*modd;
-												//return float4(ppos.xyz,1);
-												return OutputForward(c, s.alpha);
-											}
-											ENDCG
-													}
-			// ------------------------------------------------------------------
 
-			Pass
-			{
-				Name "FORWARD_DELTA"
-				Tags { "LightMode" = "ForwardAdd" }
-				Blend[_SrcBlend] One
-				Fog { Color(0,0,0,0) } // in additive pass fog should be black
-				ZWrite Off
-				ZTest LEqual
+	float4 spc = _Color*0.65;// float4(1, 1, 1, 1);// *metallicity;// *specularity * 1;
+	half4 c = UNITY_BRDF_PBS(diff, s.specColor, s.oneMinusReflectivity, rness, s.normalWorld, -s.eyeVec, gi.light, gi.indirect);
+	c.rgb += UNITY_BRDF_GI(diff, s.specColor, s.oneMinusReflectivity, rness, s.normalWorld, -s.eyeVec, occlusion, gi);
+	c.rgb += Emission(i.tex.xy);
 
-				CGPROGRAM
-				#pragma target 3.0
-												// GLES2.0 temporarily disabled to prevent errors spam on devices without textureCubeLodEXT
-												#pragma exclude_renderers gles
 
-												// -------------------------------------
 
+	c.rgb = groundColor(i.c0, i.c1, c.rgb, s.posWorld, 1.0);// *groundClouds;
 
-												#pragma shader_feature _NORMALMAP
-												#pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
-												#pragma shader_feature _METALLICGLOSSMAP
-												#pragma shader_feature ___ _DETAIL_MULX2
-												#pragma shader_feature _PARALLAXMAP
+															//											c.rgb = modulatedHillyThreshold;
+															//												c.rgb = float3(1,0,0)*modd;
+															//return float4(ppos.xyz,1);
+															//s.alpha = 1;
+	return OutputForward(c, s.alpha);
+	}
+		ENDCG
+	}
+		// ------------------------------------------------------------------
 
-												#pragma multi_compile_fwdadd_fullshadows
-												#pragma multi_compile_fog
+		Pass
+	{
+		Name "FORWARD_DELTA"
+		Tags{ "LightMode" = "ForwardAdd" }
+		Blend[_SrcBlend] One
+		Fog{ Color(0,0,0,0) } // in additive pass fog should be black
+		ZWrite Off
+		ZTest LEqual
 
-												#pragma vertex vertForwardAdd
-												#pragma fragment fragForwardAdd
+		CGPROGRAM
+#pragma target 3.0
+		// GLES2.0 temporarily disabled to prevent errors spam on devices without textureCubeLodEXT
+#pragma exclude_renderers gles
 
-												#include "UnityStandardCore.cginc"
+		// -------------------------------------
 
-												ENDCG
-											}
-												// ------------------------------------------------------------------
-												//  Shadow rendering pass
-												Pass {
-													Name "ShadowCaster"
-													Tags { "LightMode" = "ShadowCaster" }
 
-													ZWrite On ZTest LEqual
+#pragma shader_feature _NORMALMAP
+#pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
+#pragma shader_feature _METALLICGLOSSMAP
+#pragma shader_feature ___ _DETAIL_MULX2
+#pragma shader_feature _PARALLAXMAP
 
-													CGPROGRAM
-													#pragma target 3.0
-												// TEMPORARY: GLES2.0 temporarily disabled to prevent errors spam on devices without textureCubeLodEXT
-												#pragma exclude_renderers gles
+#pragma multi_compile_fwdadd_fullshadows
+#pragma multi_compile_fog
 
-												// -------------------------------------
+#pragma vertex vertForwardAdd
+#pragma fragment fragForwardAdd
 
+#include "UnityStandardCore.cginc"
 
-												#pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
-												#pragma multi_compile_shadowcaster
+		ENDCG
+	}
+		// ------------------------------------------------------------------
+		//  Shadow rendering pass
+		Pass{
+		Name "ShadowCaster"
+		Tags{ "LightMode" = "ShadowCaster" }
 
-												#pragma vertex vertShadowCaster
-												#pragma fragment fragShadowCaster
+		ZWrite On ZTest LEqual
 
-												#include "UnityStandardShadow.cginc"
+		CGPROGRAM
+#pragma target 3.0
+		// TEMPORARY: GLES2.0 temporarily disabled to prevent errors spam on devices without textureCubeLodEXT
+#pragma exclude_renderers gles
 
-												ENDCG
-											}
-												// ------------------------------------------------------------------
-												//  Deferred pass
-												Pass
-												{
-													Name "DEFERRED"
-													Tags { "LightMode" = "Deferred" }
+		// -------------------------------------
 
-													CGPROGRAM
-													#pragma target 3.0
-												// TEMPORARY: GLES2.0 temporarily disabled to prevent errors spam on devices without textureCubeLodEXT
-												#pragma exclude_renderers nomrt gles
 
+#pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
+#pragma multi_compile_shadowcaster
 
-												// -------------------------------------
+#pragma vertex vertShadowCaster
+#pragma fragment fragShadowCaster
 
-												#pragma shader_feature _NORMALMAP
-												#pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
-												#pragma shader_feature _EMISSION
-												#pragma shader_feature _METALLICGLOSSMAP
-												#pragma shader_feature ___ _DETAIL_MULX2
-												#pragma shader_feature _PARALLAXMAP
+#include "UnityCG.cginc"
+#include "UnityShaderVariables.cginc"
+#include "UnityStandardConfig.cginc"
+#include "Include/Atmosphere.cginc"
+#include "Include/PlanetSurface.cginc"
 
-												#pragma multi_compile ___ UNITY_HDR_ON
-												#pragma multi_compile LIGHTMAP_OFF LIGHTMAP_ON
-												#pragma multi_compile DIRLIGHTMAP_OFF DIRLIGHTMAP_COMBINED DIRLIGHTMAP_SEPARATE
-												#pragma multi_compile DYNAMICLIGHTMAP_OFF DYNAMICLIGHTMAP_ON
+		// Do dithering for alpha blended shadows on SM3+/desktop;
+		// on lesser systems do simple alpha-tested shadows
+#if defined(_ALPHABLEND_ON) || defined(_ALPHAPREMULTIPLY_ON)
+#if !((SHADER_TARGET < 30) || defined (SHADER_API_MOBILE) || defined(SHADER_API_D3D11_9X) || defined (SHADER_API_PSP2) || defined (SHADER_API_PSM))
+#define UNITY_STANDARD_USE_DITHER_MASK 1
+#endif
+#endif
 
-												#pragma vertex vertDeferred
-												#pragma fragment fragDeferred
+		// Need to output UVs in shadow caster, since we need to sample texture and do clip/dithering based on it
+#if defined(_ALPHATEST_ON) || defined(_ALPHABLEND_ON) || defined(_ALPHAPREMULTIPLY_ON)
+#define UNITY_STANDARD_USE_SHADOW_UVS 1
+#endif
 
-												#include "UnityStandardCore.cginc"
+		// Has a non-empty shadow caster output struct (it's an error to have empty structs on some platforms...)
+#if !defined(V2F_SHADOW_CASTER_NOPOS_IS_EMPTY) || defined(UNITY_STANDARD_USE_SHADOW_UVS)
+#define UNITY_STANDARD_USE_SHADOW_OUTPUT_STRUCT 1
+#endif
 
-												ENDCG
-											}
 
-												// ------------------------------------------------------------------
-												// Extracts information for lightmapping, GI (emission, albedo, ...)
-												// This pass it not used during regular rendering.
-												Pass
-												{
-													Name "META"
-													Tags { "LightMode" = "Meta" }
+		half4		_Color;
+	half		_Cutoff;
+	sampler2D	_MainTex;
+	float4		_MainTex_ST;
+#ifdef UNITY_STANDARD_USE_DITHER_MASK
+	sampler3D	_DitherMaskLOD;
+#endif
 
-													Cull Off
+	struct VertexInput
+	{
+		float4 vertex	: POSITION;
+		float3 normal	: NORMAL;
+		float2 uv0		: TEXCOORD0;
+	};
 
-													CGPROGRAM
-													#pragma vertex vert_meta
-													#pragma fragment frag_meta
+#ifdef UNITY_STANDARD_USE_SHADOW_OUTPUT_STRUCT
+	struct VertexOutputShadowCaster
+	{
+		V2F_SHADOW_CASTER_NOPOS
+#if defined(UNITY_STANDARD_USE_SHADOW_UVS)
+			float2 tex : TEXCOORD1;
+#endif
+	};
+#endif
 
-													#pragma shader_feature _EMISSION
-													#pragma shader_feature _METALLICGLOSSMAP
-													#pragma shader_feature ___ _DETAIL_MULX2
 
-													#include "UnityStandardMeta.cginc"
-													ENDCG
-												}
-		}
+	// We have to do these dances of outputting SV_POSITION separately from the vertex shader,
+	// and inputting VPOS in the pixel shader, since they both map to "POSITION" semantic on
+	// some platforms, and then things don't go well.
 
-			SubShader
-											{
-												Tags { "RenderType" = "Opaque" "PerformanceChecks" = "False" }
-												LOD 150
 
-												// ------------------------------------------------------------------
-												//  Base forward pass (directional light, emission, lightmaps, ...)
-												Pass
-												{
-													Name "FORWARD"
-													Tags { "LightMode" = "ForwardBase" }
+	void vertShadowCaster(VertexInput v,
+#ifdef UNITY_STANDARD_USE_SHADOW_OUTPUT_STRUCT
+		out VertexOutputShadowCaster o,
+#endif
+		out float4 opos : SV_POSITION)
+	{
 
-													Blend[_SrcBlend][_DstBlend]
-													ZWrite[_ZWrite]
+		v.vertex = getPlanetSurfaceOnly(v.vertex);
 
-													CGPROGRAM
-													#pragma target 2.0
+		TRANSFER_SHADOW_CASTER_NOPOS(o,opos)
+#if defined(UNITY_STANDARD_USE_SHADOW_UVS)
+			o.tex = TRANSFORM_TEX(v.uv0, _MainTex);
+#endif
+	}
 
-													#pragma shader_feature _NORMALMAP
-													#pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
-													#pragma shader_feature _EMISSION 
-													#pragma shader_feature _METALLICGLOSSMAP 
-													#pragma shader_feature ___ _DETAIL_MULX2
-												// SM2.0: NOT SUPPORTED shader_feature _PARALLAXMAP
 
-												#pragma skip_variants SHADOWS_SOFT DIRLIGHTMAP_COMBINED DIRLIGHTMAP_SEPARATE
+	half4 fragShadowCaster(
+#ifdef UNITY_STANDARD_USE_SHADOW_OUTPUT_STRUCT
+		VertexOutputShadowCaster i
+#endif
+#ifdef UNITY_STANDARD_USE_DITHER_MASK
+		, UNITY_VPOS_TYPE vpos : VPOS
+#endif
+	) : SV_Target
+	{
+#if defined(UNITY_STANDARD_USE_SHADOW_UVS)
+		half alpha = tex2D(_MainTex, i.tex).a * _Color.a;
+#if defined(_ALPHATEST_ON)
+	clip(alpha - _Cutoff);
+#endif
+#if defined(_ALPHABLEND_ON) || defined(_ALPHAPREMULTIPLY_ON)
+#if defined(UNITY_STANDARD_USE_DITHER_MASK)
+	// Use dither mask for alpha blended shadows, based on pixel position xy
+	// and alpha level. Our dither texture is 4x4x16.
+	half alphaRef = tex3D(_DitherMaskLOD, float3(vpos.xy*0.25,alpha*0.9375)).a;
+	clip(alphaRef - 0.01);
+#else
+	clip(alpha - _Cutoff);
+#endif
+#endif
+#endif // #if defined(UNITY_STANDARD_USE_SHADOW_UVS)
 
-												#pragma multi_compile_fwdbase
-												#pragma multi_compile_fog
+	SHADOW_CASTER_FRAGMENT(i)
+	}
 
-												#pragma vertex vertForwardBase
-												#pragma fragment fragForwardBase
+		ENDCG
+	}
+		// ------------------------------------------------------------------
+		//  Deferred pass
+		Pass
+	{
+		Name "DEFERRED"
+		Tags{ "LightMode" = "Deferred" }
 
-												#include "UnityStandardCore.cginc"
+		CGPROGRAM
+#pragma target 3.0
+		// TEMPORARY: GLES2.0 temporarily disabled to prevent errors spam on devices without textureCubeLodEXT
+#pragma exclude_renderers nomrt gles
 
-												ENDCG
-											}
-												// ------------------------------------------------------------------
-												//  Additive forward pass (one light per pass)
-												Pass
-												{
-													Name "FORWARD_DELTA"
-													Tags { "LightMode" = "ForwardAdd" }
-													Blend[_SrcBlend] One
-													Fog { Color(0,0,0,0) } // in additive pass fog should be black
-													ZWrite Off
-													ZTest LEqual
 
-													CGPROGRAM
-													#pragma target 2.0
+		// -------------------------------------
 
-													#pragma shader_feature _NORMALMAP
-													#pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
-													#pragma shader_feature _METALLICGLOSSMAP
-													#pragma shader_feature ___ _DETAIL_MULX2
-												// SM2.0: NOT SUPPORTED shader_feature _PARALLAXMAP
-												#pragma skip_variants SHADOWS_SOFT
+#pragma shader_feature _NORMALMAP
+#pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
+#pragma shader_feature _EMISSION
+#pragma shader_feature _METALLICGLOSSMAP
+#pragma shader_feature ___ _DETAIL_MULX2
+#pragma shader_feature _PARALLAXMAP
 
-												#pragma multi_compile_fwdadd_fullshadows
-												#pragma multi_compile_fog
+#pragma multi_compile ___ UNITY_HDR_ON
+#pragma multi_compile LIGHTMAP_OFF LIGHTMAP_ON
+#pragma multi_compile DIRLIGHTMAP_OFF DIRLIGHTMAP_COMBINED DIRLIGHTMAP_SEPARATE
+#pragma multi_compile DYNAMICLIGHTMAP_OFF DYNAMICLIGHTMAP_ON
 
-												#pragma vertex vertForwardAdd
-												#pragma fragment fragForwardAdd
+#pragma vertex vertDeferred
+#pragma fragment fragDeferred
 
-												#include "UnityStandardCore.cginc"
+#include "UnityStandardCore.cginc"
 
-												ENDCG
-											}
-												// ------------------------------------------------------------------
-												//  Shadow rendering pass
-												Pass {
-													Name "ShadowCaster"
-													Tags { "LightMode" = "ShadowCaster" }
 
-													ZWrite On ZTest LEqual
 
-													CGPROGRAM
-													#pragma target 2.0
 
-													#pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
-													#pragma skip_variants SHADOWS_SOFT
-													#pragma multi_compile_shadowcaster
 
-													#pragma vertex vertShadowCaster
-													#pragma fragment fragShadowCaster
 
-													#include "UnityStandardShadow.cginc"
 
-													ENDCG
-												}
+		ENDCG
+	}
 
-												// ------------------------------------------------------------------
-												// Extracts information for lightmapping, GI (emission, albedo, ...)
-												// This pass it not used during regular rendering.
-												Pass
-												{
-													Name "META"
-													Tags { "LightMode" = "Meta" }
+		// ------------------------------------------------------------------
+		// Extracts information for lightmapping, GI (emission, albedo, ...)
+		// This pass it not used during regular rendering.
+		Pass
+	{
+		Name "META"
+		Tags{ "LightMode" = "Meta" }
 
-													Cull Off
+		Cull Off
 
-													CGPROGRAM
-													#pragma vertex vert_meta
-													#pragma fragment frag_meta
+		CGPROGRAM
+#pragma vertex vert_meta
+#pragma fragment frag_meta
 
-													#pragma shader_feature _EMISSION
-													#pragma shader_feature _METALLICGLOSSMAP
-													#pragma shader_feature ___ _DETAIL_MULX2
+#pragma shader_feature _EMISSION
+#pragma shader_feature _METALLICGLOSSMAP
+#pragma shader_feature ___ _DETAIL_MULX2
 
-													#include "UnityStandardMeta.cginc"
-													ENDCG
-												}
+#include "UnityStandardMeta.cginc"
+		ENDCG
+	}
+	}
 
+		SubShader
+	{
+		Tags{ "RenderType" = "Opaque" "PerformanceChecks" = "False" }
+		LOD 150
 
-											}
+		// ------------------------------------------------------------------
+		//  Base forward pass (directional light, emission, lightmaps, ...)
+		Pass
+	{
+		Name "FORWARD"
+		Tags{ "LightMode" = "ForwardBase" }
 
+		Blend[_SrcBlend][_DstBlend]
+		ZWrite[_ZWrite]
 
-												//	FallBack "VertexLit"
-												CustomEditor "StandardShaderGUI"
+		CGPROGRAM
+#pragma target 2.0
+
+#pragma shader_feature _NORMALMAP
+#pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
+#pragma shader_feature _EMISSION 
+#pragma shader_feature _METALLICGLOSSMAP 
+#pragma shader_feature ___ _DETAIL_MULX2
+		// SM2.0: NOT SUPPORTED shader_feature _PARALLAXMAP
+
+#pragma skip_variants SHADOWS_SOFT DIRLIGHTMAP_COMBINED DIRLIGHTMAP_SEPARATE
+
+#pragma multi_compile_fwdbase
+#pragma multi_compile_fog
+
+#pragma vertex vertForwardBase
+#pragma fragment fragForwardBase
+
+#include "UnityStandardCore.cginc"
+
+		ENDCG
+	}
+		// ------------------------------------------------------------------
+		//  Additive forward pass (one light per pass)
+		Pass
+	{
+		Name "FORWARD_DELTA"
+		Tags{ "LightMode" = "ForwardAdd" }
+		Blend[_SrcBlend] One
+		Fog{ Color(0,0,0,0) } // in additive pass fog should be black
+		ZWrite Off
+		ZTest LEqual
+
+		CGPROGRAM
+#pragma target 2.0
+
+#pragma shader_feature _NORMALMAP
+#pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
+#pragma shader_feature _METALLICGLOSSMAP
+#pragma shader_feature ___ _DETAIL_MULX2
+		// SM2.0: NOT SUPPORTED shader_feature _PARALLAXMAP
+#pragma skip_variants SHADOWS_SOFT
+
+#pragma multi_compile_fwdadd_fullshadows
+#pragma multi_compile_fog
+
+#pragma vertex vertForwardAdd
+#pragma fragment fragForwardAdd
+
+#include "UnityStandardCore.cginc"
+
+		ENDCG
+	}
+		// ------------------------------------------------------------------
+		//  Shadow rendering pass
+		Pass{
+		Name "ShadowCaster"
+		Tags{ "LightMode" = "ShadowCaster" }
+
+		ZWrite On ZTest LEqual
+
+		CGPROGRAM
+#pragma target 2.0
+
+#pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
+#pragma skip_variants SHADOWS_SOFT
+#pragma multi_compile_shadowcaster
+
+#pragma vertex vertShadowCaster
+#pragma fragment fragShadowCaster
+
+#include "UnityStandardShadow.cginc"
+
+		ENDCG
+	}
+
+		// ------------------------------------------------------------------
+		// Extracts information for lightmapping, GI (emission, albedo, ...)
+		// This pass it not used during regular rendering.
+		Pass
+	{
+		Name "META"
+		Tags{ "LightMode" = "Meta" }
+
+		Cull Off
+
+		CGPROGRAM
+#pragma vertex vert_meta
+#pragma fragment frag_meta
+
+#pragma shader_feature _EMISSION
+#pragma shader_feature _METALLICGLOSSMAP
+#pragma shader_feature ___ _DETAIL_MULX2
+
+#include "UnityStandardMeta.cginc"
+		ENDCG
+	}
+
+
+	}
+
+
+		//	FallBack "VertexLit"
+		CustomEditor "StandardShaderGUI"
 }
-

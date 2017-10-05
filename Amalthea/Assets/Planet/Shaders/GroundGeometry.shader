@@ -1,8 +1,4 @@
-﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
-
-// Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
-
-Shader "LemonSpawn/GroundDisplacement"
+﻿Shader "LemonSpawn/GroundGeometry"
 {
 	Properties
 	{
@@ -46,6 +42,9 @@ Shader "LemonSpawn/GroundDisplacement"
 		[HideInInspector] _ZWrite("__zw", Float) = 1.0
 	}
 
+
+
+
 		CGINCLUDE
 #define UNITY_SETUP_BRDF_INPUT MetallicSetup
 		ENDCG
@@ -69,7 +68,7 @@ Shader "LemonSpawn/GroundDisplacement"
 
 
 		CGPROGRAM
-#pragma target 3.0
+#pragma target 4.0
 		// TEMPORARY: GLES2.0 temporarily disabled to prevent errors spam on devices without textureCubeLodEXT
 #pragma exclude_renderers gles
 
@@ -86,8 +85,16 @@ Shader "LemonSpawn/GroundDisplacement"
 #pragma multi_compile_fwdbase
 #pragma multi_compile_fog
 
+#pragma multi_compile LS_GPU_SURFACE LS_CPU_SURFACE
+
+//#pragma LS_GPU_SURFACE
+//#pragma LS_CPU_SURFACE
+
 #pragma vertex LvertForwardBase
 #pragma fragment LfragForwardBase
+#pragma geometry GS_Main
+
+
 
 #include "UnityStandardCore.cginc"
 #include "Include/IQnoise.cginc"
@@ -95,7 +102,8 @@ Shader "LemonSpawn/GroundDisplacement"
 #include "Include/PlanetSurface.cginc"
 
 
-		struct VertexOutputForwardBase2
+
+		struct VertexOutputForwardBaseGround
 	{
 		float4 pos							: SV_POSITION;
 		float4 tex							: TEXCOORD0;
@@ -103,139 +111,211 @@ Shader "LemonSpawn/GroundDisplacement"
 		half4 tangentToWorldAndPackedData[3]    : TEXCOORD2;	// [3x3:tangentToWorld | 1x3:viewDirForParallax]
 		half4 ambientOrLightmapUV			: TEXCOORD5;	// SH or Lightmap UV
 		SHADOW_COORDS(6)
-			UNITY_FOG_COORDS(7)
-			float3 c0 : TEXCOORD8;
+		UNITY_FOG_COORDS(7)
+		float3 c0 : TEXCOORD8;
 		float3 c1 : TEXCOORD9;
-		float3 n1 : TEXCOORD10;
-		//	float4 vpos  : TEXCOORD11;
-		// next ones would not fit into SM2.0 limits, but they are always for SM3.0+
-//#if UNITY_SPECCUBE_BOX_PROJECTION
-		float3 posWorld					: TEXCOORD11;
-//#endif
-		float3 posWorld2 				: TEXCOORD12;
-		float3 tangent : TEXCOORD13;
-		float3 binormal: TEXCOORD14;
+		float3 posWorld					: TEXCOORD10;
+		float3 tangent : TEXCOORD11;
+
 	};
+
+
+		struct GS_INPUT
+		{
+			float4	vertex		: POSITION;
+			float3	normal	: NORMAL;
+			float2  tex0	: TEXCOORD0;
+			half3 eyeVec 						: TEXCOORD1;
+			half4 tangentToWorldAndPackedData[3]    : TEXCOORD2;	// [3x3:tangentToWorld | 1x3:viewDirForParallax]
+			half4 ambientOrLightmapUV			: TEXCOORD5;	// SH or Lightmap UV
+			SHADOW_COORDS(6)
+				UNITY_FOG_COORDS(7)
+				float3 tangent : TEXCOORD8;
+		};
+
 
 
 	sampler2D _Mountain, _Basin, _Top, _Surface;
 
 
+	void Spit(in float4 ps[3], in float3 t[3], inout TriangleStream<VertexOutputForwardBaseGround> triStream) {
+		for (int i = 0; i < 3; i++) {
+			VertexOutputForwardBaseGround o;
 
-	VertexOutputForwardBase2 LvertForwardBase(VertexInput v)
-	{
-		VertexOutputForwardBase2 o;
+			//GS_INPUT v = p[i];
+			float4 vertex = ps[i];
+			float3 tangent = t[i];
 
+			float3 normalWorld = normalize(mul(unity_ObjectToWorld, vertex).xyz - v3Translate);
+			float4 groundVertex = getPlanetSurfaceOnly(vertex);
+			//v.vertex = groundVertex;
+			//v.vertex = groundVertex;
 
-		float3 normalWorld = normalize(mul(unity_ObjectToWorld, v.vertex).xyz - v3Translate);
-
-		float4 groundVertex = getPlanetSurfaceOnly(v.vertex);
-		v.vertex = groundVertex;
-		UNITY_INITIALIZE_OUTPUT(VertexOutputForwardBase2, o);
-		float4 capV = groundVertex;
-		float4 posWorld = mul(unity_ObjectToWorld, capV);
+			UNITY_INITIALIZE_OUTPUT(VertexOutputForwardBaseGround, o);
+			float4 capV = groundVertex;
+			float4 posWorld = mul(unity_ObjectToWorld, capV);
 
 #ifdef _TANGENT_TO_WORLD
-		float3 t = v.tangent.xyz;
-		float3 b = normalize(cross(normalWorld, t));
-		o.tangent = t;
-		o.binormal = b;
-		o.posWorld2 = normalWorld;
-		normalWorld = normalWorld;//getPlanetSurfaceNormal(posWorld - v3Translate, t, b, 0.1);
+			o.tangent = tangent;
 #endif
-//		posWorld.x = 0;
-		o.posWorld = posWorld.xyz;
-//#if UNITY_SPECCUBE_BOX_PROJECTION
-//#endif
+			//		posWorld.x = 0;
+			o.posWorld = posWorld.xyz;
 
+			float wh = (length(o.posWorld.xyz - v3Translate) - fInnerRadius);
 
-
-		float wh = (length(o.posWorld.xyz - v3Translate) - fInnerRadius);
-
-//		capV.xyz -= v3Translate;
-
-//		capV.xyz += v3Translate;
-/*		capV.x *= lengthContraction.x;
-		capV.y *= lengthContraction.y;
-		capV.z *= lengthContraction.z;*/
-		capV.x *= scaleFactor.x;
-		capV.y *= scaleFactor.y;
-		capV.z *= scaleFactor.z;
-		//capV.xyz += _WorldSpaceCameraPos;
-//			capV.xyz -= v3Translate;
-
-		o.pos = UnityObjectToClipPos(capV);
-		//o.pos.xyz -= v3Translate;
-		//o.pos.x *= lengthContraction.x;
-		//o.pos.y *= lengthContraction.y;
-		//o.pos.z *= lengthContraction.z;
-		//o.pos.xyz += v3Translate;
-		
-		//			o.vpos = capV;
-
-		o.tex = TexCoords(v);
-		o.eyeVec = NormalizePerVertexNormal(posWorld.xyz - _WorldSpaceCameraPos);
-		//float3 normalWorld = UnityObjectToWorldNormal(v.normal);
-
-
-		//			normalWorld = normalize(capV.xyz);
-
-		o.n1 = normalWorld;
-#ifdef _TANGENT_TO_WORLD
-		float4 tangentWorld = float4(UnityObjectToWorldDir(v.tangent.xyz), v.tangent.w);
-
-		float3x3 tangentToWorld = CreateTangentToWorldPerVertex(normalWorld, tangentWorld.xyz, tangentWorld.w);
-		o.tangentToWorldAndPackedData[0].xyz = tangentToWorld[0];
-		o.tangentToWorldAndPackedData[1].xyz = tangentToWorld[1];
-		o.tangentToWorldAndPackedData[2].xyz = tangentToWorld[2];
+#ifdef LS_GPU_SURFACE
+			capV.x *= scaleFactor.x;
+			capV.y *= scaleFactor.y;
+			capV.z *= scaleFactor.z;
 #else
-		o.tangentToWorldAndPackedData[0].xyz = 0;
-		o.tangentToWorldAndPackedData[1].xyz = 0;
-		o.tangentToWorldAndPackedData[2].xyz = normalWorld;
+			/*		o.posWorld.x/= scaleFactor.x;
+			o.posWorld.y /= scaleFactor.y;
+			o.posWorld.z /= scaleFactor.z;
+			o.posWorld.xyz = capV.xyz;*/
 #endif
-		//We need this for shadow receving
-		TRANSFER_SHADOW(o);
+			o.pos = UnityObjectToClipPos(capV);
 
-		// Static lightmaps
+			//o.tex = TexCoords(v);
+			o.eyeVec = NormalizePerVertexNormal(posWorld.xyz - _WorldSpaceCameraPos);
+
+			//		o.n1 = normalWorld;
+
+			getGroundAtmosphere(groundVertex, o.c0, o.c1);
+
+
+			triStream.Append(o);
+
+		}
+
+	}
+
+	void Subdivide(in float4 opos[3], out float4 p[3][3]) {
+		float4 center = (opos[0] + opos[1] + opos[2]) / 3.0;
+
+//		float4 pos1[3];
+	//	float4 pos2[3];
+	//	float4 pos3[3];
+
+		p[0][0] = opos[0];
+		p[0][2] = center;
+		p[0][1] = opos[1];
+//		Spit(pos, ot, triStream);
+
+		p[1][0] = opos[1];
+		p[1][2] = center;
+		p[1][1] = opos[2];
+	//	Spit(pos, ot, triStream);
+
+		p[2][0] = opos[2];
+		p[2][2] = center;
+		p[2][1] = opos[0];
+		//Spit(pos, ot, triStream);
+
+/*		if (currentLevel == renderLevel) {
+			Spit(pos1, t, triStream);
+			Spit(pos2, t, triStream);
+			Spit(pos3, t, triStream);
+		}
+		else {
+			Subdivide(pos1, t, currentLevel + 1, renderLevel, triStream);
+			Subdivide(pos2, t, currentLevel + 1, renderLevel, triStream);
+			Subdivide(pos3, t, currentLevel + 1, renderLevel, triStream);
+		}
+		*/
+	}
+
+	// Geometry Shader -----------------------------------------------------
+	[maxvertexcount(9)]
+	void GS_Main(triangle GS_INPUT p[3], inout TriangleStream<VertexOutputForwardBaseGround> triStream)
+	{
+		float4 opos[3];
+		float3 ot[3];
+		for (int i = 0; i < 3; i++) {
+			opos[i] = p[i].vertex;
+			ot[i] = p[i].tangent;
+		}
+		float4 pos1[3][3];
+		float4 pos2[3][3];
+		Subdivide(opos, pos1);
+		for (int i = 0; i < 3; i++) {
+			Spit(pos1[i], ot, triStream);
+			/*Subdivide(pos1[i], pos2);
+			for (int j = 0; j < 3; j++) {
+				Spit(pos2[j], ot, triStream);
+
+			}
+			*/
+			
+		}
+
+		
+	}
+
+
+
+	GS_INPUT LvertForwardBase(VertexInput v)
+	{
+	GS_INPUT o;// = (GS_INPUT)0;
+
+	o.vertex = v.vertex;// mul(unity_ObjectToWorld, v.vertex);
+	o.normal = v.normal;
+
+
+#ifdef _TANGENT_TO_WORLD
+	float4 tangentWorld = float4(UnityObjectToWorldDir(v.tangent.xyz), v.tangent.w);
+
+	float3x3 tangentToWorld = CreateTangentToWorldPerVertex(v.normal, tangentWorld.xyz, tangentWorld.w);
+	o.tangent = tangentWorld.xyz;
+	o.tangentToWorldAndPackedData[0].xyz = tangentToWorld[0];
+	o.tangentToWorldAndPackedData[1].xyz = tangentToWorld[1];
+	o.tangentToWorldAndPackedData[2].xyz = tangentToWorld[2];
+#else
+	o.tangentToWorldAndPackedData[0].xyz = 0;
+	o.tangentToWorldAndPackedData[1].xyz = 0;
+	o.tangentToWorldAndPackedData[2].xyz = v.normal;
+#endif
+	//We need this for shadow receving
+//	TRANSFER_SHADOW(o);
+
+	// Static lightmaps
 #ifndef LIGHTMAP_OFF
-		o.ambientOrLightmapUV.xy = v.uv1.xy * unity_LightmapST.xy + unity_LightmapST.zw;
-		o.ambientOrLightmapUV.zw = 0;
-		// Sample light probe for Dynamic objects only (no static or dynamic lightmaps)
+	o.ambientOrLightmapUV.xy = v.uv1.xy * unity_LightmapST.xy + unity_LightmapST.zw;
+	o.ambientOrLightmapUV.zw = 0;
+	// Sample light probe for Dynamic objects only (no static or dynamic lightmaps)
 #elif UNITY_SHOULD_SAMPLE_SH
 #if UNITY_SAMPLE_FULL_SH_PER_PIXEL
-		o.ambientOrLightmapUV.rgb = 0;
+	o.ambientOrLightmapUV.rgb = 0;
 #elif (SHADER_TARGET < 30)
-		o.ambientOrLightmapUV.rgb = ShadeSH9(half4(normalWorld, 1.0));
+	o.ambientOrLightmapUV.rgb = ShadeSH9(half4(normalWorld, 1.0));
 #else
-		// Optimization: L2 per-vertex, L0..L1 per-pixel
-		o.ambientOrLightmapUV.rgb = ShadeSH3Order(half4(normalWorld, 1.0));
+	// Optimization: L2 per-vertex, L0..L1 per-pixel
+	o.ambientOrLightmapUV.rgb = ShadeSH3Order(half4(v.normal, 1.0));
 #endif
-		// Add approximated illumination from non-important point lights
+	// Add approximated illumination from non-important point lights
 #ifdef VERTEXLIGHT_ON
-		o.ambientOrLightmapUV.rgb += Shade4PointLights(
-			unity_4LightPosX0, unity_4LightPosY0, unity_4LightPosZ0,
-			unity_LightColor[0].rgb, unity_LightColor[1].rgb, unity_LightColor[2].rgb, unity_LightColor[3].rgb,
-			unity_4LightAtten0, posWorld, normalWorld);
+	o.ambientOrLightmapUV.rgb += Shade4PointLights(
+		unity_4LightPosX0, unity_4LightPosY0, unity_4LightPosZ0,
+		unity_LightColor[0].rgb, unity_LightColor[1].rgb, unity_LightColor[2].rgb, unity_LightColor[3].rgb,
+		unity_4LightAtten0, posWorld, normalWorld);
 #endif
 #endif
 
 #ifdef DYNAMICLIGHTMAP_ON
-		o.ambientOrLightmapUV.zw = v.uv2.xy * unity_DynamicLightmapST.xy + unity_DynamicLightmapST.zw;
+	o.ambientOrLightmapUV.zw = v.uv2.xy * unity_DynamicLightmapST.xy + unity_DynamicLightmapST.zw;
 #endif
 
 #ifdef _PARALLAXMAP
-		TANGENT_SPACE_ROTATION;
-		half3 viewDirForParallax = mul(rotation, ObjSpaceViewDir(groundVertex));
-		o.tangentToWorldAndPackedData[0].w = viewDirForParallax.x;
-		o.tangentToWorldAndPackedData[1].w = viewDirForParallax.y;
-		o.tangentToWorldAndPackedData[2].w = viewDirForParallax.z;
+	TANGENT_SPACE_ROTATION;
+	half3 viewDirForParallax = mul(rotation, ObjSpaceViewDir(groundVertex));
+	o.tangentToWorldAndPackedData[0].w = viewDirForParallax.x;
+	o.tangentToWorldAndPackedData[1].w = viewDirForParallax.y;
+	o.tangentToWorldAndPackedData[2].w = viewDirForParallax.z;
 #endif
 
-		UNITY_TRANSFER_FOG(o,o.pos);
+//	UNITY_TRANSFER_FOG(o, o.pos);
 
-		getGroundAtmosphere(groundVertex, o.c0, o.c1);
+	return o;
 
-		return o;
 	}
 
 
@@ -246,9 +326,9 @@ Shader "LemonSpawn/GroundDisplacement"
 
 
 	inline float3 getTex(sampler2D t, in float2 uv) {
-		return 1;
+//		return 1;
 		//								return float3(1,1,1);
-//		uv *= ;
+		//		uv *= ;
 		float3 c = tex2D(t, uv)*0.25;
 		//								c += tex2D(t, 0.5323*uv);
 		c += tex2D(t, 0.2213*uv)*0.33;
@@ -261,7 +341,7 @@ Shader "LemonSpawn/GroundDisplacement"
 
 
 	inline float widthDistance(float3 pos) {
-		return clamp(10*length(pos - _WorldSpaceCameraPos)/fInnerRadius, 0.1, 10);
+		return clamp(10 * length(pos - _WorldSpaceCameraPos) / fInnerRadius, 0.1, 10);
 	}
 
 
@@ -269,20 +349,67 @@ Shader "LemonSpawn/GroundDisplacement"
 
 
 
-half4 LfragForwardBase(VertexOutputForwardBase2 i) : SV_Target
+	float3 getSurfaceColor(float h, float hill, float perlinGround, float posY, float2 uv) {
+		
+		float3 mColor = ((1 - perlinGround)*middleColor + middleColor2*perlinGround);
+		//	float3 bColor = ((1-tt)*basinColor + basinColor2*tt*r_noise(normalize(i.vpos.xyz),2.1032,3));
+
+
+		float3 hColor = mColor;//getTex(_Surface, i.tex.xy);//float3(1,1,1);//s.diffColor;
+							   //	float3 hillColor = s.diffColor;
+							   //if (dd < 0.98 )
+							   //	hColor = float3(0.2, 0.2 ,0.2);
+		float3 v3CameraPos = _WorldSpaceCameraPos - v3Translate;	// The camera's current position
+
+
+
+
+		float fCameraHeight = length(v3CameraPos);
+		float camH = clamp(fCameraHeight - fInnerRadius, 0, 1);
+		//	float wh = (length(i.posWorld.xyz - v3Translate) - fInnerRadius);
+		//	wh = 0.0;
+		//									float modulatedHillyThreshold = hillyThreshold* atan2(i.posWorld.z , i.posWorld.y);
+		float modulatedTopThreshold = topThreshold*(1 - posY*1.1);
+		float modulatedHillyThreshold = hillyThreshold;// clamp(hillyThreshold - 1 * posY, 0, 1);
+
+
+		hColor = mixHeight(hColor, basinColor*getTex(_Basin, uv), 500, basinThreshold, h);
+
+		hColor = mixHeight(hColor, basinColor2*getTex(_Basin, uv), 3000, liquidThreshold, h);
+		hColor = mixHeight(topColor*getTex(_Top, uv), hColor, 1000, modulatedTopThreshold, h);
+
+
+		//float dd = dot(normalize(i.posWorld2.xyz), normalize(s.normalWorld * 1));
+		hColor = mixHeight(hColor, hillColor, 10, modulatedHillyThreshold, hill);
+
+		return hColor;
+	}
+
+	half4 LfragForwardBase(VertexOutputForwardBaseGround i) : SV_Target
 	{
 		FRAGMENT_SETUP(s)
 
-   	    float h = (length(i.posWorld.xyz - v3Translate) - fInnerRadius) / fInnerRadius;// - liquidThreshold;
-		float3 realN = getPlanetSurfaceNormal(i.posWorld - v3Translate, i.tangent, i.binormal, widthDistance(i.posWorld.xyz),3);
-			s.normalWorld = realN;
+#ifdef LS_GPU_SURFACE
+	float3 pfix =  i.posWorld.xyz;
+	//pfix = float3(1, 1, 0);
+#else
+		float3 pfix = i.posWorld - v3Translate;
+		pfix = float3(pfix.x  / scaleFactor.x, pfix.y / scaleFactor.y,pfix.z / scaleFactor.z);
+		pfix += v3Translate;
+#endif
 
+		float h = (length(pfix - v3Translate) - fInnerRadius) / fInnerRadius;// - liquidThreshold;
+#ifdef LS_GPU_SURFACE
+	float3 binormal = normalize(cross(i.posWorld - v3Translate, i.tangent));
+
+	float3 realN = getPlanetSurfaceNormal(i.posWorld - v3Translate, i.tangent, binormal, widthDistance(i.posWorld.xyz), 3);
+	s.normalWorld = realN;
+#endif
 	//UnityLight mainLight = MainLight(s.normalWorld);
 	UnityLight mainLight = MainLight();
 	mainLight.dir = v3LightPos;
-	half atten = SHADOW_ATTENUATION(i);
-
-	half occlusion = Occlusion(i.tex.xy);
+	half atten = 1;// SHADOW_ATTENUATION(i);
+	half occlusion = 0.0;// Occlusion(i.tex.xy);
 
 	float rness = s.smoothness;
 
@@ -290,66 +417,39 @@ half4 LfragForwardBase(VertexOutputForwardBase2 i) : SV_Target
 		s.posWorld, occlusion, i.ambientOrLightmapUV, atten, rness, s.normalWorld, s.eyeVec, mainLight);
 
 
-//	float dd = dot(normalize(mul(rotMatrixInv, i.posWorld2.xyz)), normalize(s.normalWorld * 1 + i.n1 * 0));
-	float dd = dot(normalize(i.posWorld2.xyz), normalize(s.normalWorld * 1 + i.n1 * 0));
+	//	float dd = dot(normalize(mul(rotMatrixInv, i.posWorld2.xyz)), normalize(s.normalWorld * 1 + i.n1 * 0));
 
-	float tt = pow(clamp(noise(normalize(i.posWorld2.xyz)*3.1032) + 0.3,0,1),2);
-	float3 mColor = ((1 - tt)*middleColor + middleColor2*tt);
-	//	float3 bColor = ((1-tt)*basinColor + basinColor2*tt*r_noise(normalize(i.vpos.xyz),2.1032,3));
+	
+	float3 ppos = normalize(pfix- v3Translate);
 
 
+	float perlinGround = pow(clamp(noise(normalize(ppos)*3.1032) + 0.3, 0, 1), 2);
 
+	float hill = dot(normalize(ppos), normalize(s.normalWorld * 1));
+//	float hill = 1;
 
-
-
-
-	float3 hColor = mColor;//getTex(_Surface, i.tex.xy);//float3(1,1,1);//s.diffColor;
-													  //	float3 hillColor = s.diffColor;
-													  //if (dd < 0.98 )
-													  //	hColor = float3(0.2, 0.2 ,0.2);
-	float3 v3CameraPos = _WorldSpaceCameraPos - v3Translate;	// The camera's current position
-
-
-
-
-	float fCameraHeight = length(v3CameraPos);
-	float camH = clamp(fCameraHeight - fInnerRadius, 0, 1);
-	float wh = (length(i.posWorld.xyz - v3Translate) - fInnerRadius);
-
-	//									float modulatedHillyThreshold = hillyThreshold* atan2(i.posWorld.z , i.posWorld.y);
-	float3 ppos = normalize(i.posWorld2.xyz);
-	//									float modulatedHillyThreshold = atan2(ppos.z, ppos.y);
 	float posY = (clamp(2 * abs(asin(ppos.y) / 3.14159), 0, 1));
-	float modulatedTopThreshold = topThreshold*(1 - posY*1.1);
-	float modulatedHillyThreshold = hillyThreshold;// clamp(hillyThreshold - 1 * posY, 0, 1);
-
-
-	hColor = mixHeight(hColor, basinColor*getTex(_Basin, i.tex.xy), 500, basinThreshold	, h);
-
-	hColor = mixHeight(hColor, basinColor2*getTex(_Basin, i.tex.xy), 3000, liquidThreshold, h);
-	hColor = mixHeight(topColor*getTex(_Top, i.tex.xy), hColor, 1000, modulatedTopThreshold, h);
-	hColor = mixHeight(hColor, hillColor*getTex(_Mountain, i.tex.xy), 250, modulatedHillyThreshold, dd);
-	
-
 
 	
-	float3 diff = hColor;
-
+	float3 diff = getSurfaceColor(h, hill, perlinGround, posY, i.tex.xy);
 	
-	float4 spc = _Color*0.65;// float4(1, 1, 1, 1);// *metallicity;// *specularity * 1;
+//	diff = float3(hill,hill, 0);
+
+//	half4 c = half4(0.2, 0.2, 0.2, 1);
+	//float4 spc = _Color*0.65;// float4(1, 1, 1, 1);// *metallicity;// *specularity * 1;
+	
 	half4 c = UNITY_BRDF_PBS(diff, s.specColor, s.oneMinusReflectivity, rness, s.normalWorld, -s.eyeVec, gi.light, gi.indirect);
-	c.rgb += UNITY_BRDF_GI(diff, s.specColor, s.oneMinusReflectivity, rness, s.normalWorld, -s.eyeVec, occlusion, gi);
-	c.rgb += Emission(i.tex.xy);
+	//c.rgb += UNITY_BRDF_GI(diff, s.specColor, s.oneMinusReflectivity, rness, s.normalWorld, -s.eyeVec, occlusion, gi);
+	
+	//c.rgb += Emission(i.tex.xy);
 
-
-
+	//c.rgb = diff*clamp(;
+//	c.rgb = s.eyeVec;
 	c.rgb = groundColor(i.c0, i.c1, c.rgb, s.posWorld, 1.0);// *groundClouds;
-
-	//											c.rgb = modulatedHillyThreshold;
-	//												c.rgb = float3(1,0,0)*modd;
-	//return float4(ppos.xyz,1);
-	//s.alpha = 1;
-	return OutputForward(c, s.alpha); 
+															//return float4(ppos.xyz,1);
+															//s.alpha = 1;
+	//c.rgb = diff;
+	return OutputForward(c, s.alpha);
 	}
 		ENDCG
 	}
@@ -544,6 +644,12 @@ half4 LfragForwardBase(VertexOutputForwardBase2 i) : SV_Target
 #pragma fragment fragDeferred
 
 #include "UnityStandardCore.cginc"
+
+
+
+
+
+
 
 		ENDCG
 	}

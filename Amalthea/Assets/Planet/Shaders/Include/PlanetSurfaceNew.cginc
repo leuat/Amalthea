@@ -18,7 +18,7 @@
 
 
 
-		float getStandardPerlin(float3 pos, float scale, float power, float sub, int N) {
+/*		float getStandardPerlin(float3 pos, float scale, float power, float sub, int N) {
 			float n = 0;
 			float A = 0;
 			float ms = scale;
@@ -35,27 +35,10 @@
 			return v;	
 
 		}
-
-		float perlinNoiseDeriv(float3 p, float sc, float sc2, out float3 N)
-		{
-			if (sc == 0)
-				sc = 1.0f;
-			float e = 0.09193;//*sc;
-			N = float3(0, 0, 0);
-			float F0 = noisePerturbed(float3(p.x, p.y, p.z));
-			float Fx = noisePerturbed(float3(p.x + e, p.y, p.z));
-			float Fy = noisePerturbed(float3(p.x, p.y + e, p.z));
-			float Fz = noisePerturbed(float3(p.x, p.y, p.z + e));
-
-			N = float3((Fx - F0) / e, (Fy - F0) / e, (Fz - F0) / e);
-
-			float s = 0.8;
-			N = normalize(N)*s;
-			return F0;
-		}
+		*/
 
 
-		float swissTurbulence(float3 p, float seed, int octaves,
+/*		float swissTurbulence(float3 p, float seed, int octaves,
 			float lacunarity, float gain,
 			float warp, float powscale, float offset)
 		{
@@ -65,11 +48,7 @@
 			for (int i = 0; i < octaves; i++)
 			{
 				float3 N;
-				//float F = perlinNoiseDeriv((p + warp * dsum)*freq, 1,1,N);
-				float4 vv = noised((p + warp * dsum)*freq);
-				N = normalize(vv.yzw);
-				float F = vv.x;
-
+				float F = perlinNoiseDeriv((p + warp * dsum)*freq, 1,1,N);
 
 				float n = clamp((offset - powscale * abs(F)),-1000,1000);
 
@@ -95,28 +74,38 @@
 
 		}
 
+		*/
 
+		float4 getMultiFractal(in float3 p, float frequency, int octaves, float lacunarity, float offs, float gain, float initialO ) {
 
-		float getMultiFractal(in float3 p, float frequency, int octaves, float lacunarity, float offs, float gain, float initialO ) {
-
-            float value = 0.0f;
+            float4 value = 0.0f;
             float weight = 1.0f;
             float w = surfaceNoiseSettings6.x;//-0.5;
             float3 vt = p * frequency;
             float f = 1;
+
+//			float4 ss = float4(1, 1, 1,1);
+			float4 ss = float4(1, 1, 1, 1);
+
             for (float octave = 0; octave < octaves; octave++)
             {
-                 float signal = initialO + noisePerturbed(vt);//perlinNoise2dSeamlessRaw(frequency, vt.x, vt.z,0,0,0,0);//   Mathf.PerlinNoise(vt.x, vt.z);
+                 float4 signal = ss*initialO + noised(vt);//perlinNoise2dSeamlessRaw(frequency, vt.x, vt.z,0,0,0,0);//   Mathf.PerlinNoise(vt.x, vt.z);
 
                 // Make the ridges.
-                signal = abs(signal);
-                signal = offs - signal;
+                signal.x = abs(signal.x);
+				signal.y = abs(signal.y);
+				signal.z = abs(signal.z);
+				signal.w = abs(signal.w);
+				signal = ss*offs - signal;
 
 
-                signal *= signal;
-
-                signal *= weight;
-                weight = signal * gain;
+//                signal *= signal;
+				signal.x *= signal.x*weight;
+				signal.y *= signal.y*weight;
+				signal.z *= signal.z*weight;
+				signal.w *= signal.w*weight;
+				
+                weight = signal.x * gain;
                 weight = clamp(weight, 0, 1);
 
                 value += (signal * pow(f, w));
@@ -134,45 +123,27 @@
 
 
 
-		float getSurfaceHeight(float3 pos, float scale, float octaves, float craterScale = 1) {
+		float4 getSurfaceHeight(float3 pos, float scale, float octaves) {
 
 			// return noise(pos * 10) * 5;
 			scale = scale*(1 + surfaceVortex1.y*noise(pos*surfaceVortex1.x));
 			scale = scale*(1 + surfaceVortex2.y*noise(pos*surfaceVortex2.x));
-			float val = getMultiFractal(pos, scale*1.523, (int)octaves + 2, surfaceNoiseSettings.x, surfaceNoiseSettings.y, surfaceNoiseSettings.z, surfaceNoiseSettings2.x);
-			val = pow(val, surfaceNoiseSettings3.z);
-			return clamp(val - surfaceNoiseSettings3.x, 0, 10);
+			float4 val = getMultiFractal(pos, scale*1.523, (int)octaves + 2, surfaceNoiseSettings.x, surfaceNoiseSettings.y, surfaceNoiseSettings.z, surfaceNoiseSettings2.x);
+			return val;
+			//val.x = pow(val, surfaceNoiseSettings3.z);
+
+			//return clamp(val - surfaceNoiseSettings3.x, 0, 10);
 			//return getStandardPerlin(pos, scale, 1, 0.5, 8);
 
 		}
 
 
 
-		float getSurfaceHeightSwiss(float3 pos, float scale, float octaves, float craterScale = 1) {
 
-			//return noise(pos * 10)*5;
-
-
-			scale = scale*(1 + surfaceVortex1.y*noise(pos*surfaceVortex1.x));
-			scale = scale*(1 + surfaceVortex2.y*noise(pos*surfaceVortex2.x));
-//			float val = getMultiFractal(pos, scale*1.523, (int)octaves + 2, surfaceNoiseSettings.x, surfaceNoiseSettings.y, surfaceNoiseSettings.z, surfaceNoiseSettings2.x);
-			float val = getSwissFractal(pos, scale*1.523, (int)octaves + 2, surfaceNoiseSettings.x, surfaceNoiseSettings.y, surfaceNoiseSettings.z, 1, 0.3);
-			val = pow(val, surfaceNoiseSettings3.z);
-
-
-/*			float pi = 3.14159265;
-			float2 uv = float2(saturate(((atan2(pos.z, pos.x) / (1*pi)) + 1.0) / 2.0), (0.5 - (asin(pos.y) / pi)));			
-			float craters = tex2Dlod(_Craters, float4(uv*1,0,0)).x*0.2;
-			*/
-			float craters = 0;
-//			return craters;
-
-			return clamp(val + craters*craterScale - surfaceNoiseSettings3.x, -0.1, 10);
-
-		}
-
-		float3 getHeightPosition(in float3 pos, in float scale, float heightScale, float octaves, float cs=1) {
-			return pos*fInnerRadius *(1 + getSurfaceHeight(mul(rotMatrix, pos), scale, octaves,cs)*heightScale);
+		float3 getHeightPosition(in float3 pos, in float scale, float heightScale, float octaves, out float3 Normal) {
+			float4 v = getSurfaceHeight(mul(rotMatrix, pos), scale, octaves);
+			Normal = v.yzw;
+			return pos*fInnerRadius *(1 + v.x*heightScale);
 //			return pos*fInnerRadius*(1+getSurfaceHeight(mul(rotMatrix, pos) , scale, octaves)*heightScale);
 			
 		}
@@ -184,35 +155,9 @@
 			float3 prev = 0;
 //			pos = normalize(pos);
 			float hs = heightScale;
-			float3 centerPos = getHeightPosition(normalize(pos), scale, hs, octaves);
-			float3 norm = 0;
-
-						for (float i=0;i<N;i++) {
-							float3 disp = float3(cos(i/(N+0)*2.0*PI), 0, sin(i/(N+0)*2.0*PI));
-							//float3 rotDisp = mul(tangentToWorld, disp);
-							//float3 np = normalize(pos + mul(tangentToWorld, disp)*normalScale);
-							//float3 np = normalize(pos + disp*normalScale);
-							float3 np = normalize(pos + (disp.x*tangent + disp.z*bn) *normalScale);
-
-							float3 newPos = getHeightPosition(np, scale, hs, octaves);
-
-
-							if (length(prev)>0.1)
-							{
-								float3 n = normalize(cross(newPos - centerPos, prev - centerPos));
-								float3 nn = n;
-			//					if (dot(nn, normalize(pos)) < 0.0)
-				//					nn *= -1;
-
-								norm += nn;
-
-							}
-							prev = newPos;
-
-						}
-						
-
-			return normalize(norm)*-1;
+			float3 Normal;
+			float3 centerPos = getHeightPosition(normalize(pos), scale, hs, octaves, Normal);
+			return normalize(Normal);
 		}
 
 
@@ -254,11 +199,12 @@
 			float heightScale = surfaceNoiseSettings2.y;
 
 			p.xyz = normalize(p.xyz);
-			p.xyz = getHeightPosition(p.xyz, scale, heightScale, octaves) + v3Translate;
+			float3 Normal;
+			p.xyz = getHeightPosition(p.xyz, scale, heightScale, octaves, Normal) + v3Translate;
 			return mul(unity_WorldToObject, p);
 		}
 
-		float4 getPlanetSurfaceOnlyNoTranslate(in float4 v) {
+/*		float4 getPlanetSurfaceOnlyNoTranslate(in float4 v) {
 
 			float4 p = mul(unity_ObjectToWorld, v);
 
@@ -271,6 +217,6 @@
 			p.xyz = getHeightPosition(p.xyz, scale, heightScale, octaves);
 			return mul(unity_WorldToObject, p);
 		}
-
+		*/
 		#endif
 

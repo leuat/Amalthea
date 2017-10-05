@@ -66,7 +66,10 @@ namespace LemonSpawn
             //            DisplayPlanet sun = dPlanets[0];
             
             dpSun = findDisplayPlanetsWithparent(null);
-//            Debug.Log("Suns: " + dpSun.Count);
+            //            Debug.Log("Suns: " + dpSun.Count);
+
+            selected = dpSun[0];
+
             foreach (DisplayPlanet dp in dpSun)
                 dp.children.Clear();
 

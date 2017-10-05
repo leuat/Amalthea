@@ -713,7 +713,7 @@ namespace LemonSpawn
             CurrentApp = Verification.MCAstName;
             RenderSettings.GlobalRadiusScale = 0.995f;
 
-
+            RenderSettings.RenderCorona = false;
 
             if (solarSystem == null)
     			solarSystem = new SolarSystem(sun, sphere, transform, (int)szWorld.skybox);

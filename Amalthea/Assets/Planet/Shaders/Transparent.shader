@@ -30,7 +30,7 @@
 			struct v2f
 			{
 				float2 uv : TEXCOORD0;
-				UNITY_FOG_COORDS(1)
+//				UNITY_FOG_COORDS(1)
 				float4 vertex : SV_POSITION;
 			};
 			float4 _Color;
@@ -39,6 +39,8 @@
 			{
 				v2f o;
 				o.vertex = UnityObjectToClipPos(v.vertex);
+				o.uv = float2(0, 0);
+
 			return o;
 			}
 			

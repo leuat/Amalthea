@@ -7,6 +7,7 @@ namespace LemonSpawn {
     public class Star : Planet {
 
         private Material starMaterial;
+        private Material glareMaterial;
 
         private Billboards corona = new Billboards();
         private Billboards glare = new Billboards();
@@ -43,7 +44,8 @@ namespace LemonSpawn {
 
             pSettings.properties.extraColor = Constants.colorTemperatureToRGB(pSettings.temperature);
             starMaterial.SetColor("_Color", pSettings.properties.extraColor);
-            CreateCorona();
+            if (RenderSettings.RenderCorona)
+                CreateCorona();
 //            CreateCorona3D();
 
         }
@@ -68,16 +70,25 @@ namespace LemonSpawn {
             // Skal være 2
             corona.billboards.Add(new LemonSpawn.Billboard(Vector3.zero, new Vector2(2*r,2*r), color));
 
-            glare.billboards.Add(new LemonSpawn.Billboard(Vector3.zero, new Vector2(1.5f * r, 1.5f * r), color*0.7f));
-            glare.billboards.Add(new LemonSpawn.Billboard(Vector3.zero, new Vector2(10*r, 10*r), color*0.3f));
+            Vector3 pp = Vector3.zero;// new Vector3(3, 3, 3);
+
+            glare.billboards.Add(new LemonSpawn.Billboard(pp, new Vector2(1.0f * r, 1.0f * r), color*0.7f));
+      //      glare.billboards.Add(new LemonSpawn.Billboard(pp, new Vector2(10*r, 10*r), color*0.3f));
 
             //corona.Realize("Solar Corona", (Material)Resources.Load("Corona"), 0).transform.parent = pSettings.transform.parent;
-            glare.Realize("Solar Glare", (Material)Resources.Load("SunGlare"), 0).transform.parent = pSettings.transform.parent;
+            glareMaterial = (Material)Resources.Load("SunGlare");
+            GameObject gl = glare.Realize("Solar Glare", glareMaterial, 0);
+            gl.transform.position = new Vector3(-4, 4, 4);
+            gl.transform.parent = pSettings.transform.parent;
 
         }
 
         public override void Update() {
             cameraAndPosition();
+//            if (RenderSettings.)
+  //          glareMaterial.SetVector("_upVector", SSVAppBase.MainCamera.transform.up);
+    //        glareMaterial.SetVector("_forward", SSVAppBase.MainCamera.transform.forward);
+//            Debug.Log(Vector3.Cross(SSVAppBase.MainCamera.transform.up, SSVAppBase.MainCamera.transform.forward));
             starMaterial.SetVector("v3Translate", pSettings.transform.position);
         }
 

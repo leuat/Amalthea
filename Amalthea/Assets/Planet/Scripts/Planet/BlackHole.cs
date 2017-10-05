@@ -54,23 +54,26 @@ namespace LemonSpawn
 
             pSettings.properties.extraColor = Constants.colorTemperatureToRGB(pSettings.temperature);
             bhMaterial.SetColor("_Color", pSettings.properties.extraColor);
-            CreateAccretion();
+            CreateAccretion(go);
 
 
         }
 
-        protected void CreateAccretion()
+        protected void CreateAccretion(GameObject parent)
         {
             GameObject plane = GameObject.CreatePrimitive(PrimitiveType.Plane);
             plane.name = "Accretion disk";
-            plane.transform.localScale = Vector3.one * pSettings.radius * 4;
-            plane.GetComponent<MeshRenderer>().material = (Material)Resources.Load("AccretionDisk"); 
+            plane.transform.localScale = Vector3.one * pSettings.radius * 8;
+            if (World.SzWorld.useSpaceCamera)
+                plane.transform.rotation = Quaternion.Euler(45, 45, 0);
+            plane.GetComponent<MeshRenderer>().material = (Material)Resources.Load("AccretionDisk");
+            plane.transform.parent = parent.transform;
 
         }
 
         public override void Update()
         {
-            //cameraAndPosition();
+            cameraAndPosition();
         }
 
 

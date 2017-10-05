@@ -7,7 +7,7 @@
 		SubShader{
 		//	    Tags {"Queue"="Transparent-1" "IgnoreProjector"="True" "RenderType"="Transparent"}
 //		Tags{ "Queue" = "Transparent+1" "IgnoreProjector" = "True" "RenderType" = "Transparent" }
-		Tags{ "Queue" = "Opaque" "IgnoreProjector" = "True" "RenderType" = "Opaque" }
+		Tags{ "IgnoreProjector" = "True" "RenderType" = "Opaque" }
 		LOD 400
 
 

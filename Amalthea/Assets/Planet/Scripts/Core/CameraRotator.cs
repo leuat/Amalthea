@@ -42,6 +42,13 @@ namespace LemonSpawn
                 theta = s * Input.GetAxis("Horizontal");
                 phi = s * Input.GetAxis("Vertical") * -1.0f;
             }
+            if (Input.GetMouseButton(1))
+            {
+                theta = 2*s * Input.GetAxis("Mouse X");
+                phi = 2*s * Input.GetAxis("Mouse Y") * -1.0f;
+            }
+
+
             mouseAccel += new Vector3(theta, phi, 0);
             /*            focusPointCur += (focusPoint - focusPointCur) * 0.05f;
                         focusPointCurStar += (selectedSystem.position - focusPointCurStar) * 0.05f;

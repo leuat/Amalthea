@@ -10,8 +10,7 @@
 	{
 		Pass
 	{
-		Tags{ "RenderType" = "Transparent" "Queue" = "Transparent+100" }
-		LOD 200
+		Tags{ "RenderType" = "Transparent" "Queue" = "Transparent+1000" }
 		Blend srcalpha oneminussrcalpha
 		cull off
 		Zwrite off
@@ -65,22 +64,23 @@
 		GS_INPUT output = (GS_INPUT)0;
 
 		output.pos = mul(unity_ObjectToWorld, v.vertex);
-		output.normal = v.normal;
+		output.normal =  v.normal;
 		output.tex0 = v.texcoord;
 
 		return output;
 	}
 
-
+	uniform float3 _upVector;
+	uniform float3 _forward;
 	// Geometry Shader -----------------------------------------------------
 	[maxvertexcount(4)]
 	void GS_Main(point GS_INPUT p[1], inout TriangleStream<FS_INPUT> triStream)
 	{
-		float3 up = UNITY_MATRIX_IT_MV[1].xyz; //upVector;
-		float3 look = _WorldSpaceCameraPos - p[0].pos;
+		float3 up =  normalize(UNITY_MATRIX_IT_MV[1].xyz);// UNITY_MATRIX_IT_MV[1].xyz; //upVector;
+		float3 look = _WorldSpaceCameraPos - p[0].pos + float3	(0,0,0);
 		//look.y = 0;
 		look = normalize(look);
-		float3 right = cross(up, look);
+		float3 right =  normalize(cross(up, look));
 
 		float halfS = 1.5 * _Size *max(p[0].tex0.x, 0.5);
 
@@ -94,7 +94,7 @@
 		FS_INPUT pIn;
 		pIn.pos = mul(vp, v[0]);
 		pIn.tex0 = float2(1.0f, 0.0f);
-		pIn.normal = p[0].normal;
+		pIn.normal =  p[0].normal;
 		pIn.extra = p[0].tex0.x;
 		triStream.Append(pIn);
 
@@ -117,7 +117,6 @@
 	float4 FS_Main(FS_INPUT input) : COLOR
 	{
 
-
 		float4 val = tex2D(_SpriteTex, input.tex0);
 		float3 c = input.normal;
 		val.x *= c.x;
@@ -126,6 +125,8 @@
 		val *= 2;
 		val.a = max(val.x, val.y);
 		val.a = max(val.a, val.z);
+//		val.a = 1;
+//		val.a = 1;
 		return val;
 	}
 

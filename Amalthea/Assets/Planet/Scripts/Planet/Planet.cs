@@ -290,11 +290,11 @@ namespace LemonSpawn
                 pSettings.setLayer(9, "LOD");
 
             }
-
+//            Debug.Log(pSettings.category);
             double projectionDistance = dist / RenderSettings.LOD_ProjectionDistance;
             d.Scale(Mathf.Min((float)projectionDistance, (float)RenderSettings.LOD_ProjectionDistance));
 
-            if (pSettings.category==PlanetSettings.Categories.Planet)
+            //if (pSettings.category==PlanetSettings.Categories.Planet)
             if (projectionDistance < 1)
             {
                 pSettings.gameObject.transform.localScale = pSettings.properties.localScale;
