@@ -386,6 +386,8 @@ namespace LemonSpawn
         }
 
 
+
+
         protected void RenderRuler()
         {
             if (szWorld.rulerTicks == 0)
@@ -412,24 +414,41 @@ namespace LemonSpawn
 
             GUI.DrawTexture(r, RenderSettings.textureRuler);
 
+
+			//Draw ticks
+			float orgAspect = 16 / 9f;
+			float scale = (Camera.main.aspect/orgAspect);
+
+			//tan(FOV_H/2) / screen_width = tan(FOV_V/2) / screen_height
+
+			float fov = Mathf.Atan((Mathf.Tan (Camera.main.fieldOfView / 2) / Screen.height) * Screen.width);
+			Debug.Log (fov);
+
+			scale = fov;
+
+			float start = w;
+			float ddx = (szWorld.rulerEnd - szWorld.rulerStart)*scale;
+			float dval = ddx / szWorld.rulerTicks;
+			float val = szWorld.rulerStart*scale;
+
+			//val *= aspect;
+			//dx *= aspect;
+
             if (full.Contains(Event.current.mousePosition))
             {
 
                 float x = Event.current.mousePosition.x / Screen.width;
-                float ddx = (szWorld.rulerEnd - szWorld.rulerStart);
-                x = szWorld.rulerStart + ddx * x;
+				x = (szWorld.rulerStart*scale + ddx * x);
 
                 GUI.Label(new Rect(Event.current.mousePosition.x+10, Event.current.mousePosition.y+10, 200, 30), "" + x.ToString("F2"));
             }
 
-            //Draw ticks
-            float start = w;
-            float dval = (szWorld.rulerEnd - szWorld.rulerStart) / szWorld.rulerTicks;
-            float val = szWorld.rulerStart;
+
+
             for (int i = 0; i < szWorld.rulerTicks + 1; i++)
             {
                 GUI.DrawTexture(new Rect(start * W, y * H, tickW * W, tickH * H), RenderSettings.textureRuler);
-                string text = val.ToString("F2") + " " + szWorld.rulerUnit;
+				string text = (val).ToString("F2") + " " + szWorld.rulerUnit;
                 GUI.Label(new Rect(start * W, textY * H, 200, 30), text);
                 start = start + dx;
                 val += dval;
@@ -438,6 +457,116 @@ namespace LemonSpawn
 
 
         }
+
+		protected void RenderRuler2()
+		{
+			if (szWorld.rulerTicks == 0)
+				return;
+
+			if (RenderSettings.textureRuler == null)
+				RenderSettings.textureRuler = Util.createSolidTexture(RenderSettings.colorRuler);
+
+			float W = Screen.width;
+			float H = Screen.height;
+
+			float w = 0.0f;
+			float y = 0.1f;
+			float h = 0.008f;
+
+			float tickW = 0.002f;
+			float tickH = 0.03f;
+
+			float textY = y + tickH;
+			float dx = (1 - 2 * w) / szWorld.rulerTicks;
+
+			Rect r = new Rect(w * W, y * H, Screen.width - 2 * w * W, h * H);
+			Rect full = new Rect(w * W, 0, Screen.width - 2 * w * W,Screen.height);
+
+			GUI.DrawTexture(r, RenderSettings.textureRuler);
+
+
+			//Draw ticks
+
+			/*float distance = 800;
+			Vector3 n = Camera.main.transform.forward;
+			Vector3 On = n * distance;
+			Ray r1 = Camera.main.ScreenPointToRay (new Vector3 (0, Screen.height / 2, 0));
+			Ray r2 = Camera.main.ScreenPointToRay (new Vector3 (Screen.width, Screen.height / 2, 0));
+			r1.origin = Vector3.zero;
+			r2.origin = Vector3.zero;
+				//public float RayIntersectPlane(Ray ray, Vector3 origin, Vector3 rn, out Vector3 intersectionPoint)
+			Vector3 isp1, isp2;
+			Util.RayIntersectPlane (r1, On, n, out isp1);
+			Util.RayIntersectPlane (r2, On, n, out isp2);
+			//Debug.Log ("isp1:"  +isp1);
+			//Debug.Log ("isp2:"  +isp2);
+*/
+
+			//Ray ry = Camera.main.ScreenPointToRay (new Vector3 (Screen.width/2, 0, 0));
+
+/*			float start = w;
+
+			Vector3 dir = (isp2 - isp1).normalized;
+			float l = (isp2 - isp1).magnitude;
+			float ddx = 1f/szWorld.rulerTicks;*/
+					//Vector3 startPoint = isp1;
+
+
+			//val *= aspect;
+			//dx *= aspect;
+			Vector3 isp1, isp2;
+			Vector3 n = Camera.main.transform.forward;
+			float distance = szWorld.rulerPlaneDistance;
+			Vector3 On = n * distance;
+//			float scale = 1f / (16 / 9f);
+			float scale = 1;
+
+			float addval = (szWorld.rulerEnd+szWorld.rulerStart)/2;
+			Debug.Log (Camera.main.aspect);
+
+			if (full.Contains(Event.current.mousePosition))
+			{
+
+				float x = Event.current.mousePosition.x;// / Screen.width;
+				float start = x;
+				Ray ray = Camera.main.ScreenPointToRay (new Vector3 (start, Screen.height / 2, 0));
+				ray.origin = Vector3.zero;
+				Util.RayIntersectPlane (ray, On, n, out isp1);
+
+
+				float val = (isp1 - On).magnitude*scale; 
+				if (start < Screen.width / 2)
+					val *= -1;
+				val += addval;
+
+				GUI.Label(new Rect(Event.current.mousePosition.x+10, Event.current.mousePosition.y+10, 200, 30), "" + val.ToString("F2"));
+			}
+
+
+
+			for (int i = 0; i < szWorld.rulerTicks + 1; i++)
+			{
+				float start = (Screen.width/(float)szWorld.rulerTicks)*i;
+				GUI.DrawTexture(new Rect(start * 1, y * H, tickW * W, tickH * H), RenderSettings.textureRuler);
+				Ray ray = Camera.main.ScreenPointToRay (new Vector3 (start, Screen.height / 2, 0));
+				ray.origin = Vector3.zero;
+
+				Util.RayIntersectPlane (ray, On, n, out isp1);
+
+				float val = (isp1 - On).magnitude*scale; 
+				if (start < Screen.width / 2)
+					val *= -1;
+				val += addval;
+				string text = (val).ToString("F2") + " " + szWorld.rulerUnit;
+				GUI.Label(new Rect(start * 1, textY * H, 200, 30), text);
+				//start = start + dx;
+				//val += dval;
+			}
+
+
+
+		}
+
 
 
 
@@ -449,7 +578,7 @@ namespace LemonSpawn
 
 
 
-            RenderRuler();
+            RenderRuler2();
             RenderClock();
 
             if (RenderSettings.isVideo)

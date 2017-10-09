@@ -228,6 +228,7 @@ namespace LemonSpawn
         public float rulerStart = 0;
         public float rulerEnd = 0;
         public float rulerTicks;
+		public float rulerPlaneDistance;
         public string rulerUnit = "";
 
         public string clockUnit = "s";

@@ -1094,5 +1094,16 @@ namespace LemonSpawn
             if (r != null)
                 r.material = newMat;
         }
+
+		public static float RayIntersectPlane(Ray ray, Vector3 origin, Vector3 rn, out Vector3 intersectionPoint)
+		{
+			float rDotn = Vector3.Dot(ray.direction, rn);
+
+			float s = Vector3.Dot(rn, (origin - ray.origin)) / rDotn;
+
+			intersectionPoint = ray.origin + s * ray.direction;
+			return rDotn;
+		}
+
     }
 }
