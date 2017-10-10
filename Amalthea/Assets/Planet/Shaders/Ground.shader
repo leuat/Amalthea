@@ -51,10 +51,11 @@
 
 
 
+
 		SubShader
 	{
 		Tags{ "RenderType" = "Opaque" "PerformanceChecks" = "False" }
-		LOD 150
+		LOD 400
 
 
 		// ------------------------------------------------------------------
@@ -68,7 +69,7 @@
 
 
 		CGPROGRAM
-#pragma target 4.0
+#pragma target 3.0
 		// TEMPORARY: GLES2.0 temporarily disabled to prevent errors spam on devices without textureCubeLodEXT
 #pragma exclude_renderers gles
 
@@ -85,9 +86,12 @@
 #pragma multi_compile_fwdbase
 #pragma multi_compile_fog
 
-#pragma multi_compile LS_GPU_SURFACE LS_CPU_SURFACE
 
-//#pragma LS_GPU_SURFACE
+
+#pragma multi_compile LS_GPU_SURFACE LS_GPU_SURFACE_OFF
+
+
+//#define LS_GPU_SURFACE
 //#pragma LS_CPU_SURFACE
 
 #pragma vertex LvertForwardBase
@@ -109,9 +113,9 @@
 		half4 ambientOrLightmapUV			: TEXCOORD5;	// SH or Lightmap UV
 		SHADOW_COORDS(6)
 		UNITY_FOG_COORDS(7)
-		float3 c0 : TEXCOORD8;
-		float3 c1 : TEXCOORD9;
-		float3 posWorld					: TEXCOORD10;
+		float3 posWorld	: TEXCOORD8;
+		float3 c0 : TEXCOORD9;
+		float3 c1 : TEXCOORD10;
 		float3 tangent : TEXCOORD11;
 
 	};
@@ -128,7 +132,7 @@ VertexOutputForwardBaseGround LvertForwardBase(VertexInput v)
 
 
 		float3 normalWorld = normalize(mul(unity_ObjectToWorld, v.vertex).xyz - v3Translate);
-#ifdef LS_GPU_SURFACE
+#if LS_GPU_SURFACE
 		float4 groundVertex = getPlanetSurfaceOnly(v.vertex);
 		v.vertex = groundVertex;
 #else
@@ -148,15 +152,15 @@ VertexOutputForwardBaseGround LvertForwardBase(VertexInput v)
 
 		float wh = (length(o.posWorld.xyz - v3Translate) - fInnerRadius);
 
-#ifdef LS_GPU_SURFACE
+#if LS_GPU_SURFACE
 		capV.x *= scaleFactor.x;
 		capV.y *= scaleFactor.y;
 		capV.z *= scaleFactor.z;
 #else
-/*		o.posWorld.x/= scaleFactor.x;
+		o.posWorld.x/= scaleFactor.x;
 		o.posWorld.y /= scaleFactor.y;
 		o.posWorld.z /= scaleFactor.z;
-		o.posWorld.xyz = capV.xyz;*/
+		o.posWorld.xyz = capV.xyz;
 #endif
 		o.pos = UnityObjectToClipPos(capV);
 
@@ -171,11 +175,14 @@ VertexOutputForwardBaseGround LvertForwardBase(VertexInput v)
 		o.tangentToWorldAndPackedData[0].xyz = tangentToWorld[0];
 		o.tangentToWorldAndPackedData[1].xyz = tangentToWorld[1];
 		o.tangentToWorldAndPackedData[2].xyz = tangentToWorld[2];
+
 #else
 		o.tangentToWorldAndPackedData[0].xyz = 0;
 		o.tangentToWorldAndPackedData[1].xyz = 0;
 		o.tangentToWorldAndPackedData[2].xyz = normalWorld;
+		o.tangent = float3(0,0,0);
 #endif
+
 		//We need this for shadow receving
 		TRANSFER_SHADOW(o);
 
@@ -293,7 +300,7 @@ VertexOutputForwardBaseGround LvertForwardBase(VertexInput v)
 	{
 		FRAGMENT_SETUP(s)
 
-#ifdef LS_GPU_SURFACE
+#if LS_GPU_SURFACE
 	float3 pfix = i.posWorld.xyz;
 #else
 		float3 pfix = i.posWorld - v3Translate;
@@ -302,7 +309,8 @@ VertexOutputForwardBaseGround LvertForwardBase(VertexInput v)
 #endif
 
 		float h = (length(pfix - v3Translate) - fInnerRadius) / fInnerRadius;// - liquidThreshold;
-#ifdef LS_GPU_SURFACE
+#if LS_GPU_SURFACE
+//	float3 t = float3(1,1,0);
 	float3 binormal = normalize(cross(i.posWorld - v3Translate, i.tangent));
 
 	float3 realN = getPlanetSurfaceNormal(i.posWorld - v3Translate, i.tangent, binormal, widthDistance(i.posWorld.xyz),3);
@@ -335,6 +343,7 @@ VertexOutputForwardBaseGround LvertForwardBase(VertexInput v)
 
 
 	float3 diff = getSurfaceColor(h, hill, perlinGround, posY, i.tex.xy);
+	//diff.x = 1;
 
 
 	float4 spc = _Color*0.65;// float4(1, 1, 1, 1);// *metallicity;// *specularity * 1;
@@ -342,26 +351,33 @@ VertexOutputForwardBaseGround LvertForwardBase(VertexInput v)
 	c.rgb += UNITY_BRDF_GI(diff, s.specColor, s.oneMinusReflectivity, rness, s.normalWorld, -s.eyeVec, occlusion, gi);
 	c.rgb += Emission(i.tex.xy);
 
+//	half4 c;
+//	c.rgb = i.tangent;
+//	c.a = 1;
+	//c.rgb = diff*2;
 
-
+	//c.rgb = diff;
 	c.rgb = groundColor(i.c0, i.c1, c.rgb, s.posWorld, 1.0);// *groundClouds;
+	//c.r = 1;
+//	c.rgb = realN;
 
 															//											c.rgb = modulatedHillyThreshold;
 															//												c.rgb = float3(1,0,0)*modd;
 															//return float4(ppos.xyz,1);
 															//s.alpha = 1;
+//	c.rgb = float3(1,1,1);
 	return OutputForward(c, s.alpha);
 	}
 		ENDCG
 	}
 		// ------------------------------------------------------------------
 
+		Fog{ Color(0,0,0,0) } // in additive pass fog should be black
 		Pass
 	{
 		Name "FORWARD_DELTA"
 		Tags{ "LightMode" = "ForwardAdd" }
 		Blend[_SrcBlend] One
-		Fog{ Color(0,0,0,0) } // in additive pass fog should be black
 		ZWrite Off
 		ZTest LEqual
 

@@ -57,15 +57,25 @@ namespace LemonSpawn
         private void InitializeSurfaces()
         {
             groundMaterial = (Material)Resources.Load("GroundMaterial");
+            //Shader.EnableKeyword("LS_GPU_SURFACE");
+            //groundMaterial.EnableKeyword("LS_GPU_SURFACE");
+            groundMaterial.EnableKeyword("_NORMALMAP");
 
-
-            if (!RenderSettings.GPUSurface)
+            if (!RenderSettings.GPUSurface) {
+                groundMaterial.DisableKeyword("LS_GPU_SURFACE");
                 Shader.DisableKeyword("LS_GPU_SURFACE");
+
+                groundMaterial.EnableKeyword("LS_GPU_SURFACE_OFF");
+                Shader.EnableKeyword("LS_GPU_SURFACE_OFF");
+                }
             //                groundMaterial = (Material)Resources.Load("GroundMaterial");
             else
             {
                 
+                groundMaterial.EnableKeyword("LS_GPU_SURFACE");
                 Shader.EnableKeyword("LS_GPU_SURFACE");
+                groundMaterial.DisableKeyword("LS_GPU_SURFACE_OFF");
+                Shader.DisableKeyword("LS_GPU_SURFACE_OFF");
 
                 /*                if (RenderSettings.UsePerPixelShading)
                                     groundMaterial = (Material)Resources.Load("GroundMaterialGPU");
@@ -73,6 +83,7 @@ namespace LemonSpawn
                                     groundMaterial = (Material)Resources.Load("GroundMaterialGPUVertexOnly");
                                     */
             }
+            groundMaterial.DisableKeyword("LS_GPU_SURFACE");
 
         }
 

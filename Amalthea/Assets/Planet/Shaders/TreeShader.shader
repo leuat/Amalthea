@@ -124,9 +124,10 @@
 #include "Include/PlanetSurface.cginc"
 
 #define L_SC_PASS			
+
 struct v2f_sc
 				 {
-					 float2 uv_MainTex;
+					 float2 uv_MainTex : TEXCOORD5;
 					 V2F_SHADOW_COLLECTOR;
 				 };
 
@@ -134,6 +135,7 @@ struct v2f_sc
 #include "Include/GeometryShaderExtra.cginc"
 
 
+  #pragma exclude_renderers d3d11_9x d3d11 xbox360
 
 
 				 // ----------------------------------------------------
@@ -151,6 +153,8 @@ struct v2f_sc
 				 float4 frag(v2f_sc IN) : COLOR
 				 {
 					 SHADOW_COLLECTOR_FRAGMENT(IN)
+
+					 //return float4(0,0,0,0);
 
 				 }
 					 ENDCG

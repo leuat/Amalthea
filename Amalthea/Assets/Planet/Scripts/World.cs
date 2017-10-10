@@ -62,7 +62,7 @@ namespace LemonSpawn {
 
 
         public static SerializedWorld currentSZWorld;
-        public static bool debug = true;
+        public static bool debug = false;
 		public static float MinCameraHeight = 1.5f;
 		public static RenderType renderType = RenderType.Normal;
 		public static string extraText = "";
