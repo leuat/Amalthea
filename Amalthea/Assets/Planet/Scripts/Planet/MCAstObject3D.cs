@@ -27,7 +27,7 @@ namespace LemonSpawn
         {
             float sx = 0.5f;
             float sy = 0.5f;
-            float sz = 10;
+            float sz = 2;
             LSMeshBox b = new LSMeshBox(
                 new Vector3(sx, sy, sz),
                 new Vector3(-sx,  sy, sz),
