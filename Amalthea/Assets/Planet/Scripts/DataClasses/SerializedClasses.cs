@@ -401,6 +401,7 @@ namespace LemonSpawn
                 isNewFrame = false;
             else
                 isNewFrame = true;
+
             foreach (Planet p in planets)
             {
                 p.InterpolatePositions(b.frame, dt, isNewFrame);

@@ -90,8 +90,8 @@ namespace LemonSpawn
                 double rotz = Util.LerpDegrees(f0.rot_z, f1.rot_z, dt);
                 //pSettings.transform.rotation = Quaternion.Euler((float)rotx*scale, (float)rot*scale, (float)rotz*scale);
                 Vector3 localscale = f0.scale() + (f1.scale() - f0.scale()) * (float)dt;
-                pSettings.gameObject.transform.localScale = localscale;
-
+                //pSettings.gameObject.transform.localScale = localscale;
+                pSettings.properties.localScale = localscale;
                 if (pSettings.properties.serializedPlanet.autoOrient == 1)
                 {
                     Vector3 dir = (f0.pos() - f1.pos()).Normalize().toVectorf();
