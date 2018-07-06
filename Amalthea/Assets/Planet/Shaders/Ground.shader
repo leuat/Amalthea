@@ -109,7 +109,7 @@
 		float4 pos							: SV_POSITION;
 		float4 tex							: TEXCOORD0;
 		half3 eyeVec 						: TEXCOORD1;
-		half4 tangentToWorldAndPackedData[3]    : TEXCOORD2;	// [3x3:tangentToWorld | 1x3:viewDirForParallax]
+		float4 tangentToWorldAndPackedData[3]    : TEXCOORD2;	// [3x3:tangentToWorld | 1x3:viewDirForParallax]
 		half4 ambientOrLightmapUV			: TEXCOORD5;	// SH or Lightmap UV
 		SHADOW_COORDS(6)
 		UNITY_FOG_COORDS(7)

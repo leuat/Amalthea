@@ -330,7 +330,7 @@ namespace LemonSpawn{
 
 				private void dragBackground ()
 				{
-						if (Event.current.type == EventType.mouseDrag && Event.current.modifiers == EventModifiers.Shift) {
+						if (Event.current.type == EventType.MouseDrag && Event.current.modifiers == EventModifiers.Shift) {
 								{
 										moveWindow (mousePos.x - mousePosOld.x, mousePos.y - mousePosOld.y);
 										Repaint ();
@@ -350,7 +350,7 @@ namespace LemonSpawn{
 
 				private void mouseClick ()
 				{
-						if (Event.current.type == EventType.mouseUp && Event.current.modifiers != EventModifiers.Shift) {
+						if (Event.current.type == EventType.MouseUp && Event.current.modifiers != EventModifiers.Shift) {
 								{
 										link = null;
 										if (connection != null) {

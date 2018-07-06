@@ -269,13 +269,15 @@ namespace LemonSpawn {
             
             sea = new Sea();
             hasFlatClouds = true;
-//            if (forcedPlanetType != null)
-  //              planetType = PlanetTypes.p.FindPlanetType(forcedPlanetType);
+            //            if (forcedPlanetType != null)
+            //              planetType = PlanetTypes.p.FindPlanetType(forcedPlanetType);
             // Or else find a random one
 
 
+
+//            Debug.Log(PlanetTypes.p);
             if (planetType == null)
-                planetType = PlanetTypes.p.getRandomPlanetType(r, getActualRadius(), temperature, properties.serializedPlanet.forcePlanetSurface);
+                planetType = PlanetTypes.p.getRandomPlanetType(r, getActualRadius(), temperature,"");
 
 
             planetTypeName = planetType.name;

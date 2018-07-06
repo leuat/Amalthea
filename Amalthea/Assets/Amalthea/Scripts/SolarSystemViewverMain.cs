@@ -456,6 +456,7 @@ namespace Amalthea {
                         */
             float t = 0.1f;
             focusPointCur = (focusPoint*t + focusPointCur*(1-t));
+            if (selectedSystem!=null)
             focusPointCurStar = (selectedSystem.position*t + focusPointCurStar*(1-t));
 
             mouseAccel *= 0.65f;
@@ -819,13 +820,16 @@ namespace Amalthea {
 
         protected void UpdateStarCamera()
         {
-            float min;
-            if (currentSystem != null)
+            float min = 0;
+            if (currentSystem != null && selectedSystem != null)
             {
                 min = Mathf.Min((starCamera.transform.position - currentSystem.position).magnitude, (starCamera.transform.position - selectedSystem.position).magnitude);
             }
             else
-                min = (starCamera.transform.position - selectedSystem.position).magnitude;
+            {
+                if (selectedSystem != null)
+                    min = (starCamera.transform.position - selectedSystem.position).magnitude;
+            }
 
 
             if (min>1)
@@ -903,15 +907,20 @@ namespace Amalthea {
 
         public override void Update()
         {
+ 
             UpdateFocus();
             UpdateCamera();
             UpdateZoom();
+
+
             if (solarSystem != null)
                 solarSystem.Update();
             UpdateStarCamera();
     //        if (currentMode == Mode.Interstellar)
 
             player.Update(starCamera.transform.position, starCamera.transform.up);
+
+
 
             if (DisplayPlanet.performSelect!=null)
             {

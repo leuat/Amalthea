@@ -72,7 +72,7 @@ Shader "LemonSpawn/Water" {
 			float3 c1 : TEXCOORD6;
 			float3 T: TEXCOORD7;
 			float3 B: TEXCOORD8;
-			LIGHTING_COORDS(1, 2)
+			LIGHTING_COORDS(1, 10)
 			float3 vvertex: TEXCOORD9;
 		};
 
