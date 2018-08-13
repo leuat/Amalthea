@@ -412,7 +412,7 @@ inline float iqhash(float n)
 
 }
 
-float noise(float3 x)
+float noise(in float3 x)
 {
 
 	float3 p = floor(x);
@@ -426,7 +426,36 @@ float noise(float3 x)
 		lerp(lerp(iqhash(n + 113.0), iqhash(n + 114.0), f.x),
 			lerp(iqhash(n + 270.0), iqhash(n + 271.0), f.x), f.y), f.z);
 
+}
 
+
+
+
+float mod289(float x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+float4 mod289(float4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+float4 perm(float4 x) { return mod289(((x * 34.0) + 1.0) * x); }
+
+float noise_test2(float3 p) {
+	float3 a = floor(p);
+	float3 d = p - a;
+	d = d * d * (3.0 - 2.0 * d);
+
+	float4 b = a.xxyy + float4(0.0, 1.0, 0.0, 1.0);
+	float4 k1 = perm(b.xyxy);
+	float4 k2 = perm(k1.xyxy + b.zzww);
+
+	float4 c = k2 + a.zzzz;
+	float4 k3 = perm(c);
+	float4 k4 = perm(c + 1.0);
+
+	float4 o1 = frac(k3 * (1.0 / 41.0));
+	float4 o2 = frac(k4 * (1.0 / 41.0));
+
+	float4 o3 = o2 * d.z + o1 * (1.0 - d.z);
+	float2 o4 = o3.yw * d.x + o3.xz * (1.0 - d.x);
+
+
+	return o4.y * d.y + o4.x * (1.0 - d.y);
 }
 uniform float3 surfaceNoiseSettings4;
 
@@ -611,7 +640,7 @@ float getMultiFractal2(in float3 p, float frequency, int octaves, float lacunari
         }
 
 
-inline float getIQClouds(float3 pos, in int N) {
+inline float getIQClouds(float3 pos, in int N, in float3 normal) {
 
 		float3 p = pos*stretch;
 		float n = 0;// noise(p*3.123) * 0.2 - 0.2;;
@@ -619,8 +648,8 @@ inline float getIQClouds(float3 pos, in int N) {
 		float3 shift= float3(0.123, 2.314, 0.6243);
 		float A = 0;
 		float pp = ls_cloudscattering;
-		ms = ms * (1 + LS_LargeVortex*noise(p*3.2354 + shift) );
-		ms = ms * (1 + LS_SmallVortex*noise(p*29.2354 + shift) );
+//		ms = ms * (1 + LS_LargeVortex*noise(p*3.2354 + shift) );
+//		ms = ms * (1 + LS_SmallVortex*noise(p*29.2354 + shift) );
 
 	/*	for (int i = 1; i <= N; i++) {
 			float f = pow(2, i)*1.0293;
@@ -631,7 +660,14 @@ inline float getIQClouds(float3 pos, in int N) {
 		*/
 
 //		n = getMultiFractal2(p, ms, 12, 2.5, LS_LargeVortex, 4*LS_SmallVortex, -0.5);
+
+		float py = LS_SmallVortex *clamp(noise(LS_LargeVortex*normal+float3(2,13.123,4.123))-0.5,0,1);
+		float pz = LS_SmallVortex *clamp(noise(LS_LargeVortex*normal+float3(5.23,3.123,4.123))-0.5,0,1);
+		p.y+=py;
+		p.x+=pz;
 		n = getMultiFractal2(p, ms, 12, 2.5, 0.57, 4, -0.5);
+
+
 
 		float v = clamp(n + ls_cloudSubScale, 0, 1.5);
 
@@ -685,7 +721,7 @@ inline float getIQClouds(float3 pos, in int N) {
 //			float2 cloudUV = getCloudUVPos(iPos);
 
 					
-			float cloudVal = getIQClouds(iPos, 5);
+			float cloudVal = getIQClouds(iPos, 5, float3(1,1,1));
 			cloudVal = getCloudIntensity(cloudVal);
 /*			if (cloudVal > 0.5)
 				cloudVal = 1;

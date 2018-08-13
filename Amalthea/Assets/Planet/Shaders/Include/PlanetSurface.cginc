@@ -22,6 +22,7 @@
 			float n = 0;
 			float A = 0;
 			float ms = scale;
+
 			float3 shift= float3(0.123, 2.314, 0.6243);
 
 			for (int i = 1; i <= N; i++) {
@@ -120,12 +121,7 @@
                 weight = clamp(weight, 0, 1);
 
                 value += (signal * pow(f, w));
-//                value += (signal * pow(f, -1));
-//                value += (signal * 1);
-//                value += (signal * pow(f, 0.05));
-//                value += (signal * pow(frequency, -1.0));
                 vt = vt * lacunarity;
-//                frequency *= lacunarity;
                  f *= lacunarity;
             }
             return value;
@@ -139,7 +135,17 @@
 			// return noise(pos * 10) * 5;
 			scale = scale*(1 + surfaceVortex1.y*noise(pos*surfaceVortex1.x));
 			scale = scale*(1 + surfaceVortex2.y*noise(pos*surfaceVortex2.x));
-			float val = getMultiFractal(pos, scale*1.523, (int)octaves + 2, surfaceNoiseSettings.x, surfaceNoiseSettings.y, surfaceNoiseSettings.z, surfaceNoiseSettings2.x);
+//			float val = getMultiFractal(pos, scale*1.523, (int)octaves +2, surfaceNoiseSettings.x, surfaceNoiseSettings.y, surfaceNoiseSettings.z, surfaceNoiseSettings2.x);
+			float val = getMultiFractal(pos, scale*1.523, (int)octaves , surfaceNoiseSettings.x, surfaceNoiseSettings.y, surfaceNoiseSettings.z, surfaceNoiseSettings2.x);
+			//val = val*(0.1*getMultiFractal(pos, scale*13.523, (int)octaves-2, surfaceNoiseSettings.x, surfaceNoiseSettings.y, surfaceNoiseSettings.z, surfaceNoiseSettings2.x) + 1);
+//	val = val + val*0.15*getMultiFractal(pos, scale*23.523, (int)octaves-2, surfaceNoiseSettings.x, surfaceNoiseSettings.y, surfaceNoiseSettings.z, surfaceNoiseSettings2.x);
+			//val = val + val * 0.10*getMultiFractal(pos, scale*23.523, (int)octaves - 3, 2.75, 1, 0.75, -0.5);
+			//val = val + val * surfaceNoiseSettings4.y*getMultiFractal(pos, surfaceNoiseSettings4.z*23.523*scale, 7, 2.75, 0.75, 1.5, -0.5);
+			
+				// Next one is high detail settings, really cool
+			//val = val + val * surfaceNoiseSettings4.y*getMultiFractal(pos, 23.523*scale, 7, 2.75, 0.75, 1.5, -0.5);
+			// Next one is rivers and stuff
+			 //val = val - val * 0.1*surfaceNoiseSettings4.z*clamp(getMultiFractal(pos, 6.523*scale*surfaceNoiseSettings5.y*4, 7, 2.75, 0.75, 1.5, -0.5)-surfaceNoiseSettings5.x,0,1);
 			val = pow(val, surfaceNoiseSettings3.z);
 			return clamp(val - surfaceNoiseSettings3.x, 0, 10);
 			//return getStandardPerlin(pos, scale, 1, 0.5, 8);

@@ -114,6 +114,7 @@ Shader "LemonSpawn/LazyClouds" {
 			c.a = getCloudIntensity(x);
 			c.rgb *= NL*globalLight;
 
+//			c.r=0;
 //						c.rgb = c.a*float3(1,1,1);
 
 			return c;

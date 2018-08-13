@@ -364,8 +364,8 @@ namespace LemonSpawn
             if (pSettings.sea != null)
                 pSettings.sea.Update();
 
-            if (environment != null)
-                environment.Update();
+//            if (environment != null)
+ //               environment.Update();
 
             if (clouds != null)
                 clouds.Update();

@@ -223,12 +223,13 @@ namespace LemonSpawn
         public int screenshot_height = 1024;
         public int maxFrames = 0;
         public float defaultPlaySpeed = 0.6f;
-
+        public float renderClock = 1;
         public float currentTime = 0;
         public float rulerStart = 0;
         public float rulerEnd = 0;
         public float rulerTicks;
 		public float rulerPlaneDistance;
+        public float rulerPosition = 0.13f;
         public string rulerUnit = "";
 
         public string clockUnit = "s";

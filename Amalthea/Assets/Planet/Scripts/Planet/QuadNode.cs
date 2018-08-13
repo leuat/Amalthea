@@ -118,6 +118,7 @@ namespace LemonSpawn
             }
 //            c.fri
 
+            if (RenderSettings.RenderEnvironment)
             if (planetSettings.hasEnvironment && currentLevel == World.SzWorld.EnvQuadLevel && environment.Count == 0) {
                 int split = 1;
                 for (int i = 0; i < split; i++)
@@ -551,7 +552,7 @@ namespace LemonSpawn
 
 
 
-            float l = Mathf.Pow(findMinDistance(planetSettings.properties.localCamera, true), 1)+0.0005f;
+            float l = Mathf.Abs(Mathf.Pow(findMinDistance(planetSettings.properties.localCamera, true), 1.0f)) + 0.000001f;
 /*            float height = RenderSettings.ResolutionScale * 0.035f;
             l = l / (height);*/
             //			l = Mathf.Min (l, 10.0f);

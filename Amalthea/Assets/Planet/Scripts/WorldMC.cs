@@ -12,6 +12,9 @@ using UnityEditor;
 #endif
 using System.Collections.Generic;
 
+
+
+
 namespace LemonSpawn
 {
 
@@ -21,8 +24,8 @@ namespace LemonSpawn
 
 
         protected GameObject StarBackgroundSphere = null;
-        protected double m_playSpeed = 0.0;
-        protected Texture2D tx_background, tx_load, tx_record;
+        public static double m_playSpeed = 0.0;
+        public static Texture2D tx_background, tx_load, tx_record, tx_textBackground;
         protected int load_percent;
         protected GameObject helpPanel = null;
         protected GameObject settingsPanel = null;
@@ -309,8 +312,11 @@ namespace LemonSpawn
             {
                 tx_background = new Texture2D(1, 1);
                 tx_load = new Texture2D(1, 1);
+                tx_textBackground = new Texture2D(1, 1);
                 tx_background.SetPixel(0, 0, new Color(0, 0, 0, 1));
                 tx_background.Apply();
+                tx_textBackground.SetPixel(0, 0, new Color(0, 0, 0, 0.8f));
+                tx_textBackground.Apply();
                 tx_load.SetPixel(0, 0, new Color(0.7f, 0.3f, 0.2f, 1));
                 tx_load.Apply();
                 // Create a circle
@@ -390,6 +396,8 @@ namespace LemonSpawn
 
         protected void RenderRuler()
         {
+
+
             if (szWorld.rulerTicks == 0)
                 return;
 
@@ -470,7 +478,7 @@ namespace LemonSpawn
 			float H = Screen.height;
 
 			float w = 0.0f;
-			float y = 0.1f;
+            float y = szWorld.rulerPosition;//0.13f;
 			float h = 0.008f;
 
 			float tickW = 0.002f;
@@ -579,7 +587,8 @@ namespace LemonSpawn
 
 
             RenderRuler2();
-            RenderClock();
+            if (szWorld.renderClock==1)
+               RenderClock();
 
             if (RenderSettings.isVideo)
             {

@@ -51,7 +51,7 @@ namespace LemonSpawn {
 		public static bool RenderMenu = true;
 		public static bool GPUSurface = true;
         public static bool RenderCorona = true;
-		public static float version = 0.23f;
+		public static float version = 0.24f;
         public static float powScale = 0.75f;
         public static float fov = 70;
         public static Vector3 stretch = Vector3.one;
@@ -82,7 +82,7 @@ namespace LemonSpawn {
         public static bool sortInverse = false;
         public static float GlobalRadiusScale = 1;
         public static string textureLocation = "Textures/EnvironmentBillboards/";
-
+        public static bool RenderEnvironment = false;
         public static Texture2D textureRuler = null;
         public static Color colorRuler = new Color(1.0f, 0.9f, 0.5f, 1.0f);
         public static float fromActualRadius(float radius)

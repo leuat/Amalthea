@@ -88,7 +88,7 @@ Shader "LemonSpawn/CloudID" {
 
 
 
-		float getIQCloudShadow(float3 start, float3 direction, float stepLength, int CloudLOD) {
+		float getIQCloudShadow(float3 start, float3 direction, float stepLength, int CloudLOD, float3 normal) {
 
 			int N = 4;
 
@@ -97,7 +97,7 @@ Shader "LemonSpawn/CloudID" {
 			float val = 0;
 //			[uroll]
 			for (int i=0;i<N;i++){
-				float v = getIQClouds(p, CloudLOD);
+				float v = getIQClouds(p, CloudLOD, normal);
 				float h = abs(length(p)-1);
 				v = exp(-(h*200))*v;
 
@@ -128,29 +128,30 @@ Shader "LemonSpawn/CloudID" {
 
 			int N = 10;
 
-			float val = getIQClouds(pos,N);
+
+			float3 normal=i.normal*10;
+
+			float val = getIQClouds(pos,N, normal);
 
 
-			c.rgb = ls_cloudcolor*ls_cloudintensity;
-			c.a = val;
+			c.rgb = ls_cloudcolor*ls_cloudintensity*0.8;
 
-			c.a*=ls_cloudthickness;
+			c.a=ls_cloudthickness;
+			c.a = clamp(c.a*val*5,0,1);
 			
 			if (c.a<0.02)
 				discard;
 			
 
-			float shadow = getIQCloudShadow(pos, normalize(v3LightPos), ls_shadowscale, 4);
-
-			shadow = clamp(shadow*0.4,0.0,1.0);
-
+			//float shadow = getIQCloudShadow(pos, normalize(v3LightPos), ls_shadowscale, 4);
+			float shadow = getIQCloudShadow(pos, normalize(v3LightPos), ls_shadowscale, 4, normal);
+			//c.a=1;
+			shadow = clamp(shadow*0.2,0.0,1.0);
 			c.rgb*=(1.0-shadow)*globalLight;
 
 //			c.rgb = groundColor(i.c0, i.c1, c.rgb*0);
-			c.rgb = atmColor(i.c0, i.c1)+c.rgb;
-			
+			c.rgb = atmColor(i.c0, i.c1) + c.rgb;
 //			c.a += 1-length(c.rgb);
-
 
 	//		c.rgb = float3(0.5, 0.5, 0.5);
 //			c.a += 0.9;

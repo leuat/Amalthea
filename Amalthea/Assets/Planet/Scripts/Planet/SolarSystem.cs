@@ -246,13 +246,20 @@ namespace LemonSpawn
                         guiStyle.fontSize = Screen.height/50;
                         if (p.pSettings.properties.serializedPlanet != null)
                         {
-                            guiStyle.normal.textColor = p.pSettings.properties.serializedPlanet.getColor();//  new Color(0.5f, 0.7f, 1.0f);
+//                            guiStyle.normal.textColor = p.pSettings.properties.serializedPlanet.getColor();//  new Color(0.5f, 0.7f, 1.0f);
                             if (World.SzWorld.currentFrame < p.pSettings.properties.serializedPlanet.Frames.Count)
                             {
                                 Frame frame = p.pSettings.properties.serializedPlanet.Frames[World.SzWorld.currentFrame];
                                 string info = frame.displayMessage;
                                 if (info != null && info != "")
+                                {
+                                    //GUI.DrawTexture(new Rect(pos.x, Screen.height - pos.y, info.Trim().Length  * guiStyle.fontSize/2, guiStyle.fontSize), WorldMC.tx_textBackground);
+
+                                    guiStyle.normal.textColor = Color.black;
+                                    GUI.Label(new Rect(pos.x+2, Screen.height - pos.y+2, 250, 130), info, guiStyle);
+                                    guiStyle.normal.textColor = p.pSettings.properties.serializedPlanet.getColor();//  new Color(0.5f, 0.7f, 1.0f);
                                     GUI.Label(new Rect(pos.x, Screen.height - pos.y, 250, 130), info, guiStyle);
+                                }
 
 
                             }
