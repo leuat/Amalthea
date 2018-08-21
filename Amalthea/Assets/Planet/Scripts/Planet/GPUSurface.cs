@@ -221,8 +221,8 @@ public static float noiseStatic(Vector3 x)
             scale = scale*(1 + surfaceVortex1.y*noise(pos*surfaceVortex1.x));
             scale = scale*(1 + surfaceVortex2.y*noise(pos*surfaceVortex2.x));
             float val = getMultiFractal(pos*1.523f, scale, (int)octaves, surfaceNoiseSettings.x, surfaceNoiseSettings.y, surfaceNoiseSettings.z, surfaceNoiseSettings2.x);
-            val = val + val * surfaceNoiseSettings4.y * getMultiFractal(pos, 23.523f * scale, 7, 2.75f, 0.75f, 1.5f, -0.5f);
-            val = val - val * 0.1f * surfaceNoiseSettings4.z * clamp(getMultiFractal(pos, 6.523f * scale * surfaceNoiseSettings5.y * 4f, 7, 2.75f, 0.75f, 1.5f, -0.5f) - surfaceNoiseSettings5.x, 0f, 1f);
+            //val = val + val * surfaceNoiseSettings4.y * getMultiFractal(pos, 23.523f * scale, 7, 2.75f, 0.75f, 1.5f, -0.5f);
+            //val = val - val * 0.1f * surfaceNoiseSettings4.z * clamp(getMultiFractal(pos, 6.523f * scale * surfaceNoiseSettings5.y * 4f, 7, 2.75f, 0.75f, 1.5f, -0.5f) - surfaceNoiseSettings5.x, 0f, 1f);
             val = pow(val, surfaceNoiseSettings3.z);
             return clamp(val-surfaceNoiseSettings3.x, 0, 10);
             //return getStandardPerlin(pos, scale, 1, 0.5, 8);

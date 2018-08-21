@@ -384,7 +384,8 @@ namespace LemonSpawn
             guiStyle.fontSize = (int)fs;
 
 
-            GUI.Label(new Rect(w * W, y * H, 300, 30), "" + szWorld.currentTime.ToString("F3") + " " + szWorld.clockUnit, guiStyle);
+            if (szWorld.renderClock == 1)
+                GUI.Label(new Rect(w * W, y * H, 300, 30), "" + szWorld.currentTime.ToString("F3") + " " + szWorld.clockUnit, guiStyle);
             if (currentCamera!=null)
             GUI.Label(new Rect(w * W, y * H + fs*1.5f, 300, 30), currentCamera.displayMessage , guiStyle);
 
@@ -587,7 +588,6 @@ namespace LemonSpawn
 
 
             RenderRuler2();
-            if (szWorld.renderClock==1)
                RenderClock();
 
             if (RenderSettings.isVideo)
