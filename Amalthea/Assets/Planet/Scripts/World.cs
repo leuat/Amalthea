@@ -122,6 +122,7 @@ namespace LemonSpawn {
         public static string screenshotDir = "screenshots" + fileDelimiter;
         public static string movieDir = "movie" + fileDelimiter;
         public static string dataDir = "data" + fileDelimiter;
+        public static string SSVdataDir = "ssv_data" + fileDelimiter;
         public static string MCAstSettingsFile = "mcast_settings.xml";
 
 

@@ -394,7 +394,7 @@ namespace LemonSpawn
         }
 
         void CreateLoadFileMenu(MenuItem loadMenu, string fileType) { 
-            List<string> flist = Util.FindFilesInDirectory(RenderSettings.path + RenderSettings.dataDir, fileType);
+            List<string> flist = Util.FindFilesInDirectory(RenderSettings.path + RenderSettings.SSVdataDir, fileType);
             foreach (string s in flist)
             {
                 MenuItem file = new MenuItem(loadMenu, "File Menu", s.Replace(".xml",""), null, SSVAppSettings.menuSizeText + new Vector2(1.2f, 0), false, 2, loadMenu.layout, LoadSolarSystemFromXML, s);
@@ -468,7 +468,7 @@ namespace LemonSpawn
 //            solarSystem = new SolarSystem(sun, sphere, transform, (int)szWorld.skybox);
 
             string name = (string)o;
-            name = RenderSettings.dataDir + name;// + ".xml";
+            name = RenderSettings.SSVdataDir + name;// + ".xml";
             data.DestroyAllGameObjects();
             LoadFromXMLFile(name,false,true);
 

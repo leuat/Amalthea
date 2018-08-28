@@ -20,7 +20,7 @@ namespace LemonSpawn
         public static int MaxOrbitalLines = 60;
         public static int FontSize = 10 * Screen.height / 512;
         public static bool useAbsolutePositions = false;
-        public static Vector2 menuSizeText = new Vector2(0.2f, 0.1f) * Screen.height/1.5f;
+        public static Vector2 menuSizeText = new Vector2(0.5f, 0.1f) * Screen.height/2.0f;
         public static Vector2 menuSizeImage = new Vector2(0.2f, 0.1f) * Screen.height/1.5f;
         public static Vector2 menuSizePlanet = new Vector2(0.1f, 0.1f) * Screen.height/1.5f;
 

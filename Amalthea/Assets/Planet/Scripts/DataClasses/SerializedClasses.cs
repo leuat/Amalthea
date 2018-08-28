@@ -107,6 +107,8 @@ namespace LemonSpawn
             if (RenderSettings.logScale) ps.radius = Mathf.Pow(ps.radius,RenderSettings.powScale);
             ps.radius *= radiusScale;
 
+
+
             ps.properties.orgPos.Set(ps.properties.pos);
 //            ps.atmosphereDensity = Mathf.Clamp(atmosphereDensity, 0, RenderSettings.maxAtmosphereDensity);
             //	ps.atmosphereHeight = atmosphereHeight;

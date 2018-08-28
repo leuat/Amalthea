@@ -50,8 +50,10 @@ namespace LemonSpawn
 
         protected void setText(string box, string text)
         {
-          //  Debug.Log(box);
-            GameObject.Find(box).GetComponent<Text>().text = text;
+            //  Debug.Log(box);
+            GameObject go = GameObject.Find(box);
+            if (go!=null)
+                go.GetComponent<Text>().text = text;
         }
 
 
