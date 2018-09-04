@@ -202,7 +202,6 @@
 
 							float3 newPos = getHeightPosition(np, scale, hs, octaves);
 
-
 							if (length(prev)>0.1)
 							{
 								float3 n = normalize(cross(newPos - centerPos, prev - centerPos));

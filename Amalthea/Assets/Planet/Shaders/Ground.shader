@@ -175,7 +175,6 @@ VertexOutputForwardBaseGround LvertForwardBase(VertexInput v)
 		o.tangentToWorldAndPackedData[0].xyz = tangentToWorld[0];
 		o.tangentToWorldAndPackedData[1].xyz = tangentToWorld[1];
 		o.tangentToWorldAndPackedData[2].xyz = tangentToWorld[2];
-
 #else
 		o.tangentToWorldAndPackedData[0].xyz = 0;
 		o.tangentToWorldAndPackedData[1].xyz = 0;
@@ -224,7 +223,7 @@ VertexOutputForwardBaseGround LvertForwardBase(VertexInput v)
 		UNITY_TRANSFER_FOG(o,o.pos);
 
 		getGroundAtmosphere(groundVertex, o.c0, o.c1);
-
+		// = 1;
 		return o;
 	}
 
@@ -251,7 +250,8 @@ VertexOutputForwardBaseGround LvertForwardBase(VertexInput v)
 
 
 	inline float widthDistance(float3 pos) {
-		return clamp(10 * length(pos - _WorldSpaceCameraPos) / fInnerRadius, 0.1, 10);
+		//return clamp(10 * length(pos - _WorldSpaceCameraPos) / fInnerRadius, 0.1, 10);
+		return clamp(fInnerRadius/100000.0, 0.0001, 10);
 	}
 
 
@@ -269,13 +269,13 @@ VertexOutputForwardBaseGround LvertForwardBase(VertexInput v)
 							   //	float3 hillColor = s.diffColor;
 							   //if (dd < 0.98 )
 							   //	hColor = float3(0.2, 0.2 ,0.2);
-		float3 v3CameraPos = _WorldSpaceCameraPos - v3Translate;	// The camera's current position
+//		float3 v3CameraPos = _WorldSpaceCameraPos - v3Translate;	// The camera's current position
 
 
 
 
-		float fCameraHeight = length(v3CameraPos);
-		float camH = clamp(fCameraHeight - fInnerRadius, 0, 1);
+//		float fCameraHeight = length(v3CameraPos);
+	//	float camH = clamp(fCameraHeight - fInnerRadius, 0, 1);
 		//	float wh = (length(i.posWorld.xyz - v3Translate) - fInnerRadius);
 		//	wh = 0.0;
 		//									float modulatedHillyThreshold = hillyThreshold* atan2(i.posWorld.z , i.posWorld.y);
@@ -302,20 +302,24 @@ VertexOutputForwardBaseGround LvertForwardBase(VertexInput v)
 
 #if LS_GPU_SURFACE
 	float3 pfix = i.posWorld.xyz;
+	float h = (length(pfix - v3Translate) - fInnerRadius) / fInnerRadius;// - liquidThreshold;
 #else
 		float3 pfix = i.posWorld - v3Translate;
-		pfix = float3(pfix.x  / scaleFactor.x, pfix.y / scaleFactor.y,pfix.z / scaleFactor.z);
-		pfix += v3Translate;
+		//pfix = float3(pfix.x  / scaleFactor.x, pfix.y / scaleFactor.y,pfix.z / scaleFactor.z);
+		float h = (length(pfix+v3Translate) - fInnerRadius) / fInnerRadius;// - liquidThreshold;
+																			 //		s.normalWorld = normalize(pfix);
+		//pfix += v3Translate;
 #endif
 
-		float h = (length(pfix - v3Translate) - fInnerRadius) / fInnerRadius;// - liquidThreshold;
 #if LS_GPU_SURFACE
 //	float3 t = float3(1,1,0);
 	float3 binormal = normalize(cross(i.posWorld - v3Translate, i.tangent));
 
 	float3 realN = getPlanetSurfaceNormal(i.posWorld - v3Translate, i.tangent, binormal, widthDistance(i.posWorld.xyz),3);
+//	float3 realN = getPlanetSurfaceNormal(i.posWorld - v3Translate, i.tangent, binormal, 0.0001, 3);
 	s.normalWorld = realN;
 #endif
+	
 	//UnityLight mainLight = MainLight(s.normalWorld);
 	UnityLight mainLight = MainLight();
 	mainLight.dir = v3LightPos;
@@ -332,7 +336,7 @@ VertexOutputForwardBaseGround LvertForwardBase(VertexInput v)
 	//	float dd = dot(normalize(mul(rotMatrixInv, i.posWorld2.xyz)), normalize(s.normalWorld * 1 + i.n1 * 0));
 
 	
-	float3 ppos = normalize(pfix- v3Translate);
+	float3 ppos = normalize(pfix - v3Translate);
 
 
 	float perlinGround = pow(clamp(noise(normalize(ppos)*3.1032) + 0.3, 0, 1), 2);
@@ -345,11 +349,16 @@ VertexOutputForwardBaseGround LvertForwardBase(VertexInput v)
 	float3 diff = getSurfaceColor(h, hill, perlinGround, posY, i.tex.xy);
 	//diff.x = 1;
 
-
-	float4 spc = _Color*0.65;// float4(1, 1, 1, 1);// *metallicity;// *specularity * 1;
-	half4 c = UNITY_BRDF_PBS(diff, s.specColor, s.oneMinusReflectivity, rness, s.normalWorld, -s.eyeVec, gi.light, gi.indirect);
-	c.rgb += UNITY_BRDF_GI(diff, s.specColor, s.oneMinusReflectivity, rness, s.normalWorld, -s.eyeVec, occlusion, gi);
+//	rness = 0;
+	float3 spc = s.specColor*0;// float4(1, 1, 1, 1);// *metallicity;// *specularity * 1;
+//	rness = 0;
+	half4 c = UNITY_BRDF_PBS(diff, spc, s.oneMinusReflectivity, rness, s.normalWorld, -s.eyeVec, gi.light, gi.indirect);
+	c.rgb += UNITY_BRDF_GI(diff, spc, s.oneMinusReflectivity, rness, s.normalWorld, -s.eyeVec, occlusion, gi);
 	c.rgb += Emission(i.tex.xy);
+
+
+//	c.rgb = hill * float3(1, 0, 0);
+//	c.rgb = realN;
 
 //	half4 c;
 //	c.rgb = i.tangent;

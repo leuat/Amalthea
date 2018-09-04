@@ -60,6 +60,7 @@ namespace LemonSpawn
             //Shader.EnableKeyword("LS_GPU_SURFACE");
             //groundMaterial.EnableKeyword("LS_GPU_SURFACE");
             groundMaterial.EnableKeyword("_NORMALMAP");
+            
 
             if (!RenderSettings.GPUSurface) {
                 groundMaterial.DisableKeyword("LS_GPU_SURFACE");
@@ -71,7 +72,6 @@ namespace LemonSpawn
             //                groundMaterial = (Material)Resources.Load("GroundMaterial");
             else
             {
-                
                 groundMaterial.EnableKeyword("LS_GPU_SURFACE");
                 Shader.EnableKeyword("LS_GPU_SURFACE");
                 groundMaterial.DisableKeyword("LS_GPU_SURFACE_OFF");

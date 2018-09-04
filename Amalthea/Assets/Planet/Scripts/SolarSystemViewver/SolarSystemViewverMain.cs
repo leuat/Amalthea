@@ -252,18 +252,25 @@ namespace LemonSpawn
         public static GameObject satellite = null;
 
 
+
+
+
         public override void Start()
         {
             base.Start();
+            LoadSettings();
             SSVAppSettings.useAbsolutePositions = true;
-            RenderSettings.planetCubeSphere = false;
+            RenderSettings.planetCubeSphere = false; // true?
             SSVAppSettings.GUIFont = (Font)Resources.Load("Fonts/LektonCode");
             SSVAppSettings.guiStyle.font = SSVAppSettings.GUIFont;
+            //RenderSettings.GPUSurface = false;
 
             CurrentApp = Verification.SolarSystemViewerName;
 
             SSVAppSettings.extraGameObject = new GameObject("extra");
 
+
+//            StartBasics();
 
             satellite = GameObject.Find("Satellite");
             if (satellite != null)
@@ -441,7 +448,7 @@ namespace LemonSpawn
             mainMenu = new MenuItem(null, "Main Menu", "", null, SSVAppSettings.menuSizeText, false, 1, mLayout, null, null);
 
             mainMenu.children.Add(CreateFileMenu(mLayout));
-            mainMenu.children.Add(new MenuItem(mainMenu, "File Menu", "Assets", null, SSVAppSettings.menuSizeText, true, 1, mLayout, null, null));
+  //          mainMenu.children.Add(new MenuItem(mainMenu, "File Menu", "Assets", null, SSVAppSettings.menuSizeText, true, 1, mLayout, null, null));
             //            new MenuItem()
 
 
