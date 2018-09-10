@@ -263,6 +263,7 @@ namespace LemonSpawn
                 hidden.transform.localScale = Vector3.one * p.pSettings.radius * 2f;
                 hidden.transform.parent = p.pSettings.transform;
 
+
                 hidden.GetComponent<MeshRenderer>().material = (Material)Resources.Load("HiddenMaterial");
 
                 PlanetInstance pi = new LemonSpawn.PlanetInstance(p, Globals.definitions.stellarCategories.Get("planet"));
@@ -282,7 +283,9 @@ namespace LemonSpawn
         {
             MenuItem.isLock = true;
             //System.Threading.Thread.Sleep(1000);
+  //          Debug.Log("before" + mainMenu.children.Count);
             mainMenu.deleteFromChildren("SolarSystem");
+//            Debug.Log("after" +mainMenu.children.Count);
             if (isInterPlanetary)
             {
                 foreach (DisplayPlanet dp in data.dPlanets)
@@ -290,10 +293,11 @@ namespace LemonSpawn
 
                 foreach (DisplayPlanet star in data.dpSun)
                 {
-                    star.CreateMenu("SolarSystem:" + star.planet.lsPlanet.pSettings.name, mainMenu, SSVAppSettings.menuSizePlanet, true, 0.75f, mainMenu.layout, SelectPlanetMenu);
+                    //star.CreateMenu("SolarSystem:" + star.planet.lsPlanet.pSettings.name, mainMenu, SSVAppSettings.menuSizePlanet, true, 0.75f, mainMenu.layout, SelectPlanetMenu);
+                    star.CreateMenu("SolarSystem", mainMenu, SSVAppSettings.menuSizePlanet, true, 0.75f, mainMenu.layout, SelectPlanetMenu);
                 }
             }
-            mainMenu.replaceItem("SolarSystem", 0);
+            //mainMenu.replaceItem("SolarSystem", 0);
             MenuItem.isLock = false;
 
         }

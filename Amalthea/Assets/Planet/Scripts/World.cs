@@ -51,13 +51,13 @@ namespace LemonSpawn {
 		public static bool RenderMenu = true;
 		public static bool GPUSurface = true;
         public static bool RenderCorona = true;
-		public static float version = 0.25f;
+		public static float version = 0.26f;
         public static float powScale = 0.75f;
         public static float fov = 70;
         public static Vector3 stretch = Vector3.one;
         public static bool UsePerPixelShading = true;
         public static bool useAtmosphericStarSphere = true;
-
+        public static bool forceSSVObjectsKeepDistance = true;
         public static Texture2D craters = null;
 
 

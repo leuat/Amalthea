@@ -349,6 +349,8 @@ namespace LemonSpawn
 
         protected void ForceSpaceCraft()
         {
+            if (!RenderSettings.forceSSVObjectsKeepDistance)
+                return;
             List<DisplayPlanet> planets = new List<DisplayPlanet>(); ;
             List<DisplayPlanet> spaceCrafts = getSpaceCrafts(planets);
 
@@ -384,7 +386,7 @@ namespace LemonSpawn
                     float dist2 = dir.magnitude;
                     float scale = winner.go.transform.parent.transform.localScale.x * winner.planet.lsPlanet.pSettings.radius * 2f;
                     //scale = SSVAppSettings.SolarSystemScale;
-
+                    
                     if (dist2 < scale && spaceCraft.planet.lsPlanet.pSettings.radius < winner.planet.lsPlanet.pSettings.radius)
                     {
                         if (spaceCraft.planet.lsPlanet.pSettings.category == PlanetSettings.Categories.Object3D)
@@ -394,6 +396,7 @@ namespace LemonSpawn
                         spaceCraft.planet.lsPlanet.pSettings.gameObject.transform.position = winner.go.transform.position +
                            dir.normalized * (scale * 1.0001f + 1 * dist2 * SSVAppSettings.SolarSystemScale / 10.0f);
                     }
+                    
                 }
 
             }

@@ -205,7 +205,8 @@ namespace LemonSpawn
                 ms = 2.0f / SSVAppSettings.PlanetSizeScale;
                 prevRadius = planet.lsPlanet.pSettings.properties.parentPlanet.pSettings.radius;
             }
-            if (planet.lsPlanet.pSettings.category == LemonSpawn.PlanetSettings.Categories.Planet  && planet.lsPlanet.pSettings.properties.parentPlanet!=null)
+            if (planet.lsPlanet.pSettings.properties.parentPlanet != null)
+            if (planet.lsPlanet.pSettings.category == LemonSpawn.PlanetSettings.Categories.Planet  || planet.lsPlanet.pSettings.category == LemonSpawn.PlanetSettings.Categories.Object3D)
             {
                 ms = 1.0f;// / SSVAppSettings.PlanetSizeScale;
                 if (planet.lsPlanet.pSettings.transform.parent != null)

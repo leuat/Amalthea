@@ -50,7 +50,7 @@ namespace LemonSpawn
             GameObject obj;
             string objName = pSettings.properties.serializedPlanet.objectString;
 
-            Debug.Log(objName);
+//            Debug.Log(objName);
 
             if (objName.ToLower() == "laser")
                 obj = InitializeLaser((Material)(Resources.Load(pSettings.properties.serializedPlanet.objectMaterial)));
