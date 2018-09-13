@@ -307,6 +307,12 @@ namespace LemonSpawn
         }
 
 
+        public void ToggleForceDistance()
+        {
+            RenderSettings.forceSSVObjectsKeepDistance = !RenderSettings.forceSSVObjectsKeepDistance;
+
+        }
+
 
         public override void Update()
         {
